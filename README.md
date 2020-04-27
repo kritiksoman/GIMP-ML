@@ -7,6 +7,10 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 [1] macOS Catalina 10.15.3 <br>
 [2] ubuntu 18.04 LTS
 
+# Screenshot of Menu
+![image1](https://github.com/kritiksoman/GIMP-ML/blob/master/screenshot.png)
+
+
 # Installation Steps
 [1] Install [GIMP](https://www.gimp.org/downloads/).<br>
 [2] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
