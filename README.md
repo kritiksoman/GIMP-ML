@@ -18,7 +18,7 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
     ```bash installGimpML-mac.sh```<br>
 [6] Open GIMP.
 
-# Applications on YouTube
+# Demo videos on YouTube
 [![](http://img.youtube.com/vi/U1CieWi--gc/0.jpg)](http://www.youtube.com/watch?v=U1CieWi--gc "") <br>
 [![](http://img.youtube.com/vi/HeBgWcXFQpI/0.jpg)](http://www.youtube.com/watch?v=HeBgWcXFQpI "") <br>
 [![](http://img.youtube.com/vi/adgHtu4chyU/0.jpg)](http://www.youtube.com/watch?v=adgHtu4chyU "") <br>
