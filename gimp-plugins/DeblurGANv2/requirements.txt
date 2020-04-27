@@ -1,0 +1,13 @@
+torch==1.0.1
+torchvision
+pretrainedmodels
+numpy
+opencv-python-headless
+joblib
+albumentations
+scikit-image
+tqdm
+glog
+tensorboardx
+fire
+# this file is not ready yet
