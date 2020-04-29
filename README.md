@@ -1,5 +1,4 @@
 # GIMP-ML
-[![MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/kritiksoman/GIMP-ML/blob/master/LICENSE) <br>
 
 Set of Machine Learning Python plugins for GIMP. 
 
