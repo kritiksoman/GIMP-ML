@@ -1,5 +1,5 @@
 # GIMP-ML
-
+Preprint: [Link](https://arxiv.org/abs/2004.13060) <br>
 Set of Machine Learning Python plugins for GIMP. 
 
 The plugins have been tested with GIMP 2.10 on the following machines: <br>
