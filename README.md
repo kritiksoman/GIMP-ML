@@ -47,3 +47,15 @@ The following have been ported : <br>
 [4] https://github.com/nianticlabs/monodepth2 <br>
 [5] https://github.com/richzhang/colorization <br>
 [6] https://github.com/twtygqyy/pytorch-SRResNet
+
+# Citation
+Please cite using the following bibtex entry:
+
+```
+@article{soman2020GIMPML,
+  title={GIMP-ML: Python Plugins for using Computer Vision Models in GIMP},
+  author={Soman, Kritik},
+  journal={arXiv preprint arXiv:2004.13060},
+  year={2020}
+}
+```
