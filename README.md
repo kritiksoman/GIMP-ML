@@ -16,9 +16,9 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 [3] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and close GIMP. <br>
 [4] Download [weights.zip](https://drive.google.com/open?id=1mqzDnxtXQ75lVqlQ8tUeua68lDqUgUVe) (1.22 GB) and save it in gimp-plugins folder. <br>
 [5] Open terminal and run : <br>
-    ```bash moveWeights.sh ```
+    ```bash installGimpML-mac.sh```
     <br>
-    ```bash installGimpML-mac.sh```<br>
+    ```bash moveWeights.sh ```<br>
 [6] Open GIMP.
 
 # Demo videos on YouTube
