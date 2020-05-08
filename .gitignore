@@ -1,0 +1,7 @@
+*.pt
+*.pth
+*.h5
+*.npy
+*.zip
+opt.txt
+gimpenv/
