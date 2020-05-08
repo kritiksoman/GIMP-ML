@@ -12,7 +12,7 @@ if [ "$(uname)" == "Darwin" ]; then
   :
 elif [ "$(uname)" == "Linux" ]; then
   # Assuming Ubuntu
-  sudo apt install python-minimal
+  sudo apt install python-minimal gimp-python
   alias python='python2'
 else
   echo "Unsupported system '$(uname)'"
