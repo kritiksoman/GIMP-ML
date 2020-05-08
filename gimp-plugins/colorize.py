@@ -1,16 +1,17 @@
-
-
-from gimpfu import *
+import os
 import sys
 
-sys.path.extend([baseLoc+'gimpenv/lib/python2.7',baseLoc+'gimpenv/lib/python2.7/site-packages',baseLoc+'gimpenv/lib/python2.7/site-packages/setuptools',baseLoc+'neural-colorization'])
+from _util import add_gimpenv_to_pythonpath, baseLoc
 
+add_gimpenv_to_pythonpath()
+modelDir = os.path.join(baseLoc, 'neural-colorization')
+sys.path.append(modelDir)
 
+from gimpfu import *
 import torch
 from model import generator
 from torch.autograd import Variable
 from scipy.ndimage import zoom
-from PIL import Image
 from argparse import Namespace
 import numpy as np
 from skimage.color import rgb2yuv,yuv2rgb
@@ -23,7 +24,7 @@ def getcolor(input_image):
     else:
         g_available=-1
 
-    args=Namespace(model=baseLoc+'neural-colorization/model.pth',gpu=g_available)
+    args=Namespace(model=os.path.join(modelDir, 'model.pth'), gpu=g_available)
 
     G = generator()
 

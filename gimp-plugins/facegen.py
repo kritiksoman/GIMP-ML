@@ -1,15 +1,17 @@
-
-
-from gimpfu import *
+import os
 import sys
 
-sys.path.extend([baseLoc+'gimpenv/lib/python2.7',baseLoc+'gimpenv/lib/python2.7/site-packages',baseLoc+'gimpenv/lib/python2.7/site-packages/setuptools',baseLoc+'CelebAMask-HQ/MaskGAN_demo'])
+from _util import add_gimpenv_to_pythonpath, baseLoc
 
+add_gimpenv_to_pythonpath()
+modelDir = os.path.join(baseLoc, 'CelebAMask-HQ/MaskGAN_demo')
+sys.path.append(modelDir)
 
+from gimpfu import *
 import torch
 from argparse import Namespace
 from models.models import create_model
-from data.base_dataset import get_params, get_transform, normalize
+from data.base_dataset import get_params, get_transform
 import os
 import numpy as np
 from PIL import Image
@@ -46,7 +48,7 @@ def labelMask(mask):
 def getOptions():
     mydict={'aspect_ratio': 1.0,
     'batchSize': 1,
-    'checkpoints_dir': baseLoc+'CelebAMask-HQ/MaskGAN_demo/checkpoints',
+    'checkpoints_dir': os.path.join(modelDir, 'checkpoints'),
     'cluster_path': 'features_clustered_010.npy',
     'data_type': 32,
     'dataroot': '../Data_preprocessing/',

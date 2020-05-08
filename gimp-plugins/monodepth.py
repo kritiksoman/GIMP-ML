@@ -1,14 +1,17 @@
+import os
+import sys
 
+from _util import add_gimpenv_to_pythonpath, baseLoc
+
+add_gimpenv_to_pythonpath()
+modelDir = os.path.join(baseLoc, 'monodepth2')
+sys.path.append(modelDir)
 
 from gimpfu import *
-import sys
-sys.path.extend([baseLoc+'gimpenv/lib/python2.7',baseLoc+'gimpenv/lib/python2.7/site-packages',baseLoc+'gimpenv/lib/python2.7/site-packages/setuptools',baseLoc+'monodepth2'])
-
-
 import PIL.Image as pil
 import networks
 import torch
-from torchvision import transforms, datasets
+from torchvision import transforms
 import os
 import numpy as np
 import matplotlib as mpl
@@ -19,9 +22,8 @@ def getMonoDepth(input_image):
         device = torch.device("cuda")
     else:
         device = torch.device("cpu")
-    loc=baseLoc+'monodepth2/'
 
-    model_path = os.path.join(loc+"models", 'mono+stereo_640x192')
+    model_path = os.path.join(modelDir, 'models/mono+stereo_640x192')
     encoder_path = os.path.join(model_path, "encoder.pth")
     depth_decoder_path = os.path.join(model_path, "depth.pth")
 

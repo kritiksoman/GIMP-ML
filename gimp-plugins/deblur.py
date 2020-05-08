@@ -1,10 +1,13 @@
+import os
+import sys
 
+from _util import add_gimpenv_to_pythonpath, baseLoc
+
+add_gimpenv_to_pythonpath()
+modelDir = os.path.join(baseLoc, 'DeblurGANv2')
+sys.path.append(modelDir)
 
 from gimpfu import *
-import sys
-sys.path.extend([baseLoc+'gimpenv/lib/python2.7',baseLoc+'gimpenv/lib/python2.7/site-packages',baseLoc+'gimpenv/lib/python2.7/site-packages/setuptools',baseLoc+'DeblurGANv2'])
-
-import cv2
 from predictorClass import Predictor
 import numpy as np
 
@@ -16,7 +19,7 @@ def channelData(layer):#convert gimp image to numpy
     return np.frombuffer(pixChars,dtype=np.uint8).reshape(layer.height,layer.width,bpp)
 
 def createResultLayer(image,name,result):
-    rlBytes=np.uint8(result).tobytes();
+    rlBytes=np.uint8(result).tobytes()
     rl=gimp.Layer(image,name,image.width,image.height,image.active_layer.type,100,NORMAL_MODE)
     region=rl.get_pixel_rgn(0, 0, rl.width,rl.height,True)
     region[:,:]=rlBytes
@@ -24,7 +27,7 @@ def createResultLayer(image,name,result):
     gimp.displays_flush()
 
 def getdeblur(img):
-    predictor = Predictor(weights_path=baseLoc+'DeblurGANv2/'+'best_fpn.h5')
+    predictor = Predictor(weights_path=os.path.join(modelDir, 'best_fpn.h5'))
     pred = predictor(img, None)
     return pred
 

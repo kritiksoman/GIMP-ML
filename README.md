@@ -7,18 +7,17 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 [2] ubuntu 18.04 LTS
 
 # Screenshot of Menu
-![image1](https://github.com/kritiksoman/GIMP-ML/blob/master/screenshot.png)
+![image1](screenshot.png)
 
 
 # Installation Steps
-[1] Install [GIMP](https://www.gimp.org/downloads/).<br>
-[2] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
+[1] Install [GIMP](https://www.gimp.org/downloads/). <br>
+[2] Clone this repository: `git clone https://github.com/kritiksoman/GIMP-ML.git` <br>
 [3] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and close GIMP. <br>
 [4] Download [weights.zip](https://drive.google.com/open?id=1mqzDnxtXQ75lVqlQ8tUeua68lDqUgUVe) (1.22 GB) and save it in gimp-plugins folder. <br>
-[5] Open terminal and run : <br>
-    ```bash installGimpML-mac.sh```
-    <br>
-    ```bash moveWeights.sh ```<br>
+[5] Open terminal and run: <br>
+    `bash install.sh` <br>
+    `bash moveWeights.sh ` <br>
 [6] Open GIMP.
 
 # Demo videos on YouTube

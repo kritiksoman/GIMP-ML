@@ -1,15 +1,17 @@
-
-
-from gimpfu import *
+import os
 import sys
 
-sys.path.extend([baseLoc+'gimpenv/lib/python2.7',baseLoc+'gimpenv/lib/python2.7/site-packages',baseLoc+'gimpenv/lib/python2.7/site-packages/setuptools',baseLoc+'face-parsing.PyTorch'])
+from _util import add_gimpenv_to_pythonpath, baseLoc
 
+add_gimpenv_to_pythonpath()
+modelDir = os.path.join(baseLoc, 'face-parsing.PyTorch')
+sys.path.append(modelDir)
 
+from gimpfu import *
 from model import BiSeNet
 from PIL import Image
 import torch
-from torchvision import transforms, datasets
+from torchvision import transforms
 import numpy as np
 
 colors = np.array([[0,0,0],
@@ -47,7 +49,7 @@ def colorMask(mask):
     return np.uint8(x)
 
 def getface(input_image):
-    save_pth = baseLoc+'face-parsing.PyTorch/79999_iter.pth'
+    save_pth = os.path.join(modelDir, '79999_iter.pth')
     input_image = Image.fromarray(input_image)
 
     n_classes = 19
@@ -87,7 +89,7 @@ def getface(input_image):
     return parsing
 
 def getSeg(input_image):
-    model = torch.load(baseLoc+'deeplabv3+model.pt')
+    model = torch.load(os.path.join(baseLoc, 'deeplabv3+model.pt'))
     model.eval()
     preprocess = transforms.Compose([
         transforms.ToTensor(),
@@ -128,7 +130,7 @@ def channelData(layer):#convert gimp image to numpy
     return np.frombuffer(pixChars,dtype=np.uint8).reshape(layer.height,layer.width,bpp)
 
 def createResultLayer(image,name,result):
-    rlBytes=np.uint8(result).tobytes();
+    rlBytes=np.uint8(result).tobytes()
     rl=gimp.Layer(image,name,image.width,image.height,image.active_layer.type,100,NORMAL_MODE)
     region=rl.get_pixel_rgn(0, 0, rl.width,rl.height,True)
     region[:,:]=rlBytes

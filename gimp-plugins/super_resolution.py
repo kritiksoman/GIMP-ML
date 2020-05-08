@@ -1,9 +1,13 @@
+import os
+import sys
+
+from _util import add_gimpenv_to_pythonpath, baseLoc
+
+add_gimpenv_to_pythonpath()
+modelDir = os.path.join(baseLoc, 'pytorch-SRResNet')
+sys.path.append(modelDir)
 
 from gimpfu import *
-import sys
-sys.path.extend([baseLoc+'gimpenv/lib/python2.7',baseLoc+'gimpenv/lib/python2.7/site-packages',baseLoc+'gimpenv/lib/python2.7/site-packages/setuptools',baseLoc+'pytorch-SRResNet'])
-
-
 from argparse import Namespace
 import torch
 from torch.autograd import Variable
@@ -27,7 +31,7 @@ def colorMask(mask):
 
 def getnewimg(input_image,s):
     opt=Namespace(cuda=torch.cuda.is_available(),
-        model=baseLoc+'pytorch-SRResNet/model/model_srresnet.pth',
+        model=os.path.join(modelDir, 'model/model_srresnet.pth'),
         dataset='Set5',scale=s,gpus=0)
 
     im_l=Image.fromarray(input_image)

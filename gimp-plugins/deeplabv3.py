@@ -1,17 +1,20 @@
+import os
+import sys
 
+from _util import add_gimpenv_to_pythonpath, baseLoc
 
 from gimpfu import *
-import sys
-sys.path.extend([baseLoc+'gimpenv/lib/python2.7',baseLoc+'gimpenv/lib/python2.7/site-packages',baseLoc+'gimpenv/lib/python2.7/site-packages/setuptools'])
-
+add_gimpenv_to_pythonpath()
+modelDir = os.path.join(baseLoc, 'deeplabv3')
+sys.path.append(modelDir)
 
 from PIL import Image
 import torch
-from torchvision import transforms, datasets
+from torchvision import transforms
 import numpy as np
 
 def getSeg(input_image):
-    model = torch.load(baseLoc+'deeplabv3/deeplabv3+model.pt')
+    model = torch.load(os.path.join(modelDir, 'deeplabv3+model.pt'))
     model.eval()
     preprocess = transforms.Compose([
         transforms.ToTensor(),
