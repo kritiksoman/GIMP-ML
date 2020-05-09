@@ -8,11 +8,12 @@ sys.path.extend([baseLoc+'gimpenv/lib/python2.7',baseLoc+'gimpenv/lib/python2.7/
 import PIL.Image as pil
 import networks
 import torch
-from torchvision import transforms, datasets
+from torchvision import transforms
 import os
 import numpy as np
-import matplotlib as mpl
-import matplotlib.cm as cm
+import cv2
+# import matplotlib as mpl
+# import matplotlib.cm as cm
 
 def getMonoDepth(input_image):
     if torch.cuda.is_available():
@@ -64,9 +65,14 @@ def getMonoDepth(input_image):
         # Saving colormapped depth image
         disp_resized_np = disp_resized.squeeze().cpu().numpy()
         vmax = np.percentile(disp_resized_np, 95)
-        normalizer = mpl.colors.Normalize(vmin=disp_resized_np.min(), vmax=vmax)
-        mapper = cm.ScalarMappable(norm=normalizer, cmap='magma')
-        colormapped_im = (mapper.to_rgba(disp_resized_np)[:, :, :3] * 255).astype(np.uint8)
+        vmin = disp_resized_np.min()
+        disp_resized_np = vmin + (disp_resized_np - vmin) * (vmax - vmin) / (disp_resized_np.max() - vmin)
+        disp_resized_np = (255 * (disp_resized_np - vmin) / (vmax - vmin)).astype(np.uint8)
+        colormapped_im = cv2.applyColorMap(disp_resized_np, cv2.COLORMAP_HOT)
+        colormapped_im = cv2.cvtColor(colormapped_im, cv2.COLOR_BGR2RGB)
+        # normalizer = mpl.colors.Normalize(vmin=disp_resized_np.min(), vmax=vmax)
+        # mapper = cm.ScalarMappable(norm=normalizer, cmap='magma')
+        # colormapped_im = (mapper.to_rgba(disp_resized_np)[:, :, :3] * 255).astype(np.uint8)
     return colormapped_im
 
 def channelData(layer):#convert gimp image to numpy
