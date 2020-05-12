@@ -1,4 +1,6 @@
 
+import os 
+baseLoc = os.path.dirname(os.path.realpath(__file__))+'/'
 
 from gimpfu import *
 import sys
