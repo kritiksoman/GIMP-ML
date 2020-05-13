@@ -1,76 +1,68 @@
-import os
-import sys
+from _util import add_gimpenv_to_pythonpath
 
-from _util import add_gimpenv_to_pythonpath, baseLoc
+add_gimpenv_to_pythonpath()
 
 from gimpfu import *
-add_gimpenv_to_pythonpath()
-modelDir = os.path.join(baseLoc, 'deeplabv3')
-sys.path.append(modelDir)
-
-from PIL import Image
-import torch
-from torchvision import transforms
 import numpy as np
+import torch
+import torch.hub
+from PIL import Image
+from torchvision import transforms
 
+
+@torch.no_grad()
 def getSeg(input_image):
-    model = torch.load(os.path.join(modelDir, 'deeplabv3+model.pt'))
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    model = torch.hub.load('pytorch/vision', 'deeplabv3_resnet101', pretrained=True)
     model.eval()
+    model.to(device)
+
     preprocess = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
-    input_image = Image.fromarray(input_image)
-    input_tensor = preprocess(input_image)
-    input_batch = input_tensor.unsqueeze(0) # create a mini-batch as expected by the model
-    if torch.cuda.is_available():
-        input_batch = input_batch.to('cuda')
-        model.to('cuda')
+    h, w, _ = input_image.shape
+    input_tensor = preprocess(input_image).unsqueeze(0).to(device)
 
-    with torch.no_grad():
-        output = model(input_batch)['out'][0]
+    output = model(input_tensor)['out'][0]
     output_predictions = output.argmax(0)
 
-
-    # create a color pallette, selecting a color for each class
-    palette = torch.tensor([2 ** 25 - 1, 2 ** 15 - 1, 2 ** 21 - 1])
-    colors = torch.as_tensor([i for i in range(21)])[:, None] * palette
-    colors = (colors % 255).numpy().astype("uint8")
-
-    # plot the semantic segmentation predictions of 21 classes in each color
-    r = Image.fromarray(output_predictions.byte().cpu().numpy()).resize(input_image.size)
-
-    tmp = np.array(r)
-    tmp2 = 10*np.repeat(tmp[:, :, np.newaxis], 3, axis=2)
+    # apply a color palette, selecting a color for each class
+    palette = np.array([2**25 - 1, 2**15 - 1, 2**21 - 1])
+    colors = np.arange(21)[:, None] * palette
+    colors = (colors % 255).astype(np.uint8)
+    result = Image.fromarray(output_predictions.byte().cpu().numpy()).resize((w, h))
+    result.putpalette(colors.tobytes())
+    return np.array(result.convert('RGB'))
 
 
-    return  tmp2
+def channelData(layer):  # convert gimp image to numpy
+    region = layer.get_pixel_rgn(0, 0, layer.width, layer.height)
+    pixChars = region[:, :]  # Take whole layer
+    bpp = region.bpp
+    return np.frombuffer(pixChars, dtype=np.uint8).reshape(layer.height, layer.width, bpp)
 
 
-def channelData(layer):#convert gimp image to numpy
-    region=layer.get_pixel_rgn(0, 0, layer.width,layer.height)
-    pixChars=region[:,:] # Take whole layer
-    bpp=region.bpp
-    return np.frombuffer(pixChars,dtype=np.uint8).reshape(layer.height,layer.width,bpp)
-
-def createResultLayer(image,name,result):
-    rlBytes=np.uint8(result).tobytes();
-    rl=gimp.Layer(image,name,image.width,image.height,image.active_layer.type,100,NORMAL_MODE)
-    region=rl.get_pixel_rgn(0, 0, rl.width,rl.height,True)
-    region[:,:]=rlBytes
-    image.add_layer(rl,0)
+def createResultLayer(image, name, result):
+    rlBytes = np.uint8(result).tobytes()
+    rl = gimp.Layer(image, name, image.width, image.height, image.active_layer.type, 100, NORMAL_MODE)
+    region = rl.get_pixel_rgn(0, 0, rl.width, rl.height, True)
+    region[:, :] = rlBytes
+    image.add_layer(rl, 0)
     gimp.displays_flush()
 
-def deeplabv3(img, layer) :
+
+def deeplabv3(img, layer):
     if torch.cuda.is_available():
         gimp.progress_init("(Using GPU) Generating semantic segmentation map for " + layer.name + "...")
     else:
         gimp.progress_init("(Using CPU) Generating semantic segmentation map for " + layer.name + "...")
 
-    imgmat = channelData(layer) 
-    cpy=getSeg(imgmat)    
-    createResultLayer(img,'new_output',cpy)
+    imgmat = channelData(layer)
+    cpy = getSeg(imgmat)
+    createResultLayer(img, 'new_output', cpy)
 
 
 register(
@@ -81,8 +73,9 @@ register(
     "GIMP-ML",
     "2020",
     "deeplabv3...",
-    "*",      # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
-    [   (PF_IMAGE, "image", "Input image", None),
+    "*",  # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
+    [
+        (PF_IMAGE, "image", "Input image", None),
         (PF_DRAWABLE, "drawable", "Input drawable", None)
     ],
     [],
