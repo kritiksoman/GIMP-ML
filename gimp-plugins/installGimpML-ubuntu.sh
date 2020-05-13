@@ -11,7 +11,6 @@ if [ ! -d "gimpenv" ]; then
 	python2 -m pip install future
 	python2 -m pip install torch
 	python2 -m pip install scipy
-	python2 -m pip install scikit-image
 	python2 -m pip install typing
 	python2 -m pip install enum
 	python2 -m pip install pretrainedmodels

@@ -1,7 +1,8 @@
 unzip weights.zip
 mkdir -p CelebAMask-HQ/MaskGAN_demo/checkpoints/label2face_512p
 mkdir -p mkdir monodepth2/models/mono+stereo_640x192
-mkdir pytorch-SRResNet/model
+mkdir -p pytorch-SRResNet/model
+mkdir deeplabv3
 
 mv weights/colorize/* neural-colorization/
 mv weights/deblur/* DeblurGANv2/
