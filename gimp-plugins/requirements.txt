@@ -3,10 +3,8 @@ opencv-python-headless
 numpy
 future
 torch
-matplotlib
 scipy
 scikit-image
 typing
-albumentations
 enum
 pretrainedmodels
