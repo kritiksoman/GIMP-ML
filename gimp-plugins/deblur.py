@@ -1,41 +1,41 @@
-import os
-import sys
-
-from _util import add_gimpenv_to_pythonpath, baseLoc
+from _util import add_gimpenv_to_pythonpath
 
 add_gimpenv_to_pythonpath()
-modelDir = os.path.join(baseLoc, 'DeblurGANv2')
-sys.path.append(modelDir)
 
 from gimpfu import *
-from predictorClass import Predictor
 import numpy as np
+import torch.hub
 
-def channelData(layer):#convert gimp image to numpy
-    region=layer.get_pixel_rgn(0, 0, layer.width,layer.height)
-    pixChars=region[:,:] # Take whole layer
-    bpp=region.bpp
+
+def channelData(layer):  # convert gimp image to numpy
+    region = layer.get_pixel_rgn(0, 0, layer.width, layer.height)
+    pixChars = region[:, :]  # Take whole layer
+    bpp = region.bpp
     # return np.frombuffer(pixChars,dtype=np.uint8).reshape(len(pixChars)/bpp,bpp)
-    return np.frombuffer(pixChars,dtype=np.uint8).reshape(layer.height,layer.width,bpp)
+    return np.frombuffer(pixChars, dtype=np.uint8).reshape(layer.height, layer.width, bpp)
 
-def createResultLayer(image,name,result):
-    rlBytes=np.uint8(result).tobytes()
-    rl=gimp.Layer(image,name,image.width,image.height,image.active_layer.type,100,NORMAL_MODE)
-    region=rl.get_pixel_rgn(0, 0, rl.width,rl.height,True)
-    region[:,:]=rlBytes
-    image.add_layer(rl,0)
+
+def createResultLayer(image, name, result):
+    rlBytes = np.uint8(result).tobytes()
+    rl = gimp.Layer(image, name, image.width, image.height, image.active_layer.type, 100, NORMAL_MODE)
+    region = rl.get_pixel_rgn(0, 0, rl.width, rl.height, True)
+    region[:, :] = rlBytes
+    image.add_layer(rl, 0)
     gimp.displays_flush()
 
+
 def getdeblur(img):
-    predictor = Predictor(weights_path=os.path.join(modelDir, 'best_fpn.h5'))
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    predictor = torch.hub.load('valgur/DeblurGANv2:python2', 'predictor', 'fpn_inception', device=device)
     pred = predictor(img, None)
     return pred
+
 
 def deblur(img, layer):
     gimp.progress_init("Running for " + layer.name + "...")
     imgmat = channelData(layer)
     pred = getdeblur(imgmat)
-    createResultLayer(img,'deblur_'+layer.name,pred)
+    createResultLayer(img, 'deblur_' + layer.name, pred)
 
 
 register(
@@ -46,8 +46,9 @@ register(
     "Your",
     "2020",
     "deblur...",
-    "*",      # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
-    [   (PF_IMAGE, "image", "Input image", None),
+    "*",  # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
+    [
+        (PF_IMAGE, "image", "Input image", None),
         (PF_DRAWABLE, "drawable", "Input drawable", None),
     ],
     [],
