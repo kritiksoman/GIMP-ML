@@ -3,8 +3,9 @@ Preprint: [Link](https://arxiv.org/abs/2004.13060) <br>
 Set of Machine Learning Python plugins for GIMP. 
 
 The plugins have been tested with GIMP 2.10 on the following machines: <br>
-[1] macOS Catalina 10.15.3 <br>
-[2] ubuntu 18.04 LTS
+[1] macOS Catalina 10.15.4 <br>
+[2] ubuntu 18.04 LTS <br>
+[3] ubuntu 20.04 LTS
 
 # Screenshot of Menu
 ![image1](https://github.com/kritiksoman/GIMP-ML/blob/master/screenshot.png)
@@ -45,7 +46,7 @@ The following have been ported : <br>
 [2] https://github.com/TAMU-VITA/DeblurGANv2 <br>
 [3] https://github.com/zllrunning/face-parsing.PyTorch <br>
 [4] https://github.com/nianticlabs/monodepth2 <br>
-[5] https://github.com/richzhang/colorization <br>
+[5] https://github.com/zeruniverse/neural-colorization <br>
 [6] https://github.com/twtygqyy/pytorch-SRResNet
 
 # Citation
