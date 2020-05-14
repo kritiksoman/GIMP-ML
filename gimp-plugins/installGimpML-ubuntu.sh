@@ -1,7 +1,16 @@
 if [ ! -d "gimpenv" ]; then
 
 	echo "\n-----------Installing GIMP-ML-----------\n"
-	sudo apt install python-minimal
+	
+	if [[ $(lsb_release -rs) == "18.04" ]]; then 
+		sudo apt install python-minimal
+	       #Copy your files here
+	elif [[ $(lsb_release -rs) == "20.04" ]]; then 
+		sudo apt install python2-minimal
+		wget https://bootstrap.pypa.io/get-pip.py 
+		python2 get-pip.py	
+	fi
+
 	python2 -m pip install --user virtualenv
 	python2 -m virtualenv gimpenv
 	source gimpenv/bin/activate
@@ -23,7 +32,5 @@ else
 	echo "Environment already setup!"
 
 fi
-
-
 
 
