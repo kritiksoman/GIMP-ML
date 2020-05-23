@@ -1,11 +1,8 @@
 torch
 torchvision
 pretrainedmodels
-opencv-python-headless
 numpy
 matplotlib
-scipy
-scikit-image
 enum
 typing
 future

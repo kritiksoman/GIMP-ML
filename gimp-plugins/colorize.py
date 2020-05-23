@@ -6,8 +6,7 @@ from gimpfu import *
 import numpy as np
 import torch
 import torch.hub
-from scipy.ndimage import zoom
-from skimage.color import yuv2rgb
+from PIL import Image
 
 
 @tqdm_as_gimp_progress("Downloading model")
@@ -16,6 +15,16 @@ def load_model(device):
                        pretrained=True, map_location=device)
     G.to(device)
     return G
+
+
+def yuv2rgb(yuv):
+    yuv_from_rgb = np.array([
+        [0.299, 0.587, 0.114],
+        [-0.14714119, -0.28886916, 0.43601035],
+        [0.61497538, -0.51496512, -0.10001026]
+    ])
+    rgb_from_yuv = np.linalg.inv(yuv_from_rgb)
+    return np.dot(yuv, rgb_from_yuv.T.copy())
 
 
 @torch.no_grad()
@@ -29,12 +38,12 @@ def getcolor(input_image):
     img_variable = torch.from_numpy(infimg) - 0.5
     img_variable = img_variable.to(device)
     res = G(img_variable)
-    uv = res.cpu().numpy()
-    uv[:, 0, :, :] *= 0.436
-    uv[:, 1, :, :] *= 0.615
-    _, _, H1, W1 = uv.shape
-    uv = zoom(uv, (1, 1, float(H) / H1, float(W) / W1))
-    yuv = np.concatenate([infimg, uv], axis=1)[0].transpose(1, 2, 0)
+    uv = res.cpu().numpy()[0]
+    uv[0, :, :] *= 0.436
+    uv[1, :, :] *= 0.615
+    u = np.array(Image.fromarray(uv[0]).resize((W, H), Image.BILINEAR))[None, ...]
+    v = np.array(Image.fromarray(uv[1]).resize((W, H), Image.BILINEAR))[None, ...]
+    yuv = np.concatenate([infimg[0], u, v], axis=0).transpose(1, 2, 0)
 
     rgb = yuv2rgb(yuv * 255)
     rgb = rgb.clip(0, 255).astype(np.uint8)
