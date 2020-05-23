@@ -48,15 +48,14 @@ The following have been ported : <br>
 [6] https://github.com/twtygqyy/pytorch-SRResNet
 
 # Common Issues
-[1] No output on running plugin: Please right click on layer and remove alpha channel before using plugins. <br>
-[2] GIMP-ML menu not visible: Do following and restart GIMP.<br>
+[1] GIMP-ML menu not visible: Do following and restart GIMP.<br>
 ```
 sudo apt install gimp-python
 cd gimp-plugins
 chmod -x *
 chmod +x *.py
 ```
-[3] colorize plugin not working: Switch to grayscale mode before running plugin. (Image->Mode->Grayscale)
+[2] colorize plugin not working: Switch to grayscale mode before running plugin. (Image->Mode->Grayscale)
 
 # Citation
 Please cite using the following bibtex entry:
