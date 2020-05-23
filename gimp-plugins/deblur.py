@@ -1,10 +1,23 @@
-from _util import add_gimpenv_to_pythonpath
+from _util import add_gimpenv_to_pythonpath, tqdm_as_gimp_progress
 
 add_gimpenv_to_pythonpath()
 
 from gimpfu import *
 import numpy as np
 import torch.hub
+
+
+@tqdm_as_gimp_progress("Downloading model")
+def load_model(device):
+    predictor = torch.hub.load('valgur/DeblurGANv2:python2', 'predictor', 'fpn_inception', device=device)
+    return predictor
+
+
+def getdeblur(img):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    predictor = load_model(device)
+    pred = predictor(img, None)
+    return pred
 
 
 def channelData(layer):  # convert gimp image to numpy
@@ -22,13 +35,6 @@ def createResultLayer(image, name, result):
     region[:, :] = rlBytes
     image.add_layer(rl, 0)
     gimp.displays_flush()
-
-
-def getdeblur(img):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    predictor = torch.hub.load('valgur/DeblurGANv2:python2', 'predictor', 'fpn_inception', device=device)
-    pred = predictor(img, None)
-    return pred
 
 
 def deblur(img, layer):

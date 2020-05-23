@@ -10,3 +10,4 @@ enum
 typing
 future
 pyyaml
+tqdm

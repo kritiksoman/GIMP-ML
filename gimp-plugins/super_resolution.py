@@ -1,4 +1,4 @@
-from _util import add_gimpenv_to_pythonpath
+from _util import add_gimpenv_to_pythonpath, tqdm_as_gimp_progress
 
 add_gimpenv_to_pythonpath()
 
@@ -8,12 +8,17 @@ import numpy as np
 import torch.hub
 
 
+@tqdm_as_gimp_progress("Downloading model")
+def load_model(device):
+    model = torch.hub.load('valgur/pytorch-SRResNet', 'SRResNet', pretrained=True, map_location=device)
+    model.to(device)
+    return model
+
+
 @torch.no_grad()
 def getnewimg(input_image):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    model = torch.hub.load('valgur/pytorch-SRResNet', 'SRResNet', pretrained=True, map_location=device)
-    model.to(device)
+    model = load_model(device)
 
     im_input = torch.from_numpy(input_image).permute(2, 0, 1).to(device)
     im_input = im_input.float().div(255).unsqueeze(0)

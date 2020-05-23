@@ -1,4 +1,4 @@
-from _util import add_gimpenv_to_pythonpath
+from _util import add_gimpenv_to_pythonpath, tqdm_as_gimp_progress
 
 add_gimpenv_to_pythonpath()
 
@@ -32,10 +32,17 @@ colors = np.array([
 ], dtype=np.uint8)
 
 
+@tqdm_as_gimp_progress("Downloading model")
+def load_model(device):
+    net = torch.hub.load('valgur/face-parsing.PyTorch', 'BiSeNet', pretrained=True, map_location=device)
+    net.to(device)
+    return net
+
+
 @torch.no_grad()
 def getface(input_image):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    net = torch.hub.load('valgur/face-parsing.PyTorch', 'BiSeNet', pretrained=True, map_location=device)
+    net = load_model(device)
 
     to_tensor = transforms.Compose([
         transforms.ToTensor(),

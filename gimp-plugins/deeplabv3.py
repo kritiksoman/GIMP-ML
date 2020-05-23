@@ -1,4 +1,4 @@
-from _util import add_gimpenv_to_pythonpath
+from _util import add_gimpenv_to_pythonpath, tqdm_as_gimp_progress
 
 add_gimpenv_to_pythonpath()
 
@@ -10,13 +10,18 @@ from PIL import Image
 from torchvision import transforms
 
 
-@torch.no_grad()
-def getSeg(input_image):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+@tqdm_as_gimp_progress("Downloading model")
+def load_model(device):
     model = torch.hub.load('pytorch/vision', 'deeplabv3_resnet101', pretrained=True)
     model.eval()
     model.to(device)
+    return model
+
+
+@torch.no_grad()
+def getSeg(input_image):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = load_model(device)
 
     preprocess = transforms.Compose([
         transforms.ToTensor(),

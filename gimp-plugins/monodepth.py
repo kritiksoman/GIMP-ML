@@ -1,4 +1,4 @@
-from _util import add_gimpenv_to_pythonpath
+from _util import add_gimpenv_to_pythonpath, tqdm_as_gimp_progress
 
 add_gimpenv_to_pythonpath()
 
@@ -12,17 +12,23 @@ import matplotlib as mpl
 import matplotlib.cm as cm
 
 
+@tqdm_as_gimp_progress("Downloading model")
+def load_model(device):
+    repo = "valgur/monodepth2"
+    pretrained_model = "mono+stereo_640x192"
+    encoder = torch.hub.load(repo, "ResnetEncoder", pretrained_model, map_location=device)
+    depth_decoder = torch.hub.load(repo, "DepthDecoder", pretrained_model, map_location=device)
+    encoder.to(device)
+    depth_decoder.to(device)
+    return depth_decoder, encoder
+
+
 @torch.no_grad()
 def getMonoDepth(input_image):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # LOADING PRETRAINED MODEL
-    repo = "valgur/monodepth2"
-    pretrained_model = "mono+stereo_640x192"
-    encoder = torch.hub.load(repo, "ResnetEncoder", pretrained_model, map_location=device)
-    encoder.to(device)
-    depth_decoder = torch.hub.load(repo, "DepthDecoder", pretrained_model, map_location=device)
-    depth_decoder.to(device)
+    depth_decoder, encoder = load_model(device)
 
     input_image = pil.fromarray(input_image)
     original_width, original_height = input_image.size

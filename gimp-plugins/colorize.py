@@ -1,4 +1,4 @@
-from _util import add_gimpenv_to_pythonpath
+from _util import add_gimpenv_to_pythonpath, tqdm_as_gimp_progress
 
 add_gimpenv_to_pythonpath()
 
@@ -10,13 +10,18 @@ from scipy.ndimage import zoom
 from skimage.color import yuv2rgb
 
 
-@torch.no_grad()
-def getcolor(input_image):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+@tqdm_as_gimp_progress("Downloading model")
+def load_model(device):
     G = torch.hub.load('valgur/neural-colorization:pytorch', 'generator',
                        pretrained=True, map_location=device)
     G.to(device)
+    return G
+
+
+@torch.no_grad()
+def getcolor(input_image):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    G = load_model(device)
 
     input_image = input_image[..., 0]
     H, W = input_image.shape
