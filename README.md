@@ -11,7 +11,6 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 # Screenshot of Menu
 ![image1](https://github.com/kritiksoman/GIMP-ML/blob/master/screenshot.png)
 
-
 # Installation Steps
 [1] Install [GIMP](https://www.gimp.org/downloads/).<br>
 [2] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
@@ -24,13 +23,16 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 [6] Open GIMP.
 
 # Demo videos on YouTube
-[![](http://img.youtube.com/vi/U1CieWi--gc/0.jpg)](http://www.youtube.com/watch?v=U1CieWi--gc "") <br>
-[![](http://img.youtube.com/vi/HeBgWcXFQpI/0.jpg)](http://www.youtube.com/watch?v=HeBgWcXFQpI "") <br>
-[![](http://img.youtube.com/vi/adgHtu4chyU/0.jpg)](http://www.youtube.com/watch?v=adgHtu4chyU "") <br>
-[![](http://img.youtube.com/vi/q9Ny5XqIUKk/0.jpg)](http://www.youtube.com/watch?v=q9Ny5XqIUKk "") <br>
-[![](http://img.youtube.com/vi/thS8VqPvuhE/0.jpg)](http://www.youtube.com/watch?v=thS8VqPvuhE "") <br>
-[![](http://img.youtube.com/vi/kXYsWvOB4uk/0.jpg)](http://www.youtube.com/watch?v=kXYsWvOB4uk "") <br>
-[![](http://img.youtube.com/vi/HVwISLRow_0/0.jpg)](http://www.youtube.com/watch?v=HVwISLRow_0 "")
+[<img src="http://img.youtube.com/vi/q9Ny5XqIUKk/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=q9Ny5XqIUKk)
+[<img src="http://img.youtube.com/vi/kXYsWvOB4uk/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=kXYsWvOB4uk)
+
+[<img src="http://img.youtube.com/vi/HVwISLRow_0/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=HVwISLRow_0)
+[<img src="http://img.youtube.com/vi/U1CieWi--gc/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=U1CieWi--gc) 
+
+[<img src="http://img.youtube.com/vi/HeBgWcXFQpI/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=HeBgWcXFQpI)
+[<img src="http://img.youtube.com/vi/adgHtu4chyU/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=adgHtu4chyU) 
+
+[<img src="http://img.youtube.com/vi/thS8VqPvuhE/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=thS8VqPvuhE) 
 
 # Paper References
 [1] Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network (https://arxiv.org/abs/1609.04802) <br>
