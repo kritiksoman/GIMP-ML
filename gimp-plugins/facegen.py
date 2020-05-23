@@ -1,8 +1,9 @@
-from _util import add_gimpenv_to_pythonpath, tqdm_as_gimp_progress
+from _util import *
 
 add_gimpenv_to_pythonpath()
 
-from gimpfu import *
+from gimpfu import register, main, gimp
+import gimpfu as gfu
 import numpy as np
 import torch
 import torch.hub
@@ -71,13 +72,12 @@ def load_model(device):
 
 
 @torch.no_grad()
-def getnewface(img, mask, mask_m):
+def facegen(img, mask, mask_m, device="cuda"):
     h, w, d = img.shape
     assert d == 3, "Input image must be RGB"
     assert img.shape == mask.shape
     assert img.shape == mask_m.shape
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = load_model(device)
 
     opt = model.opt
@@ -97,35 +97,20 @@ def getnewface(img, mask, mask_m):
     return np.array(result)
 
 
-def channelData(layer):  # convert gimp image to numpy
-    region = layer.get_pixel_rgn(0, 0, layer.width, layer.height)
-    pixChars = region[:, :]  # Take whole layer
-    bpp = region.bpp
-    # return np.frombuffer(pixChars,dtype=np.uint8).reshape(len(pixChars)/bpp,bpp)
-    return np.frombuffer(pixChars, dtype=np.uint8).reshape(layer.height, layer.width, bpp)
+def process(gimp_img, curlayer, layeri, layerm, layermm):
+    gimp.progress_init("(Using {}) Running face gen for {}...".format(
+        "GPU" if default_device().type == "cuda" else "CPU",
+        layeri.name
+    ))
 
+    img, img_alpha = split_alpha(layer_to_numpy(layeri))
+    mask, mask_alpha = split_alpha(layer_to_numpy(layerm))
+    mask_m, mask_m_alpha = split_alpha(layer_to_numpy(layermm))
 
-def createResultLayer(image, name, result):
-    rlBytes = np.uint8(result).tobytes()
-    rl = gimp.Layer(image, name, image.width, image.height, image.active_layer.type, 100, NORMAL_MODE)
-    region = rl.get_pixel_rgn(0, 0, rl.width, rl.height, True)
-    region[:, :] = rlBytes
-    image.add_layer(rl, 0)
-    gimp.displays_flush()
-
-
-def facegen(imggimp, curlayer, layeri, layerm, layermm):
-    if torch.cuda.is_available():
-        gimp.progress_init("(Using GPU) Running face gen for " + layeri.name + "...")
-    else:
-        gimp.progress_init("(Using CPU) Running face gen for " + layeri.name + "...")
-
-    img = channelData(layeri)
-    mask = channelData(layerm)
-    mask_m = channelData(layermm)
-
-    cpy = getnewface(img, mask, mask_m)
-    createResultLayer(imggimp, 'new_output', cpy)
+    result = facegen(img, mask, mask_m, default_device())
+    combined_alpha = combine_alphas([img_alpha, mask_alpha, mask_m_alpha])
+    result = merge_alpha(result, combined_alpha)
+    numpy_to_layer(result, gimp_img, layeri.name + ' facegen')
 
 
 register(
@@ -133,18 +118,19 @@ register(
     "facegen",
     "Running face gen...",
     "Kritik Soman",
-    "Your",
+    "",
     "2020",
     "facegen...",
-    "*",  # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
+    "RGB*",
     [
-        (PF_IMAGE, "image", "Input image", None),
-        (PF_DRAWABLE, "drawable", "Input drawable", None),
-        (PF_LAYER, "drawinglayer", "Original Image:", None),
-        (PF_LAYER, "drawinglayer", "Original Mask:", None),
-        (PF_LAYER, "drawinglayer", "Modified Mask:", None),
+        (gfu.PF_IMAGE, "image", "Input image", None),
+        (gfu.PF_DRAWABLE, "drawable", "Input drawable", None),
+        (gfu.PF_LAYER, "drawinglayer", "Original Image:", None),
+        (gfu.PF_LAYER, "drawinglayer", "Original Mask:", None),
+        (gfu.PF_LAYER, "drawinglayer", "Modified Mask:", None),
     ],
     [],
-    facegen, menu="<Image>/Layer/GIML-ML")
+    process,
+    menu="<Image>/Layer/GIML-ML")
 
 main()

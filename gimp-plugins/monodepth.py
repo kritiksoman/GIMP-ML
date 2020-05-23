@@ -1,8 +1,9 @@
-from _util import add_gimpenv_to_pythonpath, tqdm_as_gimp_progress
+from _util import *
 
 add_gimpenv_to_pythonpath()
 
-from gimpfu import *
+from gimpfu import register, main, gimp
+import gimpfu as gfu
 import PIL.Image as pil
 import torch
 import torch.hub
@@ -24,9 +25,10 @@ def load_model(device):
 
 
 @torch.no_grad()
-def getMonoDepth(input_image):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+def monodepth(input_image, device="cuda"):
+    h, w, d = input_image.shape
+    assert d == 3, "Input image must be RGB"
+    
     # LOADING PRETRAINED MODEL
     depth_decoder, encoder = load_model(device)
 
@@ -53,30 +55,15 @@ def getMonoDepth(input_image):
     return colormapped_im
 
 
-def channelData(layer):  # convert gimp image to numpy
-    region = layer.get_pixel_rgn(0, 0, layer.width, layer.height)
-    pixChars = region[:, :]  # Take whole layer
-    bpp = region.bpp
-    # return np.frombuffer(pixChars,dtype=np.uint8).reshape(len(pixChars)/bpp,bpp)
-    return np.frombuffer(pixChars, dtype=np.uint8).reshape(layer.height, layer.width, bpp)
-
-
-def createResultLayer(image, name, result):
-    rlBytes = np.uint8(result).tobytes()
-    rl = gimp.Layer(image, name, image.width, image.height, image.active_layer.type, 100, NORMAL_MODE)
-    region = rl.get_pixel_rgn(0, 0, rl.width, rl.height, True)
-    region[:, :] = rlBytes
-    image.add_layer(rl, 0)
-    gimp.displays_flush()
-
-
-def MonoDepth(img, layer):
-    gimp.progress_init("Generating disparity map for " + layer.name + "...")
-
-    imgmat = channelData(layer)
-    cpy = getMonoDepth(imgmat)
-
-    createResultLayer(img, 'new_output', cpy)
+def process(img, layer):
+    gimp.progress_init("(Using {}) Generating disparity map for {}...".format(
+        "GPU" if default_device().type == "cuda" else "CPU",
+        layer.name
+    ))
+    rgb, alpha = split_alpha(layer_to_numpy(layer))
+    result = monodepth(rgb, default_device())
+    result = merge_alpha(result, alpha)
+    numpy_to_layer(result, img, layer.name + ' monodepth')
 
 
 register(
@@ -84,14 +71,16 @@ register(
     "MonoDepth",
     "Generate monocular disparity map based on deep learning.",
     "Kritik Soman",
-    "Your",
+    "",
     "2020",
     "MonoDepth...",
-    "*",  # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
-    [(PF_IMAGE, "image", "Input image", None),
-     (PF_DRAWABLE, "drawable", "Input drawable", None),
-     ],
+    "RGB*",
+    [
+        (gfu.PF_IMAGE, "image", "Input image", None),
+        (gfu.PF_DRAWABLE, "drawable", "Input drawable", None),
+    ],
     [],
-    MonoDepth, menu="<Image>/Layer/GIML-ML")
+    process,
+    menu="<Image>/Layer/GIML-ML")
 
 main()

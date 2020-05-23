@@ -1,7 +1,8 @@
 import os
 import sys
 
-from gimpfu import pdb
+import gimpfu as gfu
+from gimpfu import pdb, gimp
 
 baseLoc = os.path.dirname(os.path.realpath(__file__))
 
@@ -17,6 +18,11 @@ def add_gimpenv_to_pythonpath():
         os.path.join(env_path, 'site-packages'),
         os.path.join(env_path, 'site-packages/setuptools')
     ]
+
+
+def default_device():
+    import torch
+    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class tqdm_as_gimp_progress:
@@ -53,3 +59,81 @@ class tqdm_as_gimp_progress:
                 return func(*args, **kwargs)
 
         return decorator
+
+
+image_type_map = {
+    1: gfu.GRAY_IMAGE,
+    2: gfu.GRAYA_IMAGE,
+    3: gfu.RGB_IMAGE,
+    4: gfu.RGBA_IMAGE,
+}
+
+image_base_type_map = {
+    1: gfu.GRAY,
+    2: gfu.GRAY,
+    3: gfu.RGB,
+    4: gfu.RGB,
+}
+
+
+def layer_to_numpy(layer):
+    import numpy as np
+    region = layer.get_pixel_rgn(0, 0, layer.width, layer.height)
+    pixChars = region[:, :]  # Take whole layer
+    bpp = region.bpp
+    return np.frombuffer(pixChars, dtype=np.uint8).reshape(layer.height, layer.width, bpp)
+
+
+def split_alpha(array):
+    h, w, d = array.shape
+    if d == 1:
+        return array, None
+    if d == 2:
+        return array[:, :, 0:1], array[:, :, 1:2]
+    if d == 3:
+        return array, None
+    if d == 4:
+        return array[:, :, 0:3], array[:, :, 3:4]
+    raise ValueError("Image has too many channels ({})".format(d))
+
+
+def merge_alpha(image, alpha):
+    import numpy as np
+    h, w, d = image.shape
+    if d not in (1, 3):
+        raise ValueError("Incorrect number of channels ({})".format(d))
+    if alpha is None:
+        return image
+    return np.concatenate([image, alpha], axis=2)
+
+
+def combine_alphas(alphas):
+    combined_alpha = None
+    for alpha in alphas:
+        if alpha is not None:
+            if combined_alpha is None:
+                combined_alpha = alpha
+            else:
+                combined_alpha = combined_alpha * (alpha / 255.)
+    if combined_alpha is not None:
+        combined_alpha = combined_alpha.astype("uint8")
+    return combined_alpha
+
+
+def numpy_to_layer(array, gimp_image, name):
+    import numpy as np
+    h, w, d = array.shape
+    layer = gimp.Layer(gimp_image, name, w, h, image_type_map[d])
+    region = layer.get_pixel_rgn(0, 0, w, h)
+    data = array.astype(np.uint8).tobytes()
+    region[:, :] = data
+    gimp_image.insert_layer(layer, position=0)
+    return layer
+
+
+def numpy_to_gimp_image(array, name):
+    h, w, d = array.shape
+    img = gimp.Image(w, h, image_base_type_map[d])
+    numpy_to_layer(array, img, name)
+    gimp.Display(img)
+    gimp.displays_flush()
