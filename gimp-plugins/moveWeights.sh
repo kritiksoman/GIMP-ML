@@ -1,6 +1,6 @@
 unzip weights.zip
 mkdir -p CelebAMask-HQ/MaskGAN_demo/checkpoints/label2face_512p
-mkdir -p mkdir monodepth2/models/mono+stereo_640x192
+mkdir -p monodepth2/models/mono+stereo_640x192
 mkdir -p pytorch-SRResNet/model
 mkdir deeplabv3
 
