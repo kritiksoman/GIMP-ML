@@ -5,7 +5,8 @@ Set of Machine Learning Python plugins for GIMP.
 The plugins have been tested with GIMP 2.10 on the following machines: <br>
 [1] macOS Catalina 10.15.4 <br>
 [2] ubuntu 18.04 LTS <br>
-[3] ubuntu 20.04 LTS
+[3] ubuntu 20.04 LTS <br>
+[4] Debian GNU/Linux 10 (buster)
 
 # Screenshot of Menu
 ![image1](https://github.com/kritiksoman/GIMP-ML/blob/master/screenshot.png)
@@ -17,7 +18,7 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 [3] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and close GIMP. <br>
 [4] Download [weights.zip](https://drive.google.com/open?id=1mqzDnxtXQ75lVqlQ8tUeua68lDqUgUVe) (1.22 GB) and save it in gimp-plugins folder. <br>
 [5] Open terminal and run : <br>
-    ```bash installGimpML-mac.sh```
+    ```bash installGimpML.sh```
     <br>
     ```bash moveWeights.sh ```<br>
 [6] Open GIMP.
@@ -48,6 +49,17 @@ The following have been ported : <br>
 [4] https://github.com/nianticlabs/monodepth2 <br>
 [5] https://github.com/zeruniverse/neural-colorization <br>
 [6] https://github.com/twtygqyy/pytorch-SRResNet
+
+# Common Issues
+[1] No output on running plugin: Please right click on layer and remove alpha channel before using plugins. <br>
+[2] GIMP-ML menu not visible: Do following and restart GIMP.<br>
+```
+sudo apt install gimp-python
+cd gimp-plugins
+chmod -x *
+chmod +x *.py
+```
+[3] colorize plugin not working: Switch to grayscale mode before running plugin. (Image->Mode->Grayscale)
 
 # Citation
 Please cite using the following bibtex entry:
