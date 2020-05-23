@@ -14,7 +14,7 @@ from torch.autograd import Variable
 from scipy.ndimage import zoom
 from argparse import Namespace
 import numpy as np
-from skimage.color import rgb2yuv,yuv2rgb
+import cv2
 
 def getcolor(input_image):
     p = np.repeat(input_image, 3, axis=2)
@@ -34,8 +34,10 @@ def getcolor(input_image):
     else:
         G.load_state_dict(torch.load(args.model,map_location=torch.device('cpu')))
 
-    
-    img_yuv = rgb2yuv(p)
+    p = p.astype(np.float32)
+    p = p / 255
+    img_yuv = cv2.cvtColor(p, cv2.COLOR_RGB2YUV)
+    # img_yuv = rgb2yuv(p)
     H,W,_ = img_yuv.shape
     infimg = np.expand_dims(np.expand_dims(img_yuv[...,0], axis=0), axis=0)
     img_variable = Variable(torch.Tensor(infimg-0.5))
@@ -48,11 +50,11 @@ def getcolor(input_image):
     (_,_,H1,W1) = uv.shape
     uv = zoom(uv,(1,1,float(H)/H1,float(W)/W1))
     yuv = np.concatenate([infimg,uv],axis=1)[0]
-    rgb=yuv2rgb(yuv.transpose(1,2,0))
-    out=(rgb.clip(min=0,max=1)*255)[:,:,[0,1,2]]
-   
-    out=out.astype(np.uint8)
-    
+    # rgb=yuv2rgb(yuv.transpose(1,2,0))
+    # out=(rgb.clip(min=0,max=1)*255)[:,:,[0,1,2]]
+    rgb = cv2.cvtColor(yuv.transpose(1, 2, 0)*255, cv2.COLOR_YUV2RGB)
+    rgb = rgb.clip(min=0,max=255)
+    out = rgb.astype(np.uint8)
 
     return out
 
