@@ -25,35 +25,37 @@ def mask_colors_to_indices(mask):
     return x
 
 
-def get_transform(load_size, is_mask=False):
-    method = Image.NEAREST if is_mask else Image.BICUBIC
-
-    def _scale_width(img):
+def scale_to_width_transform(width, method):
+    def f(img):
         ow, oh = img.size
-        if ow == load_size:
+        if ow == width:
             return img
-        w = load_size
-        h = int(load_size * oh / ow)
+        w = width
+        h = int(width * oh / ow)
         return img.resize((w, h), method)
 
-    transform_list = []
-    if is_mask:
-        transform_list += [mask_colors_to_indices]
+    return f
 
-    transform_list += [
+
+def get_img_transform(target_width):
+    return transforms.Compose([
         Image.fromarray,
-        _scale_width,
+        scale_to_width_transform(target_width, Image.BICUBIC),
         transforms.ToTensor(),
-    ]
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        lambda x: x.unsqueeze(0)
+    ])
 
-    if is_mask:
-        transform_list += [transforms.Normalize((0, 0, 0), (1 / 255., 1 / 255., 1 / 255.))]
-    else:
-        transform_list += [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
 
-    transform_list += [lambda x: x.unsqueeze(0)]
-
-    return transforms.Compose(transform_list)
+def get_mask_transform(target_width):
+    return transforms.Compose([
+        mask_colors_to_indices,
+        Image.fromarray,
+        scale_to_width_transform(target_width, Image.NEAREST),
+        transforms.ToTensor(),
+        transforms.Normalize((0, 0, 0), (1 / 255., 1 / 255., 1 / 255.)),
+        lambda x: x.unsqueeze(0)
+    ])
 
 
 @tqdm_as_gimp_progress("Downloading model")
@@ -79,8 +81,8 @@ def getnewface(img, mask, mask_m):
     model = load_model(device)
 
     opt = model.opt
-    transform_mask = get_transform(opt.loadSize, is_mask=True)
-    transform_image = get_transform(opt.loadSize, is_mask=False)
+    transform_mask = get_mask_transform(opt.loadSize)
+    transform_image = get_img_transform(opt.loadSize)
     mask = transform_mask(mask).to(device)
     mask_m = transform_mask(mask_m).to(device)
     img = transform_image(img).to(device)
