@@ -35,7 +35,7 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 * License:
    * [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode)
    * Copyright (C) 2017 NVIDIA Corporation. All rights reserved. 
-   * :x: Restricted to non-commercial research and educational purposes
+   * Restricted to non-commercial research and educational purposes
 * http://arxiv.org/abs/1907.11922
 * C.-H. Lee, Z. Liu, L. Wu, and P. Luo, “MaskGAN: Towards Diverse and Interactive Facial Image Manipulation,”
 in *IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*, 2019.
@@ -74,7 +74,7 @@ in *IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*, 2019.
 * License:
    * See the [license file](https://github.com/nianticlabs/monodepth2/blob/master/LICENSE) for terms
    * Copyright © Niantic, Inc. 2019. Patent Pending. All rights reserved.
-   * :x: Non-commercial use only
+   * Non-commercial use only
 * http://arxiv.org/abs/1806.01260
 * C. Godard, O. Mac Aodha, M. Firman, and G. Brostow, “Digging Into Self-Supervised Monocular Depth Estimation,”
   in *2019 IEEE/CVF International Conference on Computer Vision (ICCV)*, 2019, pp. 3827–3837.
@@ -84,13 +84,13 @@ in *IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*, 2019.
 * Torch Hub fork: https://github.com/valgur/neural-colorization
 * License:
    * [GNU GPL 3.0](https://github.com/zeruniverse/neural-colorization/blob/pytorch/LICENSE) for personal or research use
-   * :x: Commercial use prohibited
+   * Commercial use prohibited
    * Model weights released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 * Based on fast-neural-style:
    * https://github.com/jcjohnson/fast-neural-style
    * License:
       * Free for personal or research use
-      * :x: For commercial use please contact the authors
+      * For commercial use please contact the authors
    * https://cs.stanford.edu/people/jcjohns/papers/eccv16/JohnsonECCV16.pdf
    * J. Johnson, A. Alahi, and L. Fei-Fei, “Perceptual Losses for Real-Time Style Transfer and Super-Resolution,”
      in *Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)*,
@@ -114,7 +114,7 @@ chmod +x *.py
 MIT
 
 Please note that additional license terms apply for each individual model. See the [references](#references) list for details.
-Many of the models restrict usage to non-commercial or research purposes only (highlighted with :x:).
+Many of the models restrict usage to non-commercial or research purposes only.
 
 
 # Citation
