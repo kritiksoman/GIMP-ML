@@ -28,24 +28,73 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 
 [<img src="http://img.youtube.com/vi/thS8VqPvuhE/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=thS8VqPvuhE) 
 
+# References
+### MaskGAN
+* Source: https://github.com/switchablenorms/CelebAMask-HQ
+* Torch Hub fork: https://github.com/valgur/CelebAMask-HQ
+* License:
+   * [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode)
+   * Copyright (C) 2017 NVIDIA Corporation. All rights reserved. 
+   * :x: Restricted to non-commercial research and educational purposes
+* http://arxiv.org/abs/1907.11922
+* C.-H. Lee, Z. Liu, L. Wu, and P. Luo, “MaskGAN: Towards Diverse and Interactive Facial Image Manipulation,”
+in *IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*, 2019.
 
-# Paper References
-[1] Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network (https://arxiv.org/abs/1609.04802) <br>
-[2] DeblurGAN-v2: Deblurring (Orders-of-Magnitude) Faster and Better (https://arxiv.org/abs/1908.03826) <br>
-[3] Digging into Self-Supervised Monocular Depth Prediction (https://arxiv.org/abs/1806.01260) <br>
-[4] BiSeNet: Bilateral Segmentation Network for Real-time Semantic Segmentation (https://arxiv.org/abs/1808.00897) <br>
-[5] MaskGAN: Towards Diverse and Interactive Facial Image Manipulation (https://arxiv.org/abs/1907.11922) <br>
-[6] Perceptual Losses for Real-Time Style Transfer and Super-Resolution (https://cs.stanford.edu/people/jcjohns/eccv16/) <br>
-[7] Rethinking Atrous Convolution for Semantic Image Segmentation (https://arxiv.org/abs/1706.05587) <br>
+### Face Parsing
+* Source: https://github.com/zllrunning/face-parsing.PyTorch
+* Torch Hub fork: https://github.com/valgur/face-parsing.PyTorch
+* License: [MIT](https://github.com/zllrunning/face-parsing.PyTorch/blob/master/LICENSE)
+* Based on BiSeNet:
+   * https://github.com/CoinCheung/BiSeNet
+   * License: [MIT](https://github.com/CoinCheung/BiSeNet/blob/master/LICENSE)
+   * http://arxiv.org/abs/1808.00897
+   * C. Yu, J. Wang, C. Peng, C. Gao, G. Yu, and N. Sang, “BiSeNet: Bilateral segmentation network for
+     real-time semantic segmentation,” in Lecture Notes in *Computer Science (including subseries Lecture Notes in 
+     Artificial Intelligence and Lecture Notes in Bioinformatics)*, 2018, vol. 11217 LNCS, pp. 334–349.
 
-# Code References
-The following have been ported : <br>
-[1] https://github.com/switchablenorms/CelebAMask-HQ <br>
-[2] https://github.com/TAMU-VITA/DeblurGANv2 <br>
-[3] https://github.com/zllrunning/face-parsing.PyTorch <br>
-[4] https://github.com/nianticlabs/monodepth2 <br>
-[5] https://github.com/zeruniverse/neural-colorization <br>
-[6] https://github.com/twtygqyy/pytorch-SRResNet
+### SRResNet
+* Source: https://github.com/twtygqyy/pytorch-SRResNet
+* Torch Hub fork: https://github.com/valgur/pytorch-SRResNet
+* License: [MIT](https://github.com/twtygqyy/pytorch-SRResNet/blob/master/LICENSE)
+* http://arxiv.org/abs/1609.04802
+* C. Ledig et al., “Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network,”
+  in *2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*, 2017, pp. 105–114.
+
+### DeblurGANv2
+* Source: https://github.com/TAMU-VITA/DeblurGANv2
+* Torch Hub fork: https://github.com/valgur/DeblurGANv2
+* License: [BSD 3-clause](https://github.com/TAMU-VITA/DeblurGANv2/blob/master/LICENSE)
+* https://arxiv.org/abs/1908.03826
+* O. Kupyn, T. Martyniuk, J. Wu, and Z. Wang, “DeblurGAN-v2: Deblurring (Orders-of-Magnitude) Faster and Better,”
+  in *2019 IEEE/CVF International Conference on Computer Vision (ICCV)*, 2019, pp. 8877–8886.
+
+### Monodepth2
+* Source: https://github.com/nianticlabs/monodepth2
+* Torch Hub fork: https://github.com/valgur/monodepth2
+* License:
+   * See the [license file](https://github.com/nianticlabs/monodepth2/blob/master/LICENSE) for terms
+   * Copyright © Niantic, Inc. 2019. Patent Pending. All rights reserved.
+   * :x: Non-commercial use only
+* http://arxiv.org/abs/1806.01260
+* C. Godard, O. Mac Aodha, M. Firman, and G. Brostow, “Digging Into Self-Supervised Monocular Depth Estimation,”
+  in *2019 IEEE/CVF International Conference on Computer Vision (ICCV)*, 2019, pp. 3827–3837.
+
+### Neural Colorization
+* Source: https://github.com/zeruniverse/neural-colorization
+* Torch Hub fork: https://github.com/valgur/neural-colorization
+* License:
+   * [GNU GPL 3.0](https://github.com/zeruniverse/neural-colorization/blob/pytorch/LICENSE) for personal or research use
+   * :x: Commercial use prohibited
+   * Model weights released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+* Based on fast-neural-style:
+   * https://github.com/jcjohnson/fast-neural-style
+   * License:
+      * Free for personal or research use
+      * :x: For commercial use please contact the authors
+   * https://cs.stanford.edu/people/jcjohns/papers/eccv16/JohnsonECCV16.pdf
+   * J. Johnson, A. Alahi, and L. Fei-Fei, “Perceptual Losses for Real-Time Style Transfer and Super-Resolution,”
+     in *Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)*,
+     vol. 9906 LNCS, 2016, pp. 694–711.
 
 # Common Issues
 [1] GIMP-ML menu not visible: Do following and restart GIMP.<br>
@@ -63,6 +112,10 @@ chmod +x *.py
 
 # License
 MIT
+
+Please note that additional license terms apply for each individual model. See the [references](#references) list for details.
+Many of the models restrict usage to non-commercial or research purposes only (highlighted with :x:).
+
 
 # Citation
 If you use GIMP-ML, please cite the following [arXiv preprint](https://arxiv.org/abs/2004.13060):
