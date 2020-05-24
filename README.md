@@ -1,5 +1,4 @@
 # GIMP-ML
-Preprint: [Link](https://arxiv.org/abs/2004.13060) <br>
 Set of Machine Learning Python plugins for GIMP. 
 
 The plugins have been tested with GIMP 2.10 on the following machines: <br>
@@ -29,6 +28,7 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 
 [<img src="http://img.youtube.com/vi/thS8VqPvuhE/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=thS8VqPvuhE) 
 
+
 # Paper References
 [1] Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network (https://arxiv.org/abs/1609.04802) <br>
 [2] DeblurGAN-v2: Deblurring (Orders-of-Magnitude) Faster and Better (https://arxiv.org/abs/1908.03826) <br>
@@ -57,14 +57,23 @@ chmod +x *.py
 ```
 [2] colorize plugin not working: Switch to grayscale mode before running plugin. (Image->Mode->Grayscale)
 
+# Authors
+* Kritik Soman ([kritiksoman](https://github.com/kritiksoman))
+* Martin Valgur ([valgur](https://github.com/valgur))
+
+# License
+MIT
+
 # Citation
-Please cite using the following bibtex entry:
+If you use GIMP-ML, please cite the following [arXiv preprint](https://arxiv.org/abs/2004.13060):
 
 ```
 @article{soman2020GIMPML,
   title={GIMP-ML: Python Plugins for using Computer Vision Models in GIMP},
   author={Soman, Kritik},
-  journal={arXiv preprint arXiv:2004.13060},
-  year={2020}
+  year={2020},
+  archivePrefix={arXiv},
+  arxivId={2004.13060},
+  eprint={2004.13060}
 }
 ```
