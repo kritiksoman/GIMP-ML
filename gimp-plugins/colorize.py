@@ -28,6 +28,7 @@ def load_model(device):
     return G
 
 
+@handle_alpha
 @torch.no_grad()
 def colorize(input_image, device="cuda"):
     h, w, d = input_image.shape
@@ -52,14 +53,13 @@ def colorize(input_image, device="cuda"):
     return rgb
 
 
-def process(img, layer):
+def process(gimp_img, layer):
     gimp.progress_init("(Using {}) Colorizing {}...".format(
         "GPU" if default_device().type == "cuda" else "CPU",
         layer.name
     ))
-    rgb, alpha = split_alpha(layer_to_numpy(layer))
-    result = colorize(rgb, default_device())
-    result = merge_alpha(result, alpha)
+    img = layer_to_numpy(layer)
+    result = colorize(img, default_device())
     numpy_to_gimp_image(result, layer.name + '_colorized')
 
 

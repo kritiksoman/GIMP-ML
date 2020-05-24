@@ -6,8 +6,6 @@ from gimpfu import register, main, gimp
 import gimpfu as gfu
 import torch
 import torch.hub
-import numpy as np
-from PIL import Image
 
 
 @tqdm_as_gimp_progress("Downloading model")
@@ -17,6 +15,7 @@ def load_model(device):
     return model
 
 
+@handle_alpha
 @torch.no_grad()
 def super_resolution(input_image, device="cuda"):
     h, w, d = input_image.shape
@@ -31,18 +30,13 @@ def super_resolution(input_image, device="cuda"):
     return HR_4x.clamp(0, 1).mul(255).byte().cpu().numpy()
 
 
-def process(img, layer):
+def process(gimp_img, layer):
     gimp.progress_init("(Using {}) Upscaling {}...".format(
         "GPU" if default_device().type == "cuda" else "CPU",
         layer.name
     ))
-
-    rgb, alpha = split_alpha(layer_to_numpy(layer))
-    result = super_resolution(rgb, default_device())
-    if alpha is not None:
-        h, w, d = result.shape
-        alpha = np.array(Image.fromarray(alpha[..., 0]).resize((w, h), Image.BILINEAR))[..., None]
-    result = merge_alpha(result, alpha)
+    img = layer_to_numpy(layer)
+    result = super_resolution(img, default_device())
     numpy_to_gimp_image(result, layer.name + '_upscaled')
 
 

@@ -71,6 +71,7 @@ def load_model(device):
     return model
 
 
+@handle_alpha
 @torch.no_grad()
 def facegen(img, mask, mask_m, device="cuda"):
     h, w, d = img.shape
@@ -97,20 +98,19 @@ def facegen(img, mask, mask_m, device="cuda"):
     return np.array(result)
 
 
-def process(gimp_img, curlayer, layeri, layerm, layermm):
+def process(gimp_img, active_layer, img_layer, mask_layer, mask_m_layer):
     gimp.progress_init("(Using {}) Running face gen for {}...".format(
         "GPU" if default_device().type == "cuda" else "CPU",
-        layeri.name
+        img_layer.name
     ))
 
-    img, img_alpha = split_alpha(layer_to_numpy(layeri))
-    mask, mask_alpha = split_alpha(layer_to_numpy(layerm))
-    mask_m, mask_m_alpha = split_alpha(layer_to_numpy(layermm))
+    img = layer_to_numpy(img_layer)
+    mask = layer_to_numpy(mask_layer)
+    mask_m = layer_to_numpy(mask_m_layer)
 
     result = facegen(img, mask, mask_m, default_device())
-    combined_alpha = combine_alphas([img_alpha, mask_alpha, mask_m_alpha])
-    result = merge_alpha(result, combined_alpha)
-    numpy_to_layer(result, gimp_img, layeri.name + ' facegen')
+
+    numpy_to_layer(result, gimp_img, img_layer.name + ' facegen')
 
 
 register(

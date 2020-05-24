@@ -120,6 +120,38 @@ def combine_alphas(alphas):
     return combined_alpha
 
 
+def handle_alpha(func):
+    def decorator(*args, **kwargs):
+        import numpy as np
+
+        alphas = []
+        args = list(args)
+        for i, arg in enumerate(args):
+            if isinstance(arg, np.ndarray):
+                img, alpha = split_alpha(arg)
+                args[i] = img
+                alphas.append(alpha)
+        for key, arg in list(kwargs.items()):
+            if isinstance(arg, np.ndarray):
+                img, alpha = split_alpha(arg)
+                kwargs[key] = img
+                alphas.append(alpha)
+
+        result = func(*args, **kwargs)
+        alpha = combine_alphas(alphas)
+
+        # for super-res
+        if alpha is not None and result.shape[:2] != alpha.shape[:2]:
+            from PIL import Image
+            h, w, d = result.shape
+            alpha = np.array(Image.fromarray(alpha[..., 0]).resize((w, h), Image.BILINEAR))[..., None]
+
+        result = merge_alpha(result, alpha)
+        return result
+
+    return decorator
+
+
 def numpy_to_layer(array, gimp_image, name):
     import numpy as np
     h, w, d = array.shape

@@ -24,11 +24,12 @@ def load_model(device):
     return depth_decoder, encoder
 
 
+@handle_alpha
 @torch.no_grad()
 def monodepth(input_image, device="cuda"):
     h, w, d = input_image.shape
     assert d == 3, "Input image must be RGB"
-    
+
     # LOADING PRETRAINED MODEL
     depth_decoder, encoder = load_model(device)
 
@@ -55,15 +56,14 @@ def monodepth(input_image, device="cuda"):
     return colormapped_im
 
 
-def process(img, layer):
+def process(gimp_img, layer):
     gimp.progress_init("(Using {}) Generating disparity map for {}...".format(
         "GPU" if default_device().type == "cuda" else "CPU",
         layer.name
     ))
-    rgb, alpha = split_alpha(layer_to_numpy(layer))
-    result = monodepth(rgb, default_device())
-    result = merge_alpha(result, alpha)
-    numpy_to_layer(result, img, layer.name + ' monodepth')
+    img = layer_to_numpy(layer)
+    result = monodepth(img, default_device())
+    numpy_to_layer(result, gimp_img, layer.name + ' monodepth')
 
 
 register(

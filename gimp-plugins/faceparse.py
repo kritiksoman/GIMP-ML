@@ -40,6 +40,7 @@ def load_model(device):
     return net
 
 
+@handle_alpha
 @torch.no_grad()
 def faceparse(input_image, device="cuda"):
     h, w, d = input_image.shape
@@ -66,15 +67,14 @@ def faceparse(input_image, device="cuda"):
     return result
 
 
-def process(img, layer):
+def process(gimp_img, layer):
     gimp.progress_init("(Using {}) Running face parse for {}...".format(
         "GPU" if default_device().type == "cuda" else "CPU",
         layer.name
     ))
-    rgb, alpha = split_alpha(layer_to_numpy(layer))
-    result = faceparse(rgb, default_device())
-    result = merge_alpha(result, alpha)
-    numpy_to_layer(result, img, layer.name + ' faceparse')
+    img = layer_to_numpy(layer)
+    result = faceparse(img, default_device())
+    numpy_to_layer(result, gimp_img, layer.name + ' faceparse')
 
 
 register(

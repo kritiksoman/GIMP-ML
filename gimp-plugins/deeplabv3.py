@@ -19,11 +19,12 @@ def load_model(device):
     return model
 
 
+@handle_alpha
 @torch.no_grad()
 def segment(input_image, device="cuda"):
     h, w, d = input_image.shape
     assert d == 3, "Input image must be RGB"
-    
+
     model = load_model(device)
 
     preprocess = transforms.Compose([
@@ -46,15 +47,14 @@ def segment(input_image, device="cuda"):
     return np.array(result.convert('RGB'))
 
 
-def process(img, layer):
+def process(gimp_img, layer):
     gimp.progress_init("(Using {}) Generating semantic segmentation map for {}...".format(
         "GPU" if default_device().type == "cuda" else "CPU",
         layer.name
     ))
-    rgb, alpha = split_alpha(layer_to_numpy(layer))
-    result = segment(rgb, default_device())
-    result = merge_alpha(result, alpha)
-    numpy_to_layer(result, img, layer.name + ' segmented')
+    img = layer_to_numpy(layer)
+    result = segment(img, default_device())
+    numpy_to_layer(result, gimp_img, layer.name + ' segmented')
 
 
 register(
