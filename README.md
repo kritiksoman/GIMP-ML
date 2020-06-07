@@ -5,7 +5,8 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 [1] macOS Catalina 10.15.4 <br>
 [2] ubuntu 18.04 LTS <br>
 [3] ubuntu 20.04 LTS <br>
-[4] Debian GNU/Linux 10 (buster)
+[4] Debian GNU/Linux 10 (buster) <br>
+[5] Windows 10 <br>
 
 # Screenshot of Menu
 ![image1](screenshot.png)
