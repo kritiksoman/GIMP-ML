@@ -151,11 +151,8 @@ dmypy.json
 
 # End of https://www.gitignore.io/api/linux,macos,python
 
+.idea/
+
 ## Project-specific ignores
-*.pt
-*.pth
-*.h5
-*.npy
-*.zip
-opt.txt
 gimpenv/
+_config.py

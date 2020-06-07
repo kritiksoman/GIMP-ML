@@ -11,6 +11,8 @@ from xmlrpclib import Binary
 import gimpfu as gfu
 from gimpfu import gimp, pdb
 
+from _config import python3_executable
+
 base_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 models_dir = os.path.join(base_dir, 'models')
 
@@ -81,8 +83,9 @@ class ModelProxy(object):
     and waits for the subprocess to call get_args() and then return_result() over XML-RPC.
     Additionally, any progress info can be sent via update_progress().
     """
+
     def __init__(self, model_file):
-        self.python_executable = os.path.join(base_dir, 'gimpenv/bin/python')
+        self.python_executable = python3_executable
         self.model_path = os.path.join(models_dir, model_file)
         self.server = None
         self.args = None
@@ -115,16 +118,31 @@ class ModelProxy(object):
         self.result = tuple(self._decode(x) for x in result)
 
     def _subproc_thread(self, rpc_port):
+        env = self._add_conda_env_to_path()
         try:
             self.proc = subprocess.Popen([
                 self.python_executable,
                 self.model_path,
                 'http://127.0.0.1:{}/'.format(rpc_port)
-            ])
+            ], env=env)
             self.proc.wait()
         finally:
             self.server.shutdown()
             self.server.server_close()
+
+    def _add_conda_env_to_path(self):
+        env = os.environ.copy()
+        conda_root = os.path.dirname(self.python_executable)
+        env['PATH'] = os.pathsep.join([
+            conda_root,
+            os.path.join(conda_root, 'Library', 'mingw-w64', 'bin'),
+            os.path.join(conda_root, 'Library', 'usr', 'bin'),
+            os.path.join(conda_root, 'Library', 'bin'),
+            os.path.join(conda_root, 'Scripts'),
+            os.path.join(conda_root, 'bin'),
+            env['PATH']
+        ])
+        return env
 
     def __call__(self, *args, **kwargs):
         self.args = args
@@ -163,6 +181,7 @@ class ModelProxy(object):
 
 class ImgArray(object):
     """Minimal Numpy ndarray-like object for serialization in RPC."""
+
     def __init__(self, buffer, shape):
         self.buffer = buffer
         self.shape = shape

@@ -27,7 +27,8 @@ fi
 python3 -m pip install --user --upgrade virtualenv
 python3 -m virtualenv -p python3 gimpenv
 source gimpenv/bin/activate
-python3 -m pip install -r requirements.txt
+python -m pip install -r requirements.txt
+python -c "import sys; print(f'python3_executable = \'{sys.executable}\'')" > plugins/_config.py
 deactivate
 
 echo -e "\n-----------Installed GIMP-ML------------\n"
