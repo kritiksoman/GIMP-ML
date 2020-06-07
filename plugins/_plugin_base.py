@@ -119,7 +119,7 @@ class ModelProxy(object):
             self.proc = subprocess.Popen([
                 self.python_executable,
                 self.model_path,
-                'http://localhost:{}/'.format(rpc_port)
+                'http://127.0.0.1:{}/'.format(rpc_port)
             ])
             self.proc.wait()
         finally:
@@ -139,7 +139,7 @@ class ModelProxy(object):
                     self.server.exception = sys.exc_info()
                     raise
 
-        self.server = SimpleXMLRPCServer(("localhost", 0), allow_none=True, logRequests=False,
+        self.server = SimpleXMLRPCServer(('127.0.0.1', 0), allow_none=True, logRequests=False,
                                          requestHandler=RequestHandler)
         rpc_port = self.server.server_address[1]
         self.server.register_function(self._rpc_get_args, 'get_args')
