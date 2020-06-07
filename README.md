@@ -13,8 +13,8 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 # Installation Steps
 [1] Install [GIMP](https://www.gimp.org/downloads/). <br>
 [2] Clone this repository: `git clone https://github.com/kritiksoman/GIMP-ML.git` <br>
-[3] Run `bash install.sh` <br>
-[4] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and restart GIMP. <br>
+[3] Run `./install.sh` <br>
+[4] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder `GIMP-ML/plugins` and restart GIMP. <br>
 
 # Demo videos on YouTube
 [<img src="http://img.youtube.com/vi/q9Ny5XqIUKk/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=q9Ny5XqIUKk)

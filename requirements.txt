@@ -3,8 +3,6 @@ torchvision
 pretrainedmodels
 numpy
 matplotlib
-enum
-typing
 future
 pyyaml
 tqdm

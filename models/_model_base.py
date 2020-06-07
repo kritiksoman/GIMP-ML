@@ -1,32 +1,69 @@
-import os
-import sys
+from abc import ABC, abstractmethod
+from xmlrpc.client import ServerProxy
 
-import gimpfu as gfu
-from gimpfu import pdb, gimp
-
-baseLoc = os.path.dirname(os.path.realpath(__file__))
-
-
-def add_gimpenv_to_pythonpath():
-    env_path = os.path.join(baseLoc, 'gimpenv/lib/python2.7')
-    if env_path in sys.path:
-        return
-    # Prepend to PYTHONPATH to make sure the gimpenv packages get loaded before system ones,
-    # since they are likely more up-to-date.
-    sys.path[:0] = [
-        env_path,
-        os.path.join(env_path, 'site-packages'),
-        os.path.join(env_path, 'site-packages/setuptools')
-    ]
+import numpy as np
+import torch
+from PIL import Image
 
 
-def default_device():
-    import torch
-    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+class ModelBase(ABC):
+    def __init__(self):
+        self.hub_repo = None
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self._rpc = None
+        self._model = None
+
+    @property
+    def model(self):
+        if self._model is None:
+            with capture_tqdm(self.update_progress, "Downloading model"):
+                self._model = self.load_model()
+        return self._model
+
+    @abstractmethod
+    def load_model(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def predict(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def update_progress(self, percent, message):
+        if self._rpc:
+            self._rpc.update_progress(percent, message)
+
+    @staticmethod
+    def _decode(x):
+        if isinstance(x, list) and len(x) == 2 and hasattr(x[0], 'data'):
+            x = np.frombuffer(x[0].data, dtype=np.uint8).reshape(x[1])
+        return x
+
+    @staticmethod
+    def _encode(x):
+        if isinstance(x, np.ndarray):
+            x = [x.astype(np.uint8).tobytes(), x.shape]
+        return x
+
+    def _decode_rpc_args(self, args, kwargs):
+        args = [self._decode(arg) for arg in args]
+        kwargs = {k: self._decode(v) for k, v in kwargs.items()}
+        return args, kwargs
+
+    def _encode_rpc_result(self, result):
+        if not isinstance(result, (list, tuple)):
+            result = [result]
+        return [self._encode(x) for x in result]
+
+    def process_rpc(self, rpc_url):
+        self._rpc = ServerProxy(rpc_url, allow_none=True)
+        args, kwargs = self._decode_rpc_args(*self._rpc.get_args())
+        result = self.predict(*args, **kwargs)
+        self._rpc.return_result(self._encode_rpc_result(result))
 
 
-class tqdm_as_gimp_progress:
-    def __init__(self, default_desc=None):
+class capture_tqdm:
+    def __init__(self, progress_fn, default_desc=None):
+        self.progress_fn = progress_fn
         self.default_desc = default_desc
 
     def __enter__(self):
@@ -39,11 +76,11 @@ class tqdm_as_gimp_progress:
             tqdm_info["bar_format"] = "{desc}: " if tqdm_info["prefix"] else ""
             # Removed {percentage:3.0f}% from bar_format
             tqdm_info["bar_format"] += "{n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}{postfix}]"
-            pdb.gimp_progress_set_text(tqdm_self.format_meter(**tqdm_info))
+            message = tqdm_self.format_meter(**tqdm_info)
+            percent = None
             if tqdm_info["total"]:
-                pdb.gimp_progress_update(tqdm_info["n"] / float(tqdm_info["total"]))
-            else:
-                pdb.gimp_progress_pulse()
+                percent = tqdm_info["n"] / float(tqdm_info["total"])
+            self.progress_fn(percent, message)
             self.tqdm_display(tqdm_self, *args, **kwargs)
 
         tqdm.display = custom_tqdm_display
@@ -61,29 +98,6 @@ class tqdm_as_gimp_progress:
         return decorator
 
 
-image_type_map = {
-    1: gfu.GRAY_IMAGE,
-    2: gfu.GRAYA_IMAGE,
-    3: gfu.RGB_IMAGE,
-    4: gfu.RGBA_IMAGE,
-}
-
-image_base_type_map = {
-    1: gfu.GRAY,
-    2: gfu.GRAY,
-    3: gfu.RGB,
-    4: gfu.RGB,
-}
-
-
-def layer_to_numpy(layer):
-    import numpy as np
-    region = layer.get_pixel_rgn(0, 0, layer.width, layer.height)
-    pixChars = region[:, :]  # Take whole layer
-    bpp = region.bpp
-    return np.frombuffer(pixChars, dtype=np.uint8).reshape(layer.height, layer.width, bpp)
-
-
 def split_alpha(array):
     h, w, d = array.shape
     if d == 1:
@@ -98,7 +112,6 @@ def split_alpha(array):
 
 
 def merge_alpha(image, alpha):
-    import numpy as np
     h, w, d = image.shape
     if d not in (1, 3):
         raise ValueError("Incorrect number of channels ({})".format(d))
@@ -116,14 +129,12 @@ def combine_alphas(alphas):
             else:
                 combined_alpha = combined_alpha * (alpha / 255.)
     if combined_alpha is not None:
-        combined_alpha = combined_alpha.astype("uint8")
+        combined_alpha = combined_alpha.astype(np.uint8)
     return combined_alpha
 
 
 def handle_alpha(func):
     def decorator(*args, **kwargs):
-        import numpy as np
-
         alphas = []
         args = list(args)
         for i, arg in enumerate(args):
@@ -142,7 +153,6 @@ def handle_alpha(func):
 
         # for super-res
         if alpha is not None and result.shape[:2] != alpha.shape[:2]:
-            from PIL import Image
             h, w, d = result.shape
             alpha = np.array(Image.fromarray(alpha[..., 0]).resize((w, h), Image.BILINEAR))[..., None]
 
@@ -150,22 +160,3 @@ def handle_alpha(func):
         return result
 
     return decorator
-
-
-def numpy_to_layer(array, gimp_image, name):
-    import numpy as np
-    h, w, d = array.shape
-    layer = gimp.Layer(gimp_image, name, w, h, image_type_map[d])
-    region = layer.get_pixel_rgn(0, 0, w, h)
-    data = array.astype(np.uint8).tobytes()
-    region[:, :] = data
-    gimp_image.insert_layer(layer, position=0)
-    return layer
-
-
-def numpy_to_gimp_image(array, name):
-    h, w, d = array.shape
-    img = gimp.Image(w, h, image_base_type_map[d])
-    numpy_to_layer(array, img, name)
-    gimp.Display(img)
-    gimp.displays_flush()
