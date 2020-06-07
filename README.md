@@ -11,10 +11,14 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 ![image1](screenshot.png)
 
 # Installation Steps
-[1] Install [GIMP](https://www.gimp.org/downloads/). <br>
-[2] Clone this repository: `git clone https://github.com/kritiksoman/GIMP-ML.git` <br>
-[3] Run `./install.sh` <br>
-[4] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder `GIMP-ML/plugins` and restart GIMP. <br>
+1. Install [GIMP](https://www.gimp.org/downloads/). <br>
+2. Clone this repository: `git clone https://github.com/kritiksoman/GIMP-ML.git` <br>
+3. On Linux and MacOS run `./install.sh`.
+4. On Windows:
+      * Install [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
+      * [Enable execution of Powershell scripts](https://superuser.com/a/106363/274408).
+      * Run `install.ps1`.
+5. Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder `GIMP-ML/plugins` and restart GIMP. <br>
 
 # Demo videos on YouTube
 [<img src="http://img.youtube.com/vi/q9Ny5XqIUKk/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=q9Ny5XqIUKk)
@@ -97,14 +101,7 @@ in *IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*, 2019.
      vol. 9906 LNCS, 2016, pp. 694–711.
 
 # Common Issues
-[1] GIMP-ML menu not visible: Do following and restart GIMP.<br>
-```
-sudo apt install gimp-python
-cd gimp-plugins
-chmod -x *
-chmod +x *.py
-```
-[2] colorize plugin not working: Switch to grayscale mode before running plugin. (Image->Mode->Grayscale)
+1. Colorize plugin not working: Switch to grayscale mode before running plugin. (Image->Mode->Grayscale)
 
 # Authors
 * Kritik Soman ([kritiksoman](https://github.com/kritiksoman))
