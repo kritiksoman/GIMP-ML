@@ -116,6 +116,7 @@ class ModelProxy(object):
     def _rpc_return_result(self, result):
         assert isinstance(result, (list, tuple))
         self.result = tuple(self._decode(x) for x in result)
+        threading.Thread(target=lambda: self.server.shutdown()).start()
 
     def _subproc_thread(self, rpc_port):
         env = self._add_conda_env_to_path()
