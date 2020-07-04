@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 import os 
 baseLoc = os.path.dirname(os.path.realpath(__file__))+'/'
 
