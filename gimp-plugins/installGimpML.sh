@@ -19,18 +19,18 @@ if [ ! -d "gimpenv" ]; then
 		fi
 	fi
 
-	python -m pip install --user virtualenv
-	python -m virtualenv gimpenv
+	python2 -m pip install --user virtualenv
+	python2 -m virtualenv gimpenv
 	source gimpenv/bin/activate
-	python -m pip install torchvision
-	python -m pip install opencv-python
-	python -m pip install numpy
-	python -m pip install future
-	python -m pip install torch
-	python -m pip install scipy
-	python -m pip install typing
-	python -m pip install enum
-	python -m pip install pretrainedmodels
+	python2 -m pip install torchvision
+	python2 -m pip install opencv-python
+	python2 -m pip install numpy
+	python2 -m pip install future
+	python2 -m pip install torch
+	python2 -m pip install scipy
+	python2 -m pip install typing
+	python2 -m pip install enum
+	python2 -m pip install pretrainedmodels
 	deactivate
 
 	echo "\n-----------Installed GIMP-ML------------\n"
