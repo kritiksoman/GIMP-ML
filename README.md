@@ -1,5 +1,5 @@
 # GIMP-ML
-Set of Machine Learning Python plugins for GIMP. <br>
+Semantics for GNU Image Manipulation Program. <br>
 Instagram: [Link](https://www.instagram.com/kritiksoman/)  <br>
 Medium: [Link](https://medium.com/@kritiksoman) <br>
 Preprint: [Link](https://arxiv.org/abs/2004.13060) <br>
