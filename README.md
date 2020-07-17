@@ -1,6 +1,10 @@
 # GIMP-ML
+Set of Machine Learning Python plugins for GIMP. <br>
+Instagram: [Link](https://www.instagram.com/kritiksoman/)  <br>
+Medium: [Link](https://medium.com/@kritiksoman) <br>
 Preprint: [Link](https://arxiv.org/abs/2004.13060) <br>
-Set of Machine Learning Python plugins for GIMP. 
+Updates: <br>
+[July 17] MonoDepth and Colorization models have been updated. <br>
 
 The plugins have been tested with GIMP 2.10 on the following machines: <br>
 [1] macOS Catalina 10.15.4 <br>
@@ -21,6 +25,7 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
     <br>
     ```bash moveWeights.sh ```<br>
 [6] Open GIMP.
+
 
 # Demo videos on YouTube
 [<img src="http://img.youtube.com/vi/q9Ny5XqIUKk/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=q9Ny5XqIUKk)
