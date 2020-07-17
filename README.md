@@ -24,15 +24,16 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 
 # Demo videos on YouTube
 [<img src="http://img.youtube.com/vi/q9Ny5XqIUKk/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=q9Ny5XqIUKk)
+[<img src="http://img.youtube.com/vi/4YpTa-gqEIw/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=4YpTa-gqEIw)
+
 [<img src="http://img.youtube.com/vi/kXYsWvOB4uk/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=kXYsWvOB4uk)
-
 [<img src="http://img.youtube.com/vi/HVwISLRow_0/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=HVwISLRow_0)
-[<img src="http://img.youtube.com/vi/U1CieWi--gc/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=U1CieWi--gc) 
 
+[<img src="http://img.youtube.com/vi/U1CieWi--gc/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=U1CieWi--gc)
 [<img src="http://img.youtube.com/vi/HeBgWcXFQpI/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=HeBgWcXFQpI)
-[<img src="http://img.youtube.com/vi/adgHtu4chyU/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=adgHtu4chyU) 
 
-[<img src="http://img.youtube.com/vi/thS8VqPvuhE/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=thS8VqPvuhE) 
+[<img src="http://img.youtube.com/vi/adgHtu4chyU/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=adgHtu4chyU)
+[<img src="http://img.youtube.com/vi/thS8VqPvuhE/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=thS8VqPvuhE)
 
 # Paper References
 [1] Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network (https://arxiv.org/abs/1609.04802) <br>
