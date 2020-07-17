@@ -38,10 +38,10 @@ The plugins have been tested with GIMP 2.10 on the following machines: <br>
 # Paper References
 [1] Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network (https://arxiv.org/abs/1609.04802) <br>
 [2] DeblurGAN-v2: Deblurring (Orders-of-Magnitude) Faster and Better (https://arxiv.org/abs/1908.03826) <br>
-[3] Digging into Self-Supervised Monocular Depth Prediction (https://arxiv.org/abs/1806.01260) <br>
+[3] Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-dataset Transfer (https://arxiv.org/abs/1907.01341v2) <br>
 [4] BiSeNet: Bilateral Segmentation Network for Real-time Semantic Segmentation (https://arxiv.org/abs/1808.00897) <br>
 [5] MaskGAN: Towards Diverse and Interactive Facial Image Manipulation (https://arxiv.org/abs/1907.11922) <br>
-[6] Perceptual Losses for Real-Time Style Transfer and Super-Resolution (https://cs.stanford.edu/people/jcjohns/eccv16/) <br>
+[6] Real-Time User-Guided Image Colorization with Learned Deep Priors (https://arxiv.org/abs/1705.02999) <br>
 [7] Rethinking Atrous Convolution for Semantic Image Segmentation (https://arxiv.org/abs/1706.05587) <br>
 
 # Code References
@@ -49,8 +49,8 @@ The following have been ported : <br>
 [1] https://github.com/switchablenorms/CelebAMask-HQ <br>
 [2] https://github.com/TAMU-VITA/DeblurGANv2 <br>
 [3] https://github.com/zllrunning/face-parsing.PyTorch <br>
-[4] https://github.com/nianticlabs/monodepth2 <br>
-[5] https://github.com/zeruniverse/neural-colorization <br>
+[4] https://github.com/junyanz/interactive-deep-colorization <br>
+[5] https://github.com/intel-isl/MiDaS <br>
 [6] https://github.com/twtygqyy/pytorch-SRResNet
 
 # Common Issues
