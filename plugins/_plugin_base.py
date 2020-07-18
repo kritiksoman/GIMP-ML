@@ -3,10 +3,10 @@ from __future__ import print_function, absolute_import, division
 import os
 import subprocess
 import sys
+import tempfile
 import threading
 from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
 from abc import ABCMeta, abstractmethod
-from xmlrpclib import Binary
 
 import gimpfu as gfu
 from gimpfu import gimp, pdb
@@ -102,7 +102,7 @@ class ModelProxy(object):
 
     @staticmethod
     def _decode(x):
-        if isinstance(x, list) and len(x) == 2 and hasattr(x[0], 'data'):
+        if isinstance(x, list) and len(x) == 3 and x[0] == 'ImgArray':
             x = ImgArray.decode(x)
         return x
 
@@ -188,11 +188,18 @@ class ImgArray(object):
         self.shape = shape
 
     def encode(self):
-        return Binary(self.buffer), self.shape
+        with tempfile.NamedTemporaryFile(mode='wb', delete=False) as f:
+            f.write(self.buffer)
+            temp_path = f.name
+        return "ImgArray", temp_path, self.shape
 
     @staticmethod
     def decode(x):
-        return ImgArray(x[0].data, x[1])
+        temp_path, shape = x[1:]
+        with open(temp_path, mode='rb') as f:
+            data = f.read()
+        os.unlink(temp_path)
+        return ImgArray(data, shape)
 
 
 image_type_map = {

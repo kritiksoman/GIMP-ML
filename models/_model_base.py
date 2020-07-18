@@ -1,3 +1,5 @@
+import os
+import tempfile
 from abc import ABC, abstractmethod
 from xmlrpc.client import ServerProxy
 
@@ -34,14 +36,21 @@ class ModelBase(ABC):
 
     @staticmethod
     def _decode(x):
-        if isinstance(x, list) and len(x) == 2 and hasattr(x[0], 'data'):
-            x = np.frombuffer(x[0].data, dtype=np.uint8).reshape(x[1])
+        if isinstance(x, list) and len(x) == 3 and x[0] == "ImgArray":
+            temp_path, shape = x[1:]
+            with open(temp_path, mode='rb') as f:
+                data = f.read()
+            os.unlink(temp_path)
+            x = np.frombuffer(data, dtype=np.uint8).reshape(shape)
         return x
 
     @staticmethod
     def _encode(x):
         if isinstance(x, np.ndarray):
-            x = [x.astype(np.uint8).tobytes(), x.shape]
+            with tempfile.NamedTemporaryFile(mode='wb', delete=False) as f:
+                f.write(x.astype(np.uint8).tobytes())
+                temp_path = f.name
+            x = ("ImgArray", temp_path, x.shape)
         return x
 
     def _decode_rpc_args(self, args, kwargs):
