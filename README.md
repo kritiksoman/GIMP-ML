@@ -1,6 +1,6 @@
 # GIMP-ML
+## [Wiki](https://github.com/kritiksoman/GIMP-ML/wiki) [Instagram](https://www.instagram.com/kritiksoman/) [Medium](https://medium.com/@kritiksoman) [Preprint](https://arxiv.org/abs/2004.13060) <br>
 Semantics for GNU Image Manipulation Program. <br>
-[Instagram](https://www.instagram.com/kritiksoman/) [Medium](https://medium.com/@kritiksoman) [Wiki](https://github.com/kritiksoman/GIMP-ML/wiki) [Preprint](https://arxiv.org/abs/2004.13060) <br>
 Updates: <br>
 [July 17] MonoDepth and Colorization models have been updated. <br>
 
