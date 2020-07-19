@@ -12,6 +12,7 @@ if [ ! -d "gimpenv" ]; then
 			wget https://bootstrap.pypa.io/get-pip.py 
 			alias python='python2'
 			python get-pip.py	
+			sudo apt-get install libpython2.7
 
 		elif [[ $(lsb_release -rs) == "10" ]]; then #for debian 10
 			wget https://bootstrap.pypa.io/get-pip.py 
