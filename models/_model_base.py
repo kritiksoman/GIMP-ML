@@ -1,5 +1,6 @@
 import os
 import tempfile
+import traceback
 from abc import ABC, abstractmethod
 from xmlrpc.client import ServerProxy
 
@@ -65,8 +66,12 @@ class ModelBase(ABC):
 
     def process_rpc(self, rpc_url):
         self._rpc = ServerProxy(rpc_url, allow_none=True)
-        args, kwargs = self._decode_rpc_args(*self._rpc.get_args())
-        result = self.predict(*args, **kwargs)
+        try:
+            args, kwargs = self._decode_rpc_args(*self._rpc.get_args())
+            result = self.predict(*args, **kwargs)
+        except:
+            self._rpc.raise_exception(traceback.format_exc())
+            return
         self._rpc.return_result(self._encode_rpc_result(result))
 
 

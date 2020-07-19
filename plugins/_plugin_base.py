@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import traceback
 from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
 from abc import ABCMeta, abstractmethod
 
@@ -73,15 +74,19 @@ class GimpPluginBase(object):
     def predict(self, *args, **kwargs):
         assert self.model_file is not None
         model_proxy = ModelProxy(self.model_file)
-        return model_proxy(*args, **kwargs)
+        try:
+            return model_proxy(*args, **kwargs)
+        except:
+            gimp.message(traceback.format_exc())
+            raise
 
 
 class ModelProxy(object):
     """
     When called, runs
         python3 models/<model_file>
-    and waits for the subprocess to call get_args() and then return_result() over XML-RPC.
-    Additionally, any progress info can be sent via update_progress().
+    and waits for the subprocess to call get_args() and then return_result() or raise_error() over XML-RPC.
+    Additionally, progress info can be reported via update_progress().
     """
 
     def __init__(self, model_file):
@@ -118,18 +123,9 @@ class ModelProxy(object):
         self.result = tuple(self._decode(x) for x in result)
         threading.Thread(target=lambda: self.server.shutdown()).start()
 
-    def _subproc_thread(self, rpc_port):
-        env = self._add_conda_env_to_path()
-        try:
-            self.proc = subprocess.Popen([
-                self.python_executable,
-                self.model_path,
-                'http://127.0.0.1:{}/'.format(rpc_port)
-            ], env=env)
-            self.proc.wait()
-        finally:
-            self.server.shutdown()
-            self.server.server_close()
+    def _rpc_raise_exception(self, exc_string):
+        self.server.exception = exc_string
+        threading.Thread(target=lambda: self.server.shutdown()).start()
 
     def _add_conda_env_to_path(self):
         env = os.environ.copy()
@@ -145,10 +141,20 @@ class ModelProxy(object):
         ])
         return env
 
-    def __call__(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
+    def _start_subprocess(self, rpc_port):
+        env = self._add_conda_env_to_path()
+        try:
+            self.proc = subprocess.Popen([
+                self.python_executable,
+                self.model_path,
+                'http://127.0.0.1:{}/'.format(rpc_port)
+            ], env=env)
+            self.proc.wait()
+        finally:
+            self.server.shutdown()
+            self.server.server_close()
 
+    def _init_rpc_server(self):
         # For cleaner exception info
         class RequestHandler(SimpleXMLRPCRequestHandler):
             def _dispatch(self, method, params):
@@ -160,21 +166,31 @@ class ModelProxy(object):
 
         self.server = SimpleXMLRPCServer(('127.0.0.1', 0), allow_none=True, logRequests=False,
                                          requestHandler=RequestHandler)
-        rpc_port = self.server.server_address[1]
         self.server.register_function(self._rpc_get_args, 'get_args')
         self.server.register_function(self._rpc_return_result, 'return_result')
+        self.server.register_function(self._rpc_raise_exception, 'raise_exception')
         self.server.register_function(update_progress)
-
-        t = threading.Thread(target=self._subproc_thread, args=(rpc_port,))
-        t.start()
         self.server.exception = None
+        rpc_port = self.server.server_address[1]
+        return rpc_port
+
+    def __call__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+
+        rpc_port = self._init_rpc_server()
+        t = threading.Thread(target=self._start_subprocess, args=(rpc_port,))
+        t.start()
         self.server.serve_forever()
 
         if self.result is None:
             if self.server.exception:
+                if isinstance(self.server.exception, str):
+                    raise RuntimeError(self.server.exception)
                 type, value, traceback = self.server.exception
                 raise type, value, traceback
             raise RuntimeError("Model did not return a result!")
+        
         if len(self.result) == 1:
             return self.result[0]
         return self.result
