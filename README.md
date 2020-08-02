@@ -2,6 +2,7 @@
 ## [Wiki](https://github.com/kritiksoman/GIMP-ML/wiki) [Instagram](https://www.instagram.com/kritiksoman/) [Medium](https://medium.com/@kritiksoman) [Preprint](https://arxiv.org/abs/2004.13060) [YouTube](https://www.youtube.com/watch?v=U9k1k7IpAlg&list=PLo9r5wFmpD5dLWTyo6NOiD6BJjhfEOM5t) <br>
 Semantics for GNU Image Manipulation Program. <br>
 Updates: <br>
+[August 2] Added deep matting and k-means. <br>
 [July 17] MonoDepth and Colorization models have been updated. <br>
 
 # Screenshot of Menu
