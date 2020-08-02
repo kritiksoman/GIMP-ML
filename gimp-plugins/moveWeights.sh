@@ -1,8 +1,10 @@
 unzip weights.zip
 mkdir -p CelebAMask-HQ/MaskGAN_demo/checkpoints/label2face_512p
 mkdir -p pytorch-SRResNet/model
+mkdir -p pytorch-deep-image-matting/model
 mkdir deeplabv3
 
+mv weights/deepmatting/* pytorch-deep-image-matting/model
 mv weights/colorize/* ideepcolor/models/pytorch/
 mv weights/deblur/* DeblurGANv2/
 mv weights/deeplabv3/* deeplabv3
