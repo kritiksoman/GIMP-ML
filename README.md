@@ -1,5 +1,5 @@
 # GIMP-ML
-## [Wiki](https://github.com/kritiksoman/GIMP-ML/wiki) [Instagram](https://www.instagram.com/explore/tags/gimpml/) [Medium](https://medium.com/@kritiksoman) [Preprint](https://arxiv.org/abs/2004.13060) [YouTube](https://www.youtube.com/watch?v=U9k1k7IpAlg&list=PLo9r5wFmpD5dLWTyo6NOiD6BJjhfEOM5t) <br>
+## [Wiki](https://github.com/kritiksoman/GIMP-ML/wiki) [Instagram](https://www.instagram.com/explore/tags/gimpml/) [Medium](https://medium.com/@kritiksoman) [Preprint](https://arxiv.org/abs/2004.13060) [YouTube](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) <br>
 Semantics for GNU Image Manipulation Program. <br>
 Updates: <br>
 [August 2] Added deep matting and k-means. <br>
