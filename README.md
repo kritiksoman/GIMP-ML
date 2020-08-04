@@ -6,7 +6,7 @@ Updates: <br>
 [July 17] MonoDepth and Colorization models have been updated. <br>
 
 # Screenshot of Menu
-![image1](https://github.com/kritiksoman/GIMP-ML/blob/master/screenshot.png)
+![image1](https://github.com/kritiksoman/tmp/blob/master/screenshot.png)
 
 # Installation Steps
 [1] Install [GIMP](https://www.gimp.org/downloads/).<br>
