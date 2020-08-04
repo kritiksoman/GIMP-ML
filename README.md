@@ -1,5 +1,5 @@
 # GIMP-ML
-## [Wiki](https://github.com/kritiksoman/GIMP-ML/wiki) [Instagram](https://www.instagram.com/kritiksoman/) [Medium](https://medium.com/@kritiksoman) [Preprint](https://arxiv.org/abs/2004.13060) [YouTube](https://www.youtube.com/watch?v=U9k1k7IpAlg&list=PLo9r5wFmpD5dLWTyo6NOiD6BJjhfEOM5t) <br>
+## [Wiki](https://github.com/kritiksoman/GIMP-ML/wiki) [Instagram](https://www.instagram.com/explore/tags/gimpml/) [Medium](https://medium.com/@kritiksoman) [Preprint](https://arxiv.org/abs/2004.13060) [YouTube](https://www.youtube.com/watch?v=U9k1k7IpAlg&list=PLo9r5wFmpD5dLWTyo6NOiD6BJjhfEOM5t) <br>
 Semantics for GNU Image Manipulation Program. <br>
 Updates: <br>
 [August 2] Added deep matting and k-means. <br>
@@ -12,7 +12,7 @@ Updates: <br>
 [1] Install [GIMP](https://www.gimp.org/downloads/).<br>
 [2] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
 [3] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and close GIMP. <br>
-[4] Download [weights.zip](https://drive.google.com/open?id=1mqzDnxtXQ75lVqlQ8tUeua68lDqUgUVe) (1.22 GB) and save it in gimp-plugins folder. <br>
+[4] Download [weights.zip](https://drive.google.com/open?id=1mqzDnxtXQ75lVqlQ8tUeua68lDqUgUVe) (1.48 GB) and save it in gimp-plugins folder. <br>
 [5] Open terminal and run : <br>
     ```bash installGimpML.sh```
     <br>
@@ -29,7 +29,6 @@ cd gimp-plugins
 chmod -x *
 chmod +x *.py
 ```
-[3] colorize plugin not working: Switch to grayscale mode before running plugin. (Image->Mode->Grayscale)
 
 # Citation
 Please cite using the following bibtex entry:
