@@ -1,7 +1,7 @@
-<img src="https://github.com/kritiksoman/tmp/blob/master/cover.png" width="1280" height="230">
-
+<img src="https://github.com/kritiksoman/tmp/blob/master/cover.png" width="1280" height="200">
 # Semantics for GNU Image Manipulation Program
 ### [YouTube](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) [Instagram](https://www.instagram.com/explore/tags/gimpml/) [Manual](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual) [Preprint](https://arxiv.org/abs/2004.13060) [Medium](https://medium.com/@kritiksoman)<br>
+
 Updates: <br>
 [August 2] Added deep matting and k-means. <br>
 [July 17] MonoDepth and Colorization models have been updated. <br>
