@@ -55,7 +55,7 @@ def channelData(layer):#convert gimp image to numpy
 
 def createResultLayer(image,name,result):
     rlBytes=np.uint8(result).tobytes();
-    rl=gimp.Layer(image,name,image.width,image.height,image.active_layer.type,100,NORMAL_MODE)
+    rl=gimp.Layer(image,name,image.width,image.height,0,100,NORMAL_MODE)
     region=rl.get_pixel_rgn(0, 0, rl.width,rl.height,True)
     region[:,:]=rlBytes
     image.add_layer(rl,0)
@@ -67,7 +67,9 @@ def deeplabv3(img, layer) :
     else:
         gimp.progress_init("(Using CPU) Generating semantic segmentation map for " + layer.name + "...")
 
-    imgmat = channelData(layer) 
+    imgmat = channelData(layer)
+    if imgmat.shape[2] == 4:  # get rid of alpha channel
+        imgmat = imgmat[:,:,0:3]
     cpy=getSeg(imgmat)    
     createResultLayer(img,'new_output',cpy)
 
