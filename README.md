@@ -1,4 +1,6 @@
-# GIMP-ML : Semantics for GNU Image Manipulation Program
+<img src="https://github.com/kritiksoman/tmp/blob/master/cover.png" width="1280" height="495">
+
+# Semantics for GNU Image Manipulation Program
 ### [YouTube](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) [Instagram](https://www.instagram.com/explore/tags/gimpml/) [Manual](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual) [Preprint](https://arxiv.org/abs/2004.13060) [Medium](https://medium.com/@kritiksoman)<br>
 Updates: <br>
 [August 2] Added deep matting and k-means. <br>
@@ -52,3 +54,4 @@ Please cite using the following bibtex entry:
 | super-resolution | MIT |
 | deepmatting | Non-commercial purposes |
 | deeplab | MIT |
+| kmeans | BSD |
