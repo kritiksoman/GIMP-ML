@@ -40,3 +40,15 @@ Please cite using the following bibtex entry:
   year={2020}
 }
 ```
+
+# License
+| Tools | License |
+| ------------- |:-------------:| 
+| facegen | CC BY-NC-SA 4.0 |
+| deblur | BSD 3-clause |
+| faceparse | MIT |
+| deepcolor | MIT | 
+| monodepth | MIT |
+| super-resolution | MIT |
+| deepmatting | Non-commercial purposes |
+| deeplab | MIT |
