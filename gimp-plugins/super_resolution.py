@@ -11,6 +11,7 @@ import torch
 from torch.autograd import Variable
 import numpy as np
 from PIL import Image
+import cv2
 
 
 def getlabelmat(mask,idx):
@@ -71,15 +72,8 @@ def channelData(layer):#convert gimp image to numpy
     bpp=region.bpp
     return np.frombuffer(pixChars,dtype=np.uint8).reshape(layer.height,layer.width,bpp)
 
-def createResultLayer(image,name,result):
-    rlBytes=np.uint8(result).tobytes();
-    rl=gimp.Layer(image,name,image.width,image.height,image.active_layer.type,100,NORMAL_MODE)
-    region=rl.get_pixel_rgn(0, 0, rl.width,rl.height,True)
-    region[:,:]=rlBytes
-    image.add_layer(rl,0)
-    gimp.displays_flush()
 
-def genNewImg(name,layer_np):
+def createResultLayer(name,layer_np):
     h,w,d=layer_np.shape
     img=pdb.gimp_image_new(w, h, RGB)
     display=pdb.gimp_display_new(img)
@@ -96,13 +90,16 @@ def genNewImg(name,layer_np):
 
 def super_resolution(img, layer,scale) :
     if torch.cuda.is_available():
-        gimp.progress_init("(Using GPU) Running for " + layer.name + "...")
+        gimp.progress_init("(Using GPU) Running super-resolution for " + layer.name + "...")
     else:
-        gimp.progress_init("(Using CPU) Running for " + layer.name + "...")
+        gimp.progress_init("(Using CPU) Running  super-resolution for " + layer.name + "...")
 
     imgmat = channelData(layer)
+    if imgmat.shape[2] == 4:  # get rid of alpha channel
+        imgmat = imgmat[:,:,0:3]    
     cpy = getnewimg(imgmat,scale)
-    genNewImg(layer.name+'_upscaled',cpy)
+    cpy = cv2.resize(cpy, (0,0), fx=scale/4, fy=scale/4) 
+    createResultLayer(layer.name+'_upscaled',cpy)
     
 
 register(
