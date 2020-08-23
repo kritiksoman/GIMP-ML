@@ -21,7 +21,7 @@ def update(flag) :
                 shutil.rmtree(file_path)
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
-    os.system("cd "+baseLoc+";git fetch;git checkout .")
+    os.system("cd "+baseLoc+";git fetch;git pull")
     if flag:
         syncWeights.sync(baseLoc+'weights',flag)
     # pdb.gimp_message("Update Completed Successfully!")
