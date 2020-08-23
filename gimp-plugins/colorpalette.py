@@ -50,7 +50,7 @@ register(
     "Your",
     "2020",
     "colorpalette...",
-    "*",  # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
+    "",  # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
     [(PF_IMAGE, "image", "Input image", None),
      (PF_DRAWABLE, "drawable", "Input drawable", None),
      ],
