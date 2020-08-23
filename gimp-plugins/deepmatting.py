@@ -47,7 +47,7 @@ def getnewalpha(image,mask):
     if torch.cuda.is_available():
     	cudaFlag = True
 
-    args = Namespace(crop_or_resize='whole', cuda=cudaFlag, max_size=1600, resume=baseLoc+'pytorch-deep-image-matting/''model/stage1_sad_57.1.pth', stage=1)
+    args = Namespace(crop_or_resize='whole', cuda=cudaFlag, max_size=1600, resume=baseLoc+'weights/deepmatting/stage1_sad_57.1.pth', stage=1)
     model = net.VGG16(args)
 
     if cudaFlag:

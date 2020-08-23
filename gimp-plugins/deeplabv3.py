@@ -13,7 +13,7 @@ from torchvision import transforms, datasets
 import numpy as np
 
 def getSeg(input_image):
-    model = torch.load(baseLoc+'deeplabv3/deeplabv3+model.pt')
+    model = torch.load(baseLoc+'weights/deeplabv3/deeplabv3+model.pt')
     model.eval()
     preprocess = transforms.Compose([
         transforms.ToTensor(),

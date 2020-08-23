@@ -24,7 +24,7 @@ if [ ! -d "gimpenv" ]; then
 	python -m virtualenv gimpenv
 	source gimpenv/bin/activate
 	python -m pip install torchvision
-	python -m pip install opencv-python
+	python -m pip install "opencv-python<=4.3"
 	python -m pip install numpy
 	python -m pip install future
 	python -m pip install torch
@@ -32,6 +32,7 @@ if [ ! -d "gimpenv" ]; then
 	python -m pip install typing
 	python -m pip install enum
 	python -m pip install pretrainedmodels
+	python -m pip install requests
 	deactivate
 
 	echo "\n-----------Installed GIMP-ML------------\n"

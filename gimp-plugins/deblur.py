@@ -26,7 +26,7 @@ def createResultLayer(image,name,result):
     gimp.displays_flush()
 
 def getdeblur(img):
-    predictor = Predictor(weights_path=baseLoc+'DeblurGANv2/'+'best_fpn.h5')
+    predictor = Predictor(weights_path=baseLoc+'weights/deblur/'+'best_fpn.h5')
     if img.shape[2] == 4:  # get rid of alpha channel
     	img = img[:,:,0:3]
     pred = predictor(img, None)

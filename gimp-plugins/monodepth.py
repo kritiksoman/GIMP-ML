@@ -16,7 +16,7 @@ import cv2
 
 def getMonoDepth(input_image):
     image = input_image / 255.0
-    out = run_depth(image, baseLoc+'MiDaS/model.pt', MonoDepthNet, MiDaS_utils, target_w=640)
+    out = run_depth(image, baseLoc+'weights/MiDaS/model.pt', MonoDepthNet, MiDaS_utils, target_w=640)
     out = np.repeat(out[:, :, np.newaxis], 3, axis=2)
     d1,d2 = input_image.shape[:2]
     out = cv2.resize(out,(d2,d1))

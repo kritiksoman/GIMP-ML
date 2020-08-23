@@ -5,7 +5,7 @@ baseLoc = os.path.dirname(os.path.realpath(__file__))+'/'
 from gimpfu import *
 import sys
 
-sys.path.extend([baseLoc+'gimpenv/lib/python2.7',baseLoc+'gimpenv/lib/python2.7/site-packages',baseLoc+'gimpenv/lib/python2.7/site-packages/setuptools',baseLoc+'face-parsing.PyTorch'])
+sys.path.extend([baseLoc+'gimpenv/lib/python2.7',baseLoc+'gimpenv/lib/python2.7/site-packages',baseLoc+'gimpenv/lib/python2.7/site-packages/setuptools',baseLoc+'face-parsing-PyTorch'])
 
 
 from model import BiSeNet
@@ -49,7 +49,7 @@ def colorMask(mask):
     return np.uint8(x)
 
 def getface(input_image):
-    save_pth = baseLoc+'face-parsing.PyTorch/79999_iter.pth'
+    save_pth = baseLoc+'weights/faceparse/79999_iter.pth'
     input_image = Image.fromarray(input_image)
 
     n_classes = 19

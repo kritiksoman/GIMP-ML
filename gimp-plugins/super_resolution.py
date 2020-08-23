@@ -30,7 +30,7 @@ def colorMask(mask):
 
 def getnewimg(input_image,s):
     opt=Namespace(cuda=torch.cuda.is_available(),
-        model=baseLoc+'pytorch-SRResNet/model/model_srresnet.pth',
+        model=baseLoc+'weights/super_resolution/model_srresnet.pth',
         dataset='Set5',scale=s,gpus=0)
 
     im_l=Image.fromarray(input_image)

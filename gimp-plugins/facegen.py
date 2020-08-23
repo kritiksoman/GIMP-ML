@@ -48,7 +48,7 @@ def labelMask(mask):
 def getOptions():
     mydict={'aspect_ratio': 1.0,
     'batchSize': 1,
-    'checkpoints_dir': baseLoc+'CelebAMask-HQ/MaskGAN_demo/checkpoints',
+    'checkpoints_dir': baseLoc+'weights/facegen',
     'cluster_path': 'features_clustered_010.npy',
     'data_type': 32,
     'dataroot': '../Data_preprocessing/',
