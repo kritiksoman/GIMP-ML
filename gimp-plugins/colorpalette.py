@@ -37,7 +37,7 @@ def genNewImg(name, layer_np):
     gimp.displays_flush()
 
 
-def colorpalette(img, layer):
+def colorpalette():
     cpy = cv2.cvtColor(cv2.imread(baseLoc+'color_palette.png'),cv2.COLOR_BGR2RGB)
     genNewImg('palette', cpy)
 
@@ -51,9 +51,7 @@ register(
     "2020",
     "colorpalette...",
     "",  # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
-    [(PF_IMAGE, "image", "Input image", None),
-     (PF_DRAWABLE, "drawable", "Input drawable", None),
-     ],
+    [],
     [],
     colorpalette, menu="<Image>/Layer/GIML-ML")
 
