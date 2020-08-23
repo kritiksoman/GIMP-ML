@@ -55,7 +55,7 @@ def deepcolor(tmp1, tmp2, ilayerimg,ilayerc) :
         gpu_id = None
 
     colorModel = CI.ColorizeImageTorch(Xd=256)
-    colorModel.prep_net(gpu_id, baseLoc + 'ideepcolor/models/pytorch/caffemodel.pth')
+    colorModel.prep_net(gpu_id, baseLoc + 'weights/colorize/caffemodel.pth')
     colorModel.load_image(layerimg)  # load an image
 
     img_out = colorModel.net_forward(input_ab, mask)  # run model, returns 256x256 image
