@@ -3,6 +3,7 @@
 ### [YouTube](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) [Instagram](https://www.instagram.com/explore/tags/gimpml/) [Manual](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual) [Preprint](https://arxiv.org/abs/2004.13060) [Medium](https://medium.com/@kritiksoman)<br>
 
 Updates: <br>
+[August 23] Simplified installation and updating method. <br>
 [August 2] Added deep matting and k-means. <br>
 [July 17] MonoDepth and Colorization models have been updated. <br>
 
@@ -13,12 +14,15 @@ Updates: <br>
 [1] Install [GIMP](https://www.gimp.org/downloads/) 2.10.<br>
 [2] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
 [3] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and close GIMP. <br>
-[4] Download [weights.zip](https://drive.google.com/open?id=1mqzDnxtXQ75lVqlQ8tUeua68lDqUgUVe) (1.48 GB) and save it in gimp-plugins folder. <br>
-[5] Open terminal and run : <br>
-    ```bash installGimpML.sh```
-    <br>
-    ```bash moveWeights.sh ```<br>
-[6] Open GIMP.
+[4] Open terminal and run : <br>
+    ```bash installGimpML.sh```<br>
+[5] Open GIMP and go to Layer->GIMP-ML->update and click on ok with update weights set to yes. <br>
+[6] Restart GIMP.
+
+# Update Steps
+This will work if cloned after 24 August 2020 otherwise install again.<br>
+[1] Open GIMP and go to Layer->GIMP-ML->update and click on ok with update weights set to yes. <br>
+[2] Restart GIMP.
 
 
 # Common Issues
