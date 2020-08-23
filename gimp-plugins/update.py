@@ -35,7 +35,7 @@ register(
     "Your Name",
     "2020",
     "update...",
-    "*",      # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
+    "",     
     [(PF_BOOL, "wUpdate", "Update weights", True)],
     [],
     update, menu="<Image>/Layer/GIML-ML")
