@@ -15,7 +15,7 @@ def update(flag) :
     for filename in os.listdir(baseLoc):
         file_path = os.path.join(baseLoc, filename)
         try:
-            if os.path.isfile(file_path) and not (file_path.endswith('update.py') or file_path.endswith('syncWeights.py')):
+            if os.path.isfile(file_path) and not file_path.endswith('update.py'):
                 os.unlink(file_path)
             elif os.path.isdir(file_path) and not (file_path.endswith('weights') or file_path.endswith('gimpenv')) :
                 shutil.rmtree(file_path)
