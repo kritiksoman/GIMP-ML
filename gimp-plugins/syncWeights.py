@@ -29,6 +29,41 @@ def save_response_content(response, destination,fileSize):
 				gimp.progress_update(float(n)/float(fileSize))
 				gimp.displays_flush() 
 
+def syncGit(baseLoc):
+	URL = "https://github.com/kritiksoman/GIMP-ML/archive/master.zip"
+	session = requests.Session()
+	response = session.get(URL, stream = True)
+	CHUNK_SIZE = 1 * 1024 * 1024
+	destination = baseLoc + 'tmp.zip'
+	with open(destination, "wb") as f:
+		for chunk in response.iter_content(CHUNK_SIZE):
+			if chunk: # filter out keep-alive new chunks
+				f.write(chunk)
+	import zipfile
+	with zipfile.ZipFile(destination, 'r') as zip_ref:
+    	zip_ref.extractall(baseLoc)
+
+    import shutil
+	root_src_dir = baseLoc + 'GIMP-ML-master/gimp-plugins/'
+	root_dst_dir = baseLoc
+
+	for src_dir, dirs, files in os.walk(root_src_dir):
+	    dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
+	    if not os.path.exists(dst_dir):
+	        os.makedirs(dst_dir)
+	    for file_ in files:
+	        src_file = os.path.join(src_dir, file_)
+	        dst_file = os.path.join(dst_dir, file_)
+	        if os.path.exists(dst_file):
+	            # in case of the src and dst are the same file
+	            if os.path.samefile(src_file, dst_file):
+	                continue
+	            os.remove(dst_file)
+	        shutil.move(src_file, dst_dir)
+
+	shutil.rmtree(baseLoc+'GIMP-ML-master')
+	os.remove(baseLoc+'tmp.zip')
+	
 def sync(path,flag):
 	if not os.path.isdir(path):
 		os.mkdir(path)
