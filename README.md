@@ -3,7 +3,7 @@
 ### [YouTube](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) [Instagram](https://www.instagram.com/explore/tags/gimpml/) [Manual](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual) [Preprint](https://arxiv.org/abs/2004.13060) [Medium](https://medium.com/@kritiksoman)<br>
 
 Updates: <br>
-[Work in progress.] Simplified installation and updating method. <br>
+[August 25] Simplified installation and updating method. <br>
 [August 2] Added deep matting and k-means. <br>
 [July 17] MonoDepth and Colorization models have been updated. <br>
 
@@ -13,12 +13,13 @@ Updates: <br>
 # Installation Steps
 [1] Install [GIMP](https://www.gimp.org/downloads/) 2.10.<br>
 [2] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
-[3] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and close GIMP. <br>
-[4] Open terminal and run : <br>
+[3] Open terminal, go to GIMP-ML/gimp-plugins and run : <br>
     ```bash installGimpML.sh```<br>
-[5] Open GIMP and go to Layer->GIMP-ML->update and click on ok with update weights set to yes. <br>
-[6] Restart GIMP.
+[4] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and restart GIMP. <br>
+[5] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to yes and restart GIMP. <br>
 
+# Update Steps
+[1] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to yes and restart GIMP. <br>
 
 # Common Issues
 [1] No output on running plugin: Please right click on layer and remove alpha channel before using plugins. <br>
