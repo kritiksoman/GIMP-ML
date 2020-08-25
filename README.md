@@ -16,20 +16,10 @@ Updates: <br>
 [3] Open terminal, go to GIMP-ML/gimp-plugins and run : <br>
     ```bash installGimpML.sh```<br>
 [4] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and restart GIMP. <br>
-[5] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to yes and restart GIMP. <br>
+[5] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to yes and restart GIMP. (Weights ~ 1.5GB will be downloaded)<br>
 
 # Update Steps
 [1] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to yes and restart GIMP. <br>
-
-# Common Issues
-[1] No output on running plugin: Please right click on layer and remove alpha channel before using plugins. <br>
-[2] GIMP-ML menu not visible: Do following and restart GIMP.<br>
-```
-sudo apt install gimp-python
-cd gimp-plugins
-chmod -x *
-chmod +x *.py
-```
 
 # Citation
 Please cite using the following bibtex entry:
