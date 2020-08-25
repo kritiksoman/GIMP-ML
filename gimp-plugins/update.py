@@ -23,6 +23,7 @@ def update(flag) :
             print('Failed to delete %s. Reason: %s' % (file_path, e))
 #     os.system("cd "+baseLoc+";git fetch;git checkout .")
     syncWeights.syncGit(baseLoc)
+    os.system("cd "+baseLoc+";chmod +x *.py")
     if flag:
         syncWeights.sync(baseLoc+'weights',flag)
     # pdb.gimp_message("Update Completed Successfully!")
