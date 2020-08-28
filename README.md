@@ -3,6 +3,7 @@
 ### :fast_forward: [YouTube](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) :fast_forward: [Instagram](https://www.instagram.com/explore/tags/gimpml/) :fast_forward: [Manual](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual) :fast_forward: [Preprint](https://arxiv.org/abs/2004.13060) :fast_forward: [Medium](https://medium.com/@kritiksoman) :fast_forward: <br>
 :star: :star: :star: :star: are welcome. New tools will be added with time.<br>
 Updates: <br>
+[August 28] Added deep learning based dehazing and denoising. <br>
 [August 25] Simplified installation and updating method. <br>
 [August 2] Added deep matting and k-means. <br>
 [July 17] MonoDepth and Colorization models have been updated. <br>
@@ -44,4 +45,6 @@ Please cite using the following bibtex entry:
 | super-resolution | MIT |
 | deepmatting | Non-commercial purposes |
 | deeplab | MIT |
-| kmeans | BSD |
+| kmeans | [BSD](https://github.com/scipy/scipy/blob/master/LICENSE.txt) |
+| deep-dehazing | [MIT](https://github.com/MayankSingal/PyTorch-Image-Dehazing/blob/master/LICENSE) |
+| deep-denoising | [GPL3](https://github.com/SaoYan/DnCNN-PyTorch/blob/master/LICENSE) |
