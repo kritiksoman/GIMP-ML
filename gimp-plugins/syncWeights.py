@@ -172,9 +172,36 @@ def sync(path,flag):
 		gimp.progress_init("Downloading " + model +"(~" + str(fileSize) + "MB)...")
 		download_file_from_google_drive(file_id, destination,fileSize)
 
+	#deepdehaze
+	model = 'deepdehaze'
+	file_id = '1hrd310nYCbh6ui_ZsZci7Zna2AFP1sMS'
+	fileSize = 0.008 #in MB
+	mFName = 'dehazer.pth'
+	if not os.path.isdir(path + '/' + model):
+		os.mkdir(path + '/' + model)
+	destination = path + '/' + model + '/' + mFName
+	if not os.path.isfile(destination):
+		gimp.progress_init("Downloading " + model +"(~" + str(fileSize) + "MB)...")
+		download_file_from_google_drive(file_id, destination,fileSize)
 
- 
-
+ 	#deepdenoise
+	model = 'deepdenoise'
+	file_id = '1acZ1FTNMuAQaYtE3RYLA8fs8cQrW2tZ_'
+	fileSize = 0.166 #in MB
+	mFName = 'est_net.pth'
+	if not os.path.isdir(path + '/' + model):
+		os.mkdir(path + '/' + model)
+	destination = path + '/' + model + '/' + mFName
+	if not os.path.isfile(destination):
+		gimp.progress_init("Downloading " + model +"(~" + str(fileSize) + "MB)...")
+		download_file_from_google_drive(file_id, destination,fileSize)
+	file_id = '1tBoyDxYJ92pvopBJeK9PmG_jMA_Ut38_'
+	fileSize = 3 #in MB
+	mFName = 'net.pth'
+	destination = path + '/' + model + '/' + mFName
+	if not os.path.isfile(destination):
+		gimp.progress_init("Downloading " + model +"(~" + str(fileSize) + "MB)...")
+		download_file_from_google_drive(file_id, destination,fileSize)
 
 
 
