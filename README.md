@@ -20,7 +20,8 @@ Updates: <br>
 [5] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to yes and restart GIMP. (Weights ~ 1.5GB will be downloaded)<br>
 
 # Update Steps
-[1] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to yes and restart GIMP. <br>
+[1] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to NO and restart GIMP. <br>
+[2] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to YES and restart GIMP. <br>
 
 # Citation
 Please cite using the following bibtex entry:
@@ -37,13 +38,13 @@ Please cite using the following bibtex entry:
 # License
 | Tools | License |
 | ------------- |:-------------:| 
-| facegen | CC BY-NC-SA 4.0 |
-| deblur | BSD 3-clause |
-| faceparse | MIT |
-| deepcolor | MIT | 
-| monodepth | MIT |
-| super-resolution | MIT |
-| deepmatting | Non-commercial purposes |
+| facegen | [CC BY-NC-SA 4.0](https://github.com/switchablenorms/CelebAMask-HQ#dataset-agreement) |
+| deblur | [BSD 3-clause](https://github.com/VITA-Group/DeblurGANv2/blob/master/LICENSE) |
+| faceparse | [MIT](https://github.com/zllrunning/face-parsing.PyTorch/blob/master/LICENSE) |
+| deepcolor | [MIT](https://github.com/junyanz/interactive-deep-colorization/blob/master/LICENSE) | 
+| monodepth | [MIT](https://github.com/intel-isl/MiDaS/blob/master/LICENSE) |
+| super-resolution | [MIT](https://github.com/twtygqyy/pytorch-SRResNet/blob/master/LICENSE) |
+| deepmatting | [Non-commercial purposes](https://github.com/poppinace/indexnet_matting/blob/master/Adobe%20Deep%20Image%20Mattng%20Dataset%20License%20Agreement.pdf) |
 | deeplab | MIT |
 | kmeans | [BSD](https://github.com/scipy/scipy/blob/master/LICENSE.txt) |
 | deep-dehazing | [MIT](https://github.com/MayankSingal/PyTorch-Image-Dehazing/blob/master/LICENSE) |
