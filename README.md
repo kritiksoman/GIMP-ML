@@ -18,7 +18,7 @@ Updates: <br>
     ```bash installGimpML.sh```<br>
 [4] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and restart GIMP. <br>
 [5] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to yes and restart GIMP. (Weights ~ 1.5GB will be downloaded)<br>
-Manual install description: [Link](https://github.com/kritiksoman/GIMP-ML/blob/master/INSTALLATION.md) <br>
+Manual install description if above is not working: [Link](https://github.com/kritiksoman/GIMP-ML/blob/master/INSTALLATION.md) <br>
 
 # Update Steps
 [1] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to NO and restart GIMP. <br>
