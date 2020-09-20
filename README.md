@@ -3,7 +3,7 @@
 ### :fast_forward: [YouTube](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) :fast_forward: [Instagram](https://www.instagram.com/explore/tags/gimpml/) :fast_forward: [Manual](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual) :fast_forward: [Preprint](https://arxiv.org/abs/2004.13060) :fast_forward: [Medium](https://medium.com/@kritiksoman) :fast_forward: <br>
 :star: :star: :star: :star: are welcome. New tools will be added and existing will be improved with time.<br>
 Updates: <br>
-[September 20] Added Force CPU use button and minor bug fixes.<br>
+[September 20] Added Force CPU use button and minor bug fixes. (Existing users should be able to update.)<br>
 [August 28] Added deep learning based dehazing and denoising. <br>
 [August 25] Simplified installation and updating method. <br>
 [August 2] Added deep matting and k-means. <br>
