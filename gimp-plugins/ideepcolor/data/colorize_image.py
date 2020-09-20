@@ -250,7 +250,7 @@ class ColorizeImageTorch(ColorizeImageBase):
             self.__patch_instance_norm_state_dict(state_dict, getattr(module, key), keys, i + 1)
 
     # ***** Call forward *****
-    def net_forward(self, input_ab, input_mask):
+    def net_forward(self, input_ab, input_mask, f):
         # INPUTS
         #     ab         2xXxX     input color patches (non-normalized)
         #     mask     1xXxX    input mask, indicating which points have been provided
@@ -264,7 +264,7 @@ class ColorizeImageTorch(ColorizeImageBase):
         # return prediction
         # self.net.blobs['data_l_ab_mask'].data[...] = net_input_prepped
         # embed()
-        output_ab = self.net.forward(self.img_l_mc, self.input_ab_mc, self.input_mask_mult, self.mask_cent)[0, :, :, :].cpu().data.numpy()
+        output_ab = self.net.forward(self.img_l_mc, self.input_ab_mc, self.input_mask_mult, self.mask_cent,f)[0, :, :, :].cpu().data.numpy()
         self.output_rgb = lab2rgb_transpose(self.img_l, output_ab)
         # self.output_rgb = lab2rgb_transpose(self.img_l, self.net.blobs[self.pred_ab_layer].data[0, :, :, :])
 

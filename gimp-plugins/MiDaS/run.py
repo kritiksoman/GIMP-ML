@@ -11,7 +11,7 @@ import cv2
 # import imageio
 
 
-def run_depth(img, model_path, Net, utils, target_w=None):
+def run_depth(img, model_path, Net, utils, target_w=None,f=False):
     """Run MonoDepthNN to compute depth maps.
 
     Args:
@@ -22,12 +22,13 @@ def run_depth(img, model_path, Net, utils, target_w=None):
     # print("initialize")
 
     # select device
-    device = torch.device("cpu")
+    # device = torch.device("cpu")
     # print("device: %s" % device)
 
     # load network
     model = Net(model_path)
-    model.to(device)
+    if torch.cuda.is_available() and not f:
+        model.cuda()
     model.eval()
 
     # get input
@@ -50,7 +51,8 @@ def run_depth(img, model_path, Net, utils, target_w=None):
     target_height, target_width = int(round(img.shape[0] * scale)), int(round(img.shape[1] * scale))
     img_input = utils.resize_image(img)
     # print(img_input.shape)
-    img_input = img_input.to(device)
+    if torch.cuda.is_available() and not f:
+        img_input = img_input.cuda()
     # compute
     with torch.no_grad():
         out = model.forward(img_input)

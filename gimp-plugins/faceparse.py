@@ -48,13 +48,13 @@ def colorMask(mask):
         x=x+getlabelmat(mask,idx)
     return np.uint8(x)
 
-def getface(input_image):
+def getface(input_image,cFlag):
     save_pth = baseLoc+'weights/faceparse/79999_iter.pth'
     input_image = Image.fromarray(input_image)
 
     n_classes = 19
     net = BiSeNet(n_classes=n_classes)
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() and not cFlag:
         net.cuda()
         net.load_state_dict(torch.load(save_pth))
     else:
@@ -74,7 +74,7 @@ def getface(input_image):
         img = input_image.resize((512, 512), Image.BILINEAR)
         img = to_tensor(img)
         img = torch.unsqueeze(img, 0)
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and not cFlag:
             img = img.cuda()
         out = net(img)[0]
         if torch.cuda.is_available():
@@ -137,8 +137,8 @@ def createResultLayer(image,name,result):
     image.add_layer(rl,0)
     gimp.displays_flush()
 
-def faceparse(img, layer) :
-    if torch.cuda.is_available():
+def faceparse(img, layer,cFlag) :
+    if torch.cuda.is_available() and not cFlag:
         gimp.progress_init("(Using GPU) Running face parse for " + layer.name + "...")
     else:
         gimp.progress_init("(Using CPU) Running face parse for " + layer.name + "...")
@@ -146,7 +146,7 @@ def faceparse(img, layer) :
     imgmat = channelData(layer)
     if imgmat.shape[2] == 4:  # get rid of alpha channel
         imgmat = imgmat[:,:,0:3]
-    cpy=getface(imgmat)
+    cpy=getface(imgmat,cFlag)
     cpy = colorMask(cpy)
     createResultLayer(img,'new_output',cpy)
 
@@ -164,6 +164,7 @@ register(
     "*",      # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
     [   (PF_IMAGE, "image", "Input image", None),
         (PF_DRAWABLE, "drawable", "Input drawable", None),
+        (PF_BOOL, "fcpu", "Force CPU", False)
     ],
     [],
     faceparse, menu="<Image>/Layer/GIML-ML")

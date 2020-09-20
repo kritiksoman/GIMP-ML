@@ -34,7 +34,7 @@ def createResultLayer(image,name,result):
     image.add_layer(rl,0)
     gimp.displays_flush()
 
-def getnewalpha(image,mask):
+def getnewalpha(image,mask,cFlag):
     if image.shape[2] == 4:  # get rid of alpha channel
     	 image = image[:,:,0:3]
     if mask.shape[2] == 4:  # get rid of alpha channel
@@ -44,7 +44,7 @@ def getnewalpha(image,mask):
     trimap = mask[:, :, 0]
 
     cudaFlag = False
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() and not cFlag:
     	cudaFlag = True
 
     args = Namespace(crop_or_resize='whole', cuda=cudaFlag, max_size=1600, resume=baseLoc+'weights/deepmatting/stage1_sad_57.1.pth', stage=1)
@@ -75,8 +75,8 @@ def getnewalpha(image,mask):
     return pred_mattes
 
 
-def deepmatting(imggimp, curlayer,layeri,layerm) :
-    if torch.cuda.is_available():
+def deepmatting(imggimp, curlayer,layeri,layerm,cFlag) :
+    if torch.cuda.is_available() and not cFlag:
         gimp.progress_init("(Using GPU) Running deep-matting for " + layeri.name + "...")
     else:
         gimp.progress_init("(Using CPU) Running deep-matting for " + layeri.name + "...")
@@ -84,7 +84,7 @@ def deepmatting(imggimp, curlayer,layeri,layerm) :
     img = channelData(layeri)
     mask = channelData(layerm)
 
-    cpy=getnewalpha(img,mask)
+    cpy=getnewalpha(img,mask,cFlag)
     createResultLayer(imggimp,'new_output',cpy)
 
     
@@ -101,7 +101,8 @@ register(
     [   (PF_IMAGE, "image", "Input image", None),
         (PF_DRAWABLE, "drawable", "Input drawable", None),
         (PF_LAYER, "drawinglayer", "Original Image:", None),
-        (PF_LAYER, "drawinglayer", "Trimap Mask:", None)
+        (PF_LAYER, "drawinglayer", "Trimap Mask:", None),
+        (PF_BOOL, "fcpu", "Force CPU", False)
     ],
     [],
     deepmatting, menu="<Image>/Layer/GIML-ML")

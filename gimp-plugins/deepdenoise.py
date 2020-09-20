@@ -12,7 +12,7 @@ sys.path.extend([baseLoc + 'gimpenv/lib/python2.7', baseLoc + 'gimpenv/lib/pytho
 from denoiser import *
 from argparse import Namespace
 
-def clrImg(Img):
+def clrImg(Img,cFlag):
     w, h, _ = Img.shape
     opt = Namespace(color=1, cond=1, delog='logsdc', ext_test_noise_level=None,
                     k=0, keep_ind=None, mode='MC', num_of_layers=20, out_dir='results_bc',
@@ -25,7 +25,7 @@ def clrImg(Img):
     device_ids = [0]
     model = nn.DataParallel(net, device_ids=device_ids)
     model_est = nn.DataParallel(est_net, device_ids=device_ids)# Estimator Model
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() and not cFlag:
         ckpt_est = torch.load(baseLoc+'weights/deepdenoise/est_net.pth')
         ckpt = torch.load(baseLoc+'weights/deepdenoise/net.pth')
         model = model.cuda()
@@ -57,6 +57,8 @@ def clrImg(Img):
     merge_out = np.zeros([w, h, 3])
     wbin = opt.wbin
     i = 0
+    idx=0
+    t=(w*h)/(wbin*wbin)
     while i < w:
         i_end = min(i + wbin, w)
         j = 0
@@ -66,7 +68,8 @@ def clrImg(Img):
             patch_merge_out_numpy = denoiser(patch, c, pss, model, model_est, opt)
             merge_out[i:i_end, j:j_end, :] = patch_merge_out_numpy
             j = j_end
-            gimp.progress_update(float(i+j)/float(w+h))
+            idx=idx+1
+            gimp.progress_update(float(idx)/float(t))
             gimp.displays_flush()
         i = i_end
 
@@ -91,15 +94,15 @@ def createResultLayer(image, name, result):
     gimp.displays_flush()
 
 
-def deepdenoise(img, layer):
-    if torch.cuda.is_available():
+def deepdenoise(img, layer,cFlag):
+    if torch.cuda.is_available() and not cFlag:
         gimp.progress_init("(Using GPU) Denoising " + layer.name + "...")
     else:
         gimp.progress_init("(Using CPU) Denoising " + layer.name + "...")
     imgmat = channelData(layer)
     if imgmat.shape[2] == 4:  # get rid of alpha channel
         imgmat = imgmat[:,:,0:3]
-    cpy = clrImg(imgmat)
+    cpy = clrImg(imgmat,cFlag)
     createResultLayer(img, 'new_output', cpy)
 
 
@@ -114,6 +117,7 @@ register(
     "*",  # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
     [(PF_IMAGE, "image", "Input image", None),
      (PF_DRAWABLE, "drawable", "Input drawable", None),
+     (PF_BOOL, "fcpu", "Force CPU", False)
      ],
     [],
     deepdenoise, menu="<Image>/Layer/GIML-ML")
