@@ -28,8 +28,8 @@ def colorMask(mask):
     return np.uint8(x)
 
 
-def getnewimg(input_image,s):
-    opt=Namespace(cuda=torch.cuda.is_available(),
+def getnewimg(input_image,s,cFlag):
+    opt=Namespace(cuda=torch.cuda.is_available() and not cFlag,
         model=baseLoc+'weights/super_resolution/model_srresnet.pth',
         dataset='Set5',scale=s,gpus=0)
 
@@ -88,8 +88,8 @@ def createResultLayer(name,layer_np):
     gimp.displays_flush()
     
 
-def super_resolution(img, layer,scale) :
-    if torch.cuda.is_available():
+def super_resolution(img, layer,scale,cFlag) :
+    if torch.cuda.is_available() and not cFlag:
         gimp.progress_init("(Using GPU) Running super-resolution for " + layer.name + "...")
     else:
         gimp.progress_init("(Using CPU) Running  super-resolution for " + layer.name + "...")
@@ -97,7 +97,7 @@ def super_resolution(img, layer,scale) :
     imgmat = channelData(layer)
     if imgmat.shape[2] == 4:  # get rid of alpha channel
         imgmat = imgmat[:,:,0:3]    
-    cpy = getnewimg(imgmat,scale)
+    cpy = getnewimg(imgmat,scale,cFlag)
     cpy = cv2.resize(cpy, (0,0), fx=scale/4, fy=scale/4) 
     createResultLayer(layer.name+'_upscaled',cpy)
     
@@ -113,7 +113,8 @@ register(
     "*",      # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
     [   (PF_IMAGE, "image", "Input image", None),
         (PF_DRAWABLE, "drawable", "Input drawable", None),
-        (PF_SLIDER, "Scale",  "Scale", 4, (1.1, 4, 0.5))
+        (PF_SLIDER, "Scale",  "Scale", 4, (1.1, 4, 0.5)),
+        (PF_BOOL, "fcpu", "Force CPU", False)
     ],
     [],
     super_resolution, menu="<Image>/Layer/GIML-ML")

@@ -56,7 +56,7 @@ def getOptions():
     'engine': None,
     'export_onnx': None,
     'fineSize': 512,
-    'gpu_ids': [0],
+    'gpu_ids': [],
     'how_many': 1000,
     'input_nc': 3,
     'isTrain': False,
@@ -105,15 +105,18 @@ def createResultLayer(image,name,result):
     image.add_layer(rl,0)
     gimp.displays_flush()
 
-def getnewface(img,mask,mask_m):
+def getnewface(img,mask,mask_m,cFlag):
     h,w,d = img.shape
     img = Image.fromarray(img)
     lmask = labelMask(mask)
     lmask_m = labelMask(mask_m)
 
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(0)
+    # os.environ["CUDA_VISIBLE_DEVICES"] = str(0)
     opt = getOptions()
+
+    if torch.cuda.is_available() and not cFlag:
+        opt.gpu_ids=[0]
 
     model = create_model(opt)   
 
@@ -124,11 +127,11 @@ def getnewface(img,mask,mask_m):
     mask_m = transform_mask(Image.fromarray(np.uint8(lmask_m)))
     img = transform_image(img)
  
-    generated = model.inference(torch.FloatTensor([mask_m.numpy()]), torch.FloatTensor([mask.numpy()]), torch.FloatTensor([img.numpy()]))   
+    generated = model.inference(torch.FloatTensor([mask_m.numpy()]), torch.FloatTensor([mask.numpy()]), torch.FloatTensor([img.numpy()]), cFlag)   
 
     result = generated.permute(0, 2, 3, 1)
     if torch.cuda.is_available():
-        result = result.cpu().numpy()
+        result = result.detach().cpu().numpy()
     else:
         result = result.detach().numpy()
 
@@ -141,8 +144,8 @@ def getnewface(img,mask,mask_m):
     return result
 
 
-def facegen(imggimp, curlayer,layeri,layerm,layermm) :
-    if torch.cuda.is_available():
+def facegen(imggimp, curlayer,layeri,layerm,layermm,cFlag):
+    if torch.cuda.is_available() and not cFlag:
         gimp.progress_init("(Using GPU) Running face gen for " + layeri.name + "...")
     else:
         gimp.progress_init("(Using CPU) Running face gen for " + layeri.name + "...")
@@ -151,7 +154,7 @@ def facegen(imggimp, curlayer,layeri,layerm,layermm) :
     mask = channelData(layerm)
     mask_m = channelData(layermm)
 
-    cpy=getnewface(img,mask,mask_m)
+    cpy=getnewface(img,mask,mask_m,cFlag)
     createResultLayer(imggimp,'new_output',cpy)
 
     
@@ -168,8 +171,9 @@ register(
     [   (PF_IMAGE, "image", "Input image", None),
         (PF_DRAWABLE, "drawable", "Input drawable", None),
         (PF_LAYER, "drawinglayer", "Original Image:", None),
-        (PF_LAYER, "drawinglayer", "Original Mask:", None),
-        (PF_LAYER, "drawinglayer", "Modified Mask:", None),
+        (PF_LAYER, "drawinglayer2", "Original Mask:", None),
+        (PF_LAYER, "drawinglayer3", "Modified Mask:", None),
+        (PF_BOOL, "fcpu", "Force CPU", False),
     ],
     [],
     facegen, menu="<Image>/Layer/GIML-ML")

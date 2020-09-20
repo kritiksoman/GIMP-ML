@@ -25,11 +25,11 @@ config = {'project': 'deblur_gan', 'warmup_num': 3, 'optimizer': {'lr': 0.0001, 
 
 
 class Predictor:
-    def __init__(self, weights_path, model_name=''):
+    def __init__(self, weights_path, model_name='',cf=False):
         # model = get_generator(model_name or config['model'])
         model = get_generator_new(weights_path[0:-11])
         model.load_state_dict(torch.load(weights_path, map_location=lambda storage, loc: storage)['model'])
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and not cf:
             self.model = model.cuda()
         else:
             self.model = model
@@ -73,10 +73,10 @@ class Predictor:
         x = (np.transpose(x, (1, 2, 0)) + 1) / 2.0 * 255.0
         return x.astype('uint8')
 
-    def __call__(self, img, mask, ignore_mask=True):
+    def __call__(self, img, mask, ignore_mask=True,cf=False):
         (img, mask), h, w = self._preprocess(img, mask)
         with torch.no_grad():
-            if torch.cuda.is_available():
+            if torch.cuda.is_available() and not cf:
                 inputs = [img.cuda()]
             else:
                 inputs = [img]

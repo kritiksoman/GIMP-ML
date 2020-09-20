@@ -184,7 +184,7 @@ class Pix2PixHDModel(BaseModel):
 
         return inter_label_1, input_label, inter_label_2, real_image, input_label_ref, real_image_ref
 
-    def encode_input_test(self, label_map, label_map_ref, real_image_ref, infer=False):
+    def encode_input_test(self, label_map, label_map_ref, real_image_ref, infer=False,f=False):
         
         if self.opt.label_nc == 0:
             if torch.cuda.is_available(): 
@@ -198,7 +198,7 @@ class Pix2PixHDModel(BaseModel):
             # create one-hot vector for label map 
             size = label_map.size()
             oneHot_size = (size[0], self.opt.label_nc, size[2], size[3])
-            if torch.cuda.is_available(): 
+            if torch.cuda.is_available() and not f: 
                 input_label = torch.cuda.FloatTensor(torch.Size(oneHot_size)).zero_()
                 input_label = input_label.scatter_(1, label_map.data.long().cuda(), 1.0)
                 input_label_ref = torch.cuda.FloatTensor(torch.Size(oneHot_size)).zero_()
@@ -280,11 +280,11 @@ class Pix2PixHDModel(BaseModel):
         # Only return the fake_B image if necessary to save BW
         return [ self.loss_filter( loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_GB_GAN, loss_GB_GAN_Feat, loss_GB_VGG, loss_D_real, loss_D_fake, loss_D_blend ), None if not infer else fake_inter_1, fake_image, fake_inter_2, blend_image, alpha, real_image, inter_label_1, input_label, inter_label_2 ]
 
-    def inference(self, label, label_ref, image_ref):
+    def inference(self, label, label_ref, image_ref,cFlag):
 
         # Encode Inputs        
         image_ref = Variable(image_ref)
-        input_label, input_label_ref, real_image_ref = self.encode_input_test(Variable(label), Variable(label_ref), image_ref, infer=True)        
+        input_label, input_label_ref, real_image_ref = self.encode_input_test(Variable(label), Variable(label_ref), image_ref, infer=True,f=cFlag)        
            
         if torch.__version__.startswith('0.4'):
             with torch.no_grad():

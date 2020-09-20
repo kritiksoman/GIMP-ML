@@ -12,7 +12,7 @@ import torch
 from torchvision import transforms, datasets
 import numpy as np
 
-def getSeg(input_image):
+def getSeg(input_image,f):
     model = torch.load(baseLoc+'weights/deeplabv3/deeplabv3+model.pt')
     model.eval()
     preprocess = transforms.Compose([
@@ -23,7 +23,7 @@ def getSeg(input_image):
     input_image = Image.fromarray(input_image)
     input_tensor = preprocess(input_image)
     input_batch = input_tensor.unsqueeze(0) # create a mini-batch as expected by the model
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() and not f:
         input_batch = input_batch.to('cuda')
         model.to('cuda')
 
@@ -61,8 +61,8 @@ def createResultLayer(image,name,result):
     image.add_layer(rl,0)
     gimp.displays_flush()
 
-def deeplabv3(img, layer) :
-    if torch.cuda.is_available():
+def deeplabv3(img, layer,cFlag) :
+    if torch.cuda.is_available() and not cFlag:
         gimp.progress_init("(Using GPU) Generating semantic segmentation map for " + layer.name + "...")
     else:
         gimp.progress_init("(Using CPU) Generating semantic segmentation map for " + layer.name + "...")
@@ -70,7 +70,7 @@ def deeplabv3(img, layer) :
     imgmat = channelData(layer)
     if imgmat.shape[2] == 4:  # get rid of alpha channel
         imgmat = imgmat[:,:,0:3]
-    cpy=getSeg(imgmat)    
+    cpy=getSeg(imgmat,cFlag)    
     createResultLayer(img,'new_output',cpy)
 
 
@@ -84,7 +84,8 @@ register(
     "deeplabv3...",
     "*",      # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
     [   (PF_IMAGE, "image", "Input image", None),
-        (PF_DRAWABLE, "drawable", "Input drawable", None)
+        (PF_DRAWABLE, "drawable", "Input drawable", None),
+        (PF_BOOL, "fcpu", "Force CPU", False)
     ],
     [],
     deeplabv3, menu="<Image>/Layer/GIML-ML")

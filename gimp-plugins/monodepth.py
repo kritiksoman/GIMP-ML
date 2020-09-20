@@ -13,10 +13,11 @@ from monodepth_net import MonoDepthNet
 import MiDaS_utils as MiDaS_utils
 import numpy as np
 import cv2
+import torch
 
-def getMonoDepth(input_image):
+def getMonoDepth(input_image,cFlag):
     image = input_image / 255.0
-    out = run_depth(image, baseLoc+'weights/MiDaS/model.pt', MonoDepthNet, MiDaS_utils, target_w=640)
+    out = run_depth(image, baseLoc+'weights/MiDaS/model.pt', MonoDepthNet, MiDaS_utils, target_w=640,f=cFlag)
     out = np.repeat(out[:, :, np.newaxis], 3, axis=2)
     d1,d2 = input_image.shape[:2]
     out = cv2.resize(out,(d2,d1))
@@ -34,17 +35,22 @@ def channelData(layer):  # convert gimp image to numpy
 
 def createResultLayer(image, name, result):
     rlBytes = np.uint8(result).tobytes();
-    rl = gimp.Layer(image, name, image.width, image.height, image.active_layer.type, 100, NORMAL_MODE)
+    rl = gimp.Layer(image, name, image.width, image.height, 0, 100, NORMAL_MODE)
     region = rl.get_pixel_rgn(0, 0, rl.width, rl.height, True)
     region[:, :] = rlBytes
     image.add_layer(rl, 0)
     gimp.displays_flush()
 
 
-def MonoDepth(img, layer):
-    gimp.progress_init("Generating disparity map for " + layer.name + "...")
+def MonoDepth(img, layer,cFlag):
+    if torch.cuda.is_available() and not cFlag:
+        gimp.progress_init("(Using GPU) Generating disparity map for " + layer.name + "...")
+    else:
+        gimp.progress_init("(Using CPU) Generating disparity map for " + layer.name + "...")
     imgmat = channelData(layer)
-    cpy = getMonoDepth(imgmat)
+    if imgmat.shape[2] == 4:  # get rid of alpha channel
+        imgmat = imgmat[:,:,0:3]
+    cpy = getMonoDepth(imgmat,cFlag)
     createResultLayer(img, 'new_output', cpy)
 
 
@@ -59,6 +65,7 @@ register(
     "*",  # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
     [(PF_IMAGE, "image", "Input image", None),
      (PF_DRAWABLE, "drawable", "Input drawable", None),
+     (PF_BOOL, "fcpu", "Force CPU", False)
      ],
     [],
     MonoDepth, menu="<Image>/Layer/GIML-ML")

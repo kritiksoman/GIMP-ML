@@ -14,13 +14,13 @@ import net
 import numpy as np
 import cv2
 
-def clrImg(data_hazy):
+def clrImg(data_hazy,cFlag):
     data_hazy = (data_hazy / 255.0)
     data_hazy = torch.from_numpy(data_hazy).float()
     data_hazy = data_hazy.permute(2, 0, 1)
     dehaze_net = net.dehaze_net()
 
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() and not cFlag:
         dehaze_net = dehaze_net.cuda()
         dehaze_net.load_state_dict(torch.load(baseLoc+'weights/deepdehaze/dehazer.pth'))
         data_hazy = data_hazy.cuda()
@@ -31,7 +31,7 @@ def clrImg(data_hazy):
     gimp.displays_flush()    
     data_hazy = data_hazy.unsqueeze(0)
     clean_image = dehaze_net(data_hazy)
-    out = clean_image.detach().numpy()[0,:,:,:]*255
+    out = clean_image.detach().cpu().numpy()[0,:,:,:]*255
     out = np.clip(np.transpose(out,(1,2,0)),0,255).astype(np.uint8)
     return out
 
@@ -53,15 +53,15 @@ def createResultLayer(image, name, result):
     gimp.displays_flush()
 
 
-def deepdehazing(img, layer):
-    if torch.cuda.is_available():
+def deepdehazing(img, layer, cFlag):
+    if torch.cuda.is_available() and not cFlag:
         gimp.progress_init("(Using GPU) Dehazing " + layer.name + "...")
     else:
         gimp.progress_init("(Using CPU) Dehazing " + layer.name + "...")
     imgmat = channelData(layer)
     if imgmat.shape[2] == 4:  # get rid of alpha channel
         imgmat = imgmat[:,:,0:3]
-    cpy = clrImg(imgmat)
+    cpy = clrImg(imgmat,cFlag)
     createResultLayer(img, 'new_output', cpy)
 
 
@@ -76,6 +76,7 @@ register(
     "*",  # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
     [(PF_IMAGE, "image", "Input image", None),
      (PF_DRAWABLE, "drawable", "Input drawable", None),
+     (PF_BOOL, "fcpu", "Force CPU", False)
      ],
     [],
     deepdehazing, menu="<Image>/Layer/GIML-ML")

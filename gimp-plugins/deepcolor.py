@@ -24,7 +24,7 @@ def channelData(layer):#convert gimp image to numpy
     return np.frombuffer(pixChars,dtype=np.uint8).reshape(layer.height,layer.width,bpp)
 
 
-def deepcolor(tmp1, tmp2, ilayerimg,ilayerc) :
+def deepcolor(tmp1, tmp2, ilayerimg,ilayerc,cflag) :
     layerimg = channelData(ilayerimg)
     layerc = channelData(ilayerc)
 
@@ -47,7 +47,7 @@ def deepcolor(tmp1, tmp2, ilayerimg,ilayerc) :
     if layerimg.shape[2] == 4: #remove alpha channel in image if present
         layerimg = layerimg[:,:,0:3]
 
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() and not cflag:
         gimp.progress_init("(Using GPU) Running deepcolor for " + ilayerimg.name + "...")
         gpu_id = 0
     else:
@@ -58,7 +58,7 @@ def deepcolor(tmp1, tmp2, ilayerimg,ilayerc) :
     colorModel.prep_net(gpu_id, baseLoc + 'weights/colorize/caffemodel.pth')
     colorModel.load_image(layerimg)  # load an image
 
-    img_out = colorModel.net_forward(input_ab, mask)  # run model, returns 256x256 image
+    img_out = colorModel.net_forward(input_ab, mask,f=cflag)  # run model, returns 256x256 image
     img_out_fullres = colorModel.get_img_fullres()  # get image at full resolution
 
     createResultLayer(tmp1, 'new_' + ilayerimg.name, img_out_fullres)
@@ -78,6 +78,7 @@ register(
         (PF_DRAWABLE, "drawable", "Input drawable", None),
         (PF_LAYER, "drawinglayer", "Original Image:", None),
         (PF_LAYER, "drawinglayer", "Color Mask:", None),
+        (PF_BOOL, "fcpu", "Force CPU", False)
     ],
     [],
     deepcolor, menu="<Image>/Layer/GIML-ML")
