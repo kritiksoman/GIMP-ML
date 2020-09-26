@@ -1,7 +1,0 @@
-.DS_Store
-*~
-*$py.class
-*.so
-*.py[cod]
-gimpenv/
-weights/
