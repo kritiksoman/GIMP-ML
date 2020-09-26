@@ -58,14 +58,14 @@ def clrImg(Img,cFlag):
     wbin = opt.wbin
     i = 0
     idx=0
-    t=(w*h)/(wbin*wbin)
+    t=float(w*h)/float(wbin*wbin)
     while i < w:
         i_end = min(i + wbin, w)
         j = 0
         while j < h:
             j_end = min(j + wbin, h)
             patch = Img[i:i_end, j:j_end, :]
-            patch_merge_out_numpy = denoiser(patch, c, pss, model, model_est, opt)
+            patch_merge_out_numpy = denoiser(patch, c, pss, model, model_est, opt, cFlag)
             merge_out[i:i_end, j:j_end, :] = patch_merge_out_numpy
             j = j_end
             idx=idx+1

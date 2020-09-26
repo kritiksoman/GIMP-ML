@@ -17,7 +17,7 @@ limit_set = [[0,75], [0, 80]]
 def img_normalize(data):
     return data/255.
 
-def denoiser(Img, c, pss, model, model_est, opt):
+def denoiser(Img, c, pss, model, model_est, opt, cFlag):
 
     w, h, _ = Img.shape   
     Img = pixelshuffle(Img, pss)
@@ -43,7 +43,7 @@ def denoiser(Img, c, pss, model, model_est, opt):
     INoisy = np2ts(noisy_img, opt.color)
     INoisy = torch.clamp(INoisy, 0., 1.)
     True_Res = INoisy - ISource
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() and not cFlag:
         ISource, INoisy, True_Res = Variable(ISource.cuda(),volatile=True), Variable(INoisy.cuda(),volatile=True), Variable(True_Res.cuda(),volatile=True)
     else:
         ISource, INoisy, True_Res = Variable(ISource,volatile=True), Variable(INoisy,volatile=True), Variable(True_Res,volatile=True)
