@@ -20,11 +20,11 @@ def clrImg(Img,cFlag):
                     rescale=1, scale=1, spat_n=0, test_data='real_night', test_data_gnd='Set12',
                     test_noise_level=None, wbin=512, zeroout=0)
     c = 1 if opt.color == 0 else 3
-    net = DnCNN_c(channels=c, num_of_layers=opt.num_of_layers, num_of_est=2 * c)
-    est_net = Estimation_direct(c, 2 * c)
-    device_ids = [0]
-    model = nn.DataParallel(net, device_ids=device_ids)
-    model_est = nn.DataParallel(est_net, device_ids=device_ids)# Estimator Model
+    model = DnCNN_c(channels=c, num_of_layers=opt.num_of_layers, num_of_est=2 * c)
+    model_est = Estimation_direct(c, 2 * c)
+    # device_ids = [0]
+    # model = nn.DataParallel(net, device_ids=device_ids)
+    # model_est = nn.DataParallel(est_net, device_ids=device_ids)# Estimator Model
     if torch.cuda.is_available() and not cFlag:
         ckpt_est = torch.load(baseLoc+'weights/deepdenoise/est_net.pth')
         ckpt = torch.load(baseLoc+'weights/deepdenoise/net.pth')
@@ -33,6 +33,10 @@ def clrImg(Img,cFlag):
     else:
         ckpt = torch.load(baseLoc+'weights/deepdenoise/net.pth',map_location=torch.device("cpu"))
         ckpt_est = torch.load(baseLoc+'weights/deepdenoise/est_net.pth',map_location=torch.device("cpu"))
+
+    ckpt = {key.replace("module.",""):value for key,value in ckpt.items()}
+    ckpt_est = {key.replace("module.",""):value for key,value in ckpt_est.items()}
+
     model.load_state_dict(ckpt)
     model.eval()
     model_est.load_state_dict(ckpt_est)

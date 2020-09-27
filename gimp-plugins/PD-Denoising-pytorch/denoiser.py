@@ -68,7 +68,7 @@ def denoiser(Img, c, pss, model, model_est, opt, cFlag):
         elif opt.cond == 1:  #if we use the estimated map directly
             NM_tensor = torch.clamp(model_est(INoisy), 0., 1.)
             if opt.refine == 1:  #if we need to refine the map before putting it to the denoiser
-                NM_tensor_bundle = level_refine(NM_tensor, opt.refine_opt, 2*c)  #refine_opt can be max, freq and their average
+                NM_tensor_bundle = level_refine(NM_tensor, opt.refine_opt, 2*c, cFlag)  #refine_opt can be max, freq and their average
                 NM_tensor = NM_tensor_bundle[0]
                 noise_estimation_table = np.reshape(NM_tensor_bundle[1], (2 * c,))
             if opt.zeroout == 1:
@@ -81,7 +81,7 @@ def denoiser(Img, c, pss, model, model_est, opt, cFlag):
     Out = torch.clamp(INoisy-Res, 0., 1.)  #Output image after denoising
     
     #get the maximum denoising result
-    max_NM_tensor = level_refine(NM_tensor, 1, 2*c)[0]
+    max_NM_tensor = level_refine(NM_tensor, 1, 2*c, cFlag)[0]
     max_Res = model(INoisy, max_NM_tensor)
     max_Out = torch.clamp(INoisy - max_Res, 0., 1.)
     max_out_numpy = visual_va2np(max_Out, opt.color, opt.ps, pss, 1, opt.rescale, w, h, c)
@@ -102,14 +102,14 @@ def denoiser(Img, c, pss, model, model_est, opt, cFlag):
                 if opt.color == 0:  #if gray image
                     re_test = np.expand_dims(re_test[:, :, :, 0], 3)
                 re_test_tensor = torch.from_numpy(np.transpose(re_test, (0,3,1,2))).type(torch.FloatTensor)
-                if torch.cuda.is_available():
+                if torch.cuda.is_available() and not cFlag:
                     re_test_tensor = Variable(re_test_tensor.cuda(),volatile=True)
                 else:
                     re_test_tensor = Variable(re_test_tensor, volatile=True)
 
                 re_NM_tensor = torch.clamp(model_est(re_test_tensor), 0., 1.)
                 if opt.refine == 1:  #if we need to refine the map before putting it to the denoiser
-                        re_NM_tensor_bundle = level_refine(re_NM_tensor, opt.refine_opt, 2*c)  #refine_opt can be max, freq and their average
+                        re_NM_tensor_bundle = level_refine(re_NM_tensor, opt.refine_opt, 2*c, cFlag)  #refine_opt can be max, freq and their average
                         re_NM_tensor = re_NM_tensor_bundle[0]
                 re_Res = model(re_test_tensor, re_NM_tensor)
                 Out2 = torch.clamp(re_test_tensor - re_Res, 0., 1.)
