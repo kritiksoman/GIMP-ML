@@ -1,11 +1,11 @@
 <img src="https://github.com/kritiksoman/tmp/blob/master/cover.png" width="1280" height="180"> <br>
 # Semantics for GNU Image Manipulation Program
-### [<img src="https://github.com/kritiksoman/tmp/blob/master/yt.png" width="70" height="50">](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) [<img src="https://github.com/kritiksoman/tmp/blob/master/inst.png" width="50" height="50">](https://www.instagram.com/explore/tags/gimpml/) [<img src="https://github.com/kritiksoman/tmp/blob/master/arxiv.png" width="100" height="50">](https://arxiv.org/abs/2004.13060)<br>
+### [<img src="https://github.com/kritiksoman/tmp/blob/master/yt.png" width="70" height="50">](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) [<img src="https://github.com/kritiksoman/tmp/blob/master/inst.png" width="50" height="50">](https://www.instagram.com/explore/tags/gimpml/) [<img src="https://github.com/kritiksoman/tmp/blob/master/arxiv.png" width="100" height="50">](https://arxiv.org/abs/2004.13060) [<img src="https://github.com/kritiksoman/tmp/blob/master/ref.png" width="100" height="50">](https://github.com/kritiksoman/GIMP-ML/wiki/References)<br>
 
 :star: :star: :star: :star: are welcome. New tools will be added and existing will be improved with time.<br>
 
 Updates: <br>
-[September 20] Added Force CPU use button and minor bug fixes. (Existing users should be able to update.)<br>
+[September 27] Added Force CPU use button and minor bug fixes. (Existing users should be able to update.)<br>
 [August 28] Added deep learning based dehazing and denoising. <br>
 [August 25] Simplified installation and updating method. <br>
 [August 2] Added deep matting and k-means. <br>
