@@ -24,7 +24,7 @@ Clone this repository: ```git clone https://github.com/kritiksoman/GIMP-ML.git``
 [7] Download the weights folder from [link](https://drive.google.com/drive/folders/10IiBO4fuMiGQ-spBStnObbk9R-pGp6u8?usp=sharing) and move it inside ```gimp-plugins``` folder. <br>
 [8] Allow the python scripts to be executable using ```chmod +x *.py``` in the ```gimp-plugins``` folder.<br>
 [9] Run GIMP. <br>
-Note: See ```installGimpML.sh``` if getting stuck.
+Note: See [```installGimpML.sh```](https://github.com/kritiksoman/GIMP-ML/blob/master/INSTALLATION.md) if getting stuck.
 
 
 ### Using shell script and update tool
