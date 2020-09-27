@@ -277,7 +277,7 @@ def zeroing_out_maps(lm, keep=0):
     RF_tensor = Variable(RF_tensor.cuda(),volatile=True)
     return RF_tensor       
 
-def level_refine(NM_tensor, ref_mode, chn=3):
+def level_refine(NM_tensor, ref_mode, chn=3,cFlag=False):
     '''
     Description: To refine the estimated noise level maps
     [Input] the noise map tensor, and a refinement mode
@@ -308,7 +308,7 @@ def level_refine(NM_tensor, ref_mode, chn=3):
             noise_map[n,:,:,:] = np.reshape(np.tile(nl_list[n], NM_tensor.size()[2] * NM_tensor.size()[3]),
                                           (chn, NM_tensor.size()[2], NM_tensor.size()[3]))
         RF_tensor = torch.from_numpy(noise_map).type(torch.FloatTensor)
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and not cFlag:
             RF_tensor = Variable(RF_tensor.cuda(),volatile=True)
         else:
             RF_tensor = Variable(RF_tensor,volatile=True)
