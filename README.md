@@ -5,7 +5,8 @@
 :star: :star: :star: :star: are welcome. New tools will be added and existing will be improved with time.<br>
 
 Updates: <br>
-[September 27] Added Force CPU use button and minor bug fixes. (Existing users should be able to update.)<br>
+[October 17] Added image enlightening. (Existing users should be able to update.)<br>
+[September 27] Added Force CPU use button and minor bug fixes. <br>
 [August 28] Added deep learning based dehazing and denoising. <br>
 [August 25] Simplified installation and updating method. <br>
 [August 2] Added deep matting and k-means. <br>
