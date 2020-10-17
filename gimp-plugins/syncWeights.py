@@ -206,7 +206,7 @@ def sync(path,flag):
 	#enlighten
 	model = 'enlightening'
 	file_id = '1V8ARc2tDgUUpc11xiT5Y9HFQgC6Ug2T6'
-	fileSize = 0.035 #in MB
+	fileSize = 35 #in MB
 	mFName = '200_net_G_A.pth'
 	if not os.path.isdir(path + '/' + model):
 		os.mkdir(path + '/' + model)
