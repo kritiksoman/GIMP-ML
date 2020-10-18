@@ -75,13 +75,13 @@ def deeplabv3(img, layer,cFlag) :
 
 
 register(
-    "deeplabv3",
-    "deeplabv3",
+    "semantic-segmentation",
+    "semantic-segmentation",
     "Generate semantic segmentation map based on deep learning.",
     "Kritik Soman",
     "GIMP-ML",
     "2020",
-    "deeplabv3...",
+    "semantic-segmentation...",
     "*",      # Alternately use RGB, RGB*, GRAY*, INDEXED etc.
     [   (PF_IMAGE, "image", "Input image", None),
         (PF_DRAWABLE, "drawable", "Input drawable", None),
