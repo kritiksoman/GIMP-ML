@@ -2,6 +2,9 @@
 # Semantics for GNU Image Manipulation Program
 ### [<img src="https://github.com/kritiksoman/tmp/blob/master/yt.png" width="70" height="50">](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) [<img src="https://github.com/kritiksoman/tmp/blob/master/inst.png" width="50" height="50">](https://www.instagram.com/explore/tags/gimpml/) [<img src="https://github.com/kritiksoman/tmp/blob/master/arxiv.png" width="100" height="50">](https://arxiv.org/abs/2004.13060) [<img src="https://github.com/kritiksoman/tmp/blob/master/manual.png" width="100" height="50">](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual) [<img src="https://github.com/kritiksoman/tmp/blob/master/ref.png" width="100" height="50">](https://github.com/kritiksoman/GIMP-ML/wiki/References) [<img src="https://github.com/kritiksoman/tmp/blob/master/wiki.png" width="100" height="30">](https://en.wikipedia.org/wiki/GIMP#Extensions)<br>
  
+
+[![Cover Video](https://img.youtube.com/vi/uAz3A3gHKtA/0.jpg)](https://www.youtube.com/watch?v=uAz3A3gHKtA)<br>
+
 :star: :star: :star: :star: are welcome. New tools will be added and existing will be improved with time.<br>
 
 Updates: <br>
