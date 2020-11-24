@@ -39,7 +39,69 @@ if [ ! -d "gimpenv" ]; then
 
 else
 
-	echo "Environment already setup!"
+	echo "Checking environment ..."
+
+	source gimpenv/bin/activate
+	WASOK=true
+
+	pip list | grep -w torchvision
+	if [ $? != 0 ]; then
+		python -m pip install torchvision
+		WASOK=false
+	fi
+	pip list | grep -w opencv-python
+	if [ $? != 0 ]; then
+		python -m pip install "opencv-python<=4.3"
+		WASOK=false
+	fi
+	pip list | grep -w numpy
+	if [ $? != 0 ]; then
+		python -m pip install numpy
+		WASOK=false
+	fi
+	pip list | grep -w future
+	if [ $? != 0 ]; then
+		python -m pip install future
+		WASOK=false
+	fi
+	pip list | grep -w torch
+	if [ $? != 0 ]; then
+		python -m pip install torch
+		WASOK=false
+	fi
+	pip list | grep -w scipy
+	if [ $? != 0 ]; then
+		python -m pip install scipy
+		WASOK=false
+	fi
+	pip list | grep -w typing
+	if [ $? != 0 ]; then
+		python -m pip install typing
+		WASOK=false
+	fi
+	pip list | grep -w enum
+	if [ $? != 0 ]; then
+		python -m pip install enum
+		WASOK=false
+	fi
+	pip list | grep -w pretrainedmodels
+	if [ $? != 0 ]; then
+		python -m pip install pretrainedmodels
+		WASOK=false
+	fi
+	pip list | grep -w requests
+	if [ $? != 0 ]; then
+		python -m pip install requests
+		WASOK=false
+	fi
+	
+	deactivate
+
+	if [ "$WASOK" = true ]; then
+		echo "Environment already setup!"
+	else
+		echo "Environment now correctly setup!"
+	fi
 
 fi
 
