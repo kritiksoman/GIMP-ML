@@ -215,4 +215,31 @@ def sync(path,flag):
 		gimp.progress_init("Downloading " + model +"(~" + str(fileSize) + "MB)...")
 		download_file_from_google_drive(file_id, destination,fileSize)
 
+	#interpolateframes
+	model = 'interpolateframes'
+	file_id = '1bHmO9-_ENTYoN1-BNwSk3nLN9-NDUnRg'
+	fileSize = 1.6 #in MB
+	mFName = 'contextnet.pkl'
+	if not os.path.isdir(path + '/' + model):
+		os.mkdir(path + '/' + model)
+	destination = path + '/' + model + '/' + mFName
+	if not os.path.isfile(destination):
+		gimp.progress_init("Downloading " + model +"(~" + str(fileSize) + "MB)...")
+		download_file_from_google_drive(file_id, destination,fileSize)
+	file_id = '1cQvDPBKsz3TAi0Q5bJXsu6A-Z7lpk_cE'
+	fileSize = 25.4 #in MB
+	mFName = 'flownet.pkl'
+	destination = path + '/' + model + '/' + mFName
+	if not os.path.isfile(destination):
+		gimp.progress_init("Downloading " + model +"(~" + str(fileSize) + "MB)...")
+		download_file_from_google_drive(file_id, destination,fileSize)	
+	file_id = '1mlA8VtxIcvJfz51OsQMvWX24oqxZ429r'
+	fileSize = 15 #in MB
+	mFName = 'unet.pkl'
+	destination = path + '/' + model + '/' + mFName
+	if not os.path.isfile(destination):
+		gimp.progress_init("Downloading " + model +"(~" + str(fileSize) + "MB)...")
+		download_file_from_google_drive(file_id, destination,fileSize)
+
+
 
