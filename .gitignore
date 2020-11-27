@@ -5,3 +5,4 @@
 *.pyc
 gimpenv/
 weights/
+output/
