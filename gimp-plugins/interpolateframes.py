@@ -87,21 +87,25 @@ def getinter(img_s, img_e, c_flag, string_path):
 
 
 def interpolateframes(imggimp, curlayer, string_path, layer_s, layer_e, c_flag):
-    if torch.cuda.is_available() and not c_flag:
-        gimp.progress_init("(Using GPU) Running slomo and saving frames in "+string_path)
-        # device = torch.device("cuda")
-    else:
-        gimp.progress_init("(Using CPU) Running slomo and saving frames in "+string_path)
-        # device = torch.device("cpu")
-
     layer_1 = channelData(layer_s)
     layer_2 = channelData(layer_e)
-    if layer_1.shape[2] == 4:  # get rid of alpha channel
-        layer_1 = layer_1[:, :, 0:3]
-    if layer_2.shape[2] == 4:  # get rid of alpha channel
-        layer_2 = layer_2[:, :, 0:3]
-    getinter(layer_1, layer_2, c_flag, string_path)
-    # pdb.gimp_message("Saved")
+
+    if layer_1.shape[0] != imggimp.height or layer_1.shape[1] != imggimp.width or layer_2.shape[0] != imggimp.height or layer_2.shape[1] != imggimp.width:
+        pdb.gimp_message(" Do (Layer -> Layer to Image Size) for both layers and try again.")
+    else:
+        if torch.cuda.is_available() and not c_flag:
+            gimp.progress_init("(Using GPU) Running slomo and saving frames in "+string_path)
+            # device = torch.device("cuda")
+        else:
+            gimp.progress_init("(Using CPU) Running slomo and saving frames in "+string_path)
+            # device = torch.device("cpu")
+
+        if layer_1.shape[2] == 4:  # get rid of alpha channel
+            layer_1 = layer_1[:, :, 0:3]
+        if layer_2.shape[2] == 4:  # get rid of alpha channel
+            layer_2 = layer_2[:, :, 0:3]
+        getinter(layer_1, layer_2, c_flag, string_path)
+        # pdb.gimp_message("Saved")
 
 
 register(
