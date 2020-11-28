@@ -5,7 +5,8 @@
 :star: :star: :star: :star: are welcome. New tools will be added and existing will be improved with time.<br>
 
 Updates: <br>
-[October 31] Use super-resolution as a filter for medium/large images. (Existing users should be able to update.)<br>
+[November 28] Added interpolate-frames. (Existing users should be able to update.)<br>
+[October 31] Use super-resolution as a filter for medium/large images.<br>
 [October 17] Added image enlightening.<br>
 [September 27] Added Force CPU use button and minor bug fixes. <br>
 [August 28] Added deep learning based dehazing and denoising. <br>
@@ -56,3 +57,5 @@ Please cite using the following bibtex entry:
 | deep-dehazing | [MIT](https://github.com/MayankSingal/PyTorch-Image-Dehazing/blob/master/LICENSE) | [Custom](https://sites.google.com/site/boyilics/website-builder/project-page) |
 | deep-denoising | [GPL3](https://github.com/SaoYan/DnCNN-PyTorch/blob/master/LICENSE) | BSD68 |
 | enlighten | [BSD](https://github.com/VITA-Group/EnlightenGAN/blob/master/License) | [Custom](https://arxiv.org/pdf/1906.06972.pdf) |
+| interpolate-frames | [MIT](https://github.com/hzwer/arXiv2020-RIFE/blob/main/LICENSE) | [HD](https://arxiv.org/pdf/2011.06294.pdf) |
+
