@@ -54,15 +54,18 @@ def createResultLayer(image, name, result):
 
 
 def deepdehazing(img, layer, cFlag):
-    if torch.cuda.is_available() and not cFlag:
-        gimp.progress_init("(Using GPU) Dehazing " + layer.name + "...")
-    else:
-        gimp.progress_init("(Using CPU) Dehazing " + layer.name + "...")
     imgmat = channelData(layer)
-    if imgmat.shape[2] == 4:  # get rid of alpha channel
-        imgmat = imgmat[:,:,0:3]
-    cpy = clrImg(imgmat,cFlag)
-    createResultLayer(img, 'new_output', cpy)
+    if imgmat.shape[0] != img.height or imgmat.shape[1] != img.width:
+        pdb.gimp_message(" Do (Layer -> Layer to Image Size) first and try again.")
+    else:
+        if torch.cuda.is_available() and not cFlag:
+            gimp.progress_init("(Using GPU) Dehazing " + layer.name + "...")
+        else:
+            gimp.progress_init("(Using CPU) Dehazing " + layer.name + "...")
+        if imgmat.shape[2] == 4:  # get rid of alpha channel
+            imgmat = imgmat[:,:,0:3]
+        cpy = clrImg(imgmat,cFlag)
+        createResultLayer(img, 'new_output', cpy)
 
 
 register(

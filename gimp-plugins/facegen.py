@@ -145,17 +145,24 @@ def getnewface(img,mask,mask_m,cFlag):
 
 
 def facegen(imggimp, curlayer,layeri,layerm,layermm,cFlag):
-    if torch.cuda.is_available() and not cFlag:
-        gimp.progress_init("(Using GPU) Running face gen for " + layeri.name + "...")
-    else:
-        gimp.progress_init("(Using CPU) Running face gen for " + layeri.name + "...")
-
     img = channelData(layeri)
     mask = channelData(layerm)
     mask_m = channelData(layermm)
-
-    cpy=getnewface(img,mask,mask_m,cFlag)
-    createResultLayer(imggimp,'new_output',cpy)
+    if img.shape[0] != imggimp.height or img.shape[1] != imggimp.width or mask.shape[0] != imggimp.height or mask.shape[1] != imggimp.width or mask_m.shape[0] != imggimp.height or mask_m.shape[1] != imggimp.width:
+        pdb.gimp_message("Do (Layer -> Layer to Image Size) for all layers and try again.")
+    else:
+        if torch.cuda.is_available() and not cFlag:
+            gimp.progress_init("(Using GPU) Running face gen for " + layeri.name + "...")
+        else:
+            gimp.progress_init("(Using CPU) Running face gen for " + layeri.name + "...")
+        if img.shape[2] == 4:  # get rid of alpha channel
+            img = img[:, :, 0:3]
+        if mask.shape[2] == 4:  # get rid of alpha channel
+            mask = mask[:, :, 0:3]
+        if mask_m.shape[2] == 4:  # get rid of alpha channel
+            mask_m = mask_m[:, :, 0:3]
+        cpy = getnewface(img,mask,mask_m,cFlag)
+        createResultLayer(imggimp,'new_output',cpy)
 
     
 

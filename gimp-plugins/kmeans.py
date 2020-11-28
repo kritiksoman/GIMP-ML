@@ -29,29 +29,32 @@ def createResultLayer(image,name,result):
 
 def kmeans(imggimp, curlayer,layeri,n_clusters,locflag) :
     image = channelData(layeri)
-    if image.shape[2] == 4:  # get rid of alpha channel
-    	image = image[:,:,0:3]
-    h,w,d = image.shape   
-    # reshape the image to a 2D array of pixels and 3 color values (RGB)
-    pixel_values = image.reshape((-1, 3))
-
-    if locflag:
-	    xx,yy = np.meshgrid(range(w),range(h))
-	    x = xx.reshape(-1,1)
-	    y = yy.reshape(-1,1)
-	    pixel_values = np.concatenate((pixel_values,x,y),axis=1)
-
-    pixel_values = np.float32(pixel_values)
-    c,out = kmeans2(pixel_values,n_clusters)
-    
-    if locflag:
-	    c = np.uint8(c[:,0:3])
+    if image.shape[0] != imggimp.height or image.shape[1] != imggimp.width:
+        pdb.gimp_message(" Do (Layer -> Layer to Image Size) first and try again.")
     else:
-    	c = np.uint8(c)
-    
-    segmented_image = c[out.flatten()]
-    segmented_image = segmented_image.reshape((h,w,d))
-    createResultLayer(imggimp,'new_output',segmented_image)
+        if image.shape[2] == 4:  # get rid of alpha channel
+            image = image[:,:,0:3]
+        h,w,d = image.shape
+        # reshape the image to a 2D array of pixels and 3 color values (RGB)
+        pixel_values = image.reshape((-1, 3))
+
+        if locflag:
+            xx,yy = np.meshgrid(range(w),range(h))
+            x = xx.reshape(-1,1)
+            y = yy.reshape(-1,1)
+            pixel_values = np.concatenate((pixel_values,x,y),axis=1)
+
+        pixel_values = np.float32(pixel_values)
+        c,out = kmeans2(pixel_values,n_clusters)
+
+        if locflag:
+            c = np.uint8(c[:,0:3])
+        else:
+            c = np.uint8(c)
+
+        segmented_image = c[out.flatten()]
+        segmented_image = segmented_image.reshape((h,w,d))
+        createResultLayer(imggimp,'new_output',segmented_image)
 
     
 register(

@@ -117,20 +117,23 @@ def createResultLayer(image, name, result):
     gimp.displays_flush()
 
 def super_resolution(img, layer, scale, cFlag, fFlag):
-    if torch.cuda.is_available() and not cFlag:
-        gimp.progress_init("(Using GPU) Running super-resolution for " + layer.name + "...")
-    else:
-        gimp.progress_init("(Using CPU) Running  super-resolution for " + layer.name + "...")
-
     imgmat = channelData(layer)
-    if imgmat.shape[2] == 4:  # get rid of alpha channel
-        imgmat = imgmat[:, :, 0:3]
-    cpy = getnewimg(imgmat, scale, cFlag, fFlag)
-    cpy = cv2.resize(cpy, (0, 0), fx=scale / 4, fy=scale / 4)
-    if scale==1:
-    	createResultLayer(img, layer.name + '_super', cpy)
+    if imgmat.shape[0] != img.height or imgmat.shape[1] != img.width:
+        pdb.gimp_message(" Do (Layer -> Layer to Image Size) first and try again.")
     else:
-    	createResultFile(layer.name + '_super', cpy)
+        if torch.cuda.is_available() and not cFlag:
+            gimp.progress_init("(Using GPU) Running super-resolution for " + layer.name + "...")
+        else:
+            gimp.progress_init("(Using CPU) Running  super-resolution for " + layer.name + "...")
+
+        if imgmat.shape[2] == 4:  # get rid of alpha channel
+            imgmat = imgmat[:, :, 0:3]
+        cpy = getnewimg(imgmat, scale, cFlag, fFlag)
+        cpy = cv2.resize(cpy, (0, 0), fx=scale / 4, fy=scale / 4)
+        if scale==1:
+            createResultLayer(img, layer.name + '_super', cpy)
+        else:
+            createResultFile(layer.name + '_super', cpy)
 
 
 register(
