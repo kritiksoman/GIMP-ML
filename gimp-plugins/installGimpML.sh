@@ -1,6 +1,6 @@
 if [ ! -d "gimpenv" ]; then
 
-	echo "\n-----------Installing GIMP-ML-----------\n"
+	echo "-----------Installing GIMP-ML-----------"
 	
 	if [ "$(uname)" == "Linux" ]; then
 		if [[ $(lsb_release -rs) == "18.04" ]]; then #for ubuntu 18.04
@@ -23,85 +23,21 @@ if [ ! -d "gimpenv" ]; then
 	python -m pip install --user virtualenv
 	python -m virtualenv gimpenv
 	source gimpenv/bin/activate
-	python -m pip install torchvision
-	python -m pip install "opencv-python<=4.3"
-	python -m pip install numpy
-	python -m pip install future
-	python -m pip install torch
-	python -m pip install scipy
-	python -m pip install typing
-	python -m pip install enum
-	python -m pip install pretrainedmodels
-	python -m pip install requests
+	python -m pip install -r requirements.txt
 	deactivate
 
-	echo "\n-----------Installed GIMP-ML------------\n"
+	echo "-----------Installed GIMP-ML------------"
 
 else
 
-	echo "Checking environment ..."
+	echo "------Checking GIMP-ML environment------"
+
 
 	source gimpenv/bin/activate
-	WASOK=true
-
-	pip list | grep -w torchvision
-	if [ $? != 0 ]; then
-		python -m pip install torchvision
-		WASOK=false
-	fi
-	pip list | grep -w opencv-python
-	if [ $? != 0 ]; then
-		python -m pip install "opencv-python<=4.3"
-		WASOK=false
-	fi
-	pip list | grep -w numpy
-	if [ $? != 0 ]; then
-		python -m pip install numpy
-		WASOK=false
-	fi
-	pip list | grep -w future
-	if [ $? != 0 ]; then
-		python -m pip install future
-		WASOK=false
-	fi
-	pip list | grep -w torch
-	if [ $? != 0 ]; then
-		python -m pip install torch
-		WASOK=false
-	fi
-	pip list | grep -w scipy
-	if [ $? != 0 ]; then
-		python -m pip install scipy
-		WASOK=false
-	fi
-	pip list | grep -w typing
-	if [ $? != 0 ]; then
-		python -m pip install typing
-		WASOK=false
-	fi
-	pip list | grep -w enum
-	if [ $? != 0 ]; then
-		python -m pip install enum
-		WASOK=false
-	fi
-	pip list | grep -w pretrainedmodels
-	if [ $? != 0 ]; then
-		python -m pip install pretrainedmodels
-		WASOK=false
-	fi
-	pip list | grep -w requests
-	if [ $? != 0 ]; then
-		python -m pip install requests
-		WASOK=false
-	fi
-	
+	python -m pip install -r requirements.txt
 	deactivate
 
-	if [ "$WASOK" = true ]; then
-		echo "Environment already setup!"
-	else
-		echo "Environment now correctly setup!"
-	fi
+	echo "------------GIMP-ML updated-------------"
 
 fi
 
