@@ -77,15 +77,19 @@ def createResultLayer(image, name, result):
 
 
 def Enlighten(img, layer,cFlag):
-    if torch.cuda.is_available() and not cFlag:
-        gimp.progress_init("(Using GPU) Enlighten " + layer.name + "...")
-    else:
-        gimp.progress_init("(Using CPU) Enlighten " + layer.name + "...")
     imgmat = channelData(layer)
-    if imgmat.shape[2] == 4:  # get rid of alpha channel
-        imgmat = imgmat[:,:,0:3]
-    cpy = getEnlighten(imgmat,cFlag)
-    createResultLayer(img, 'new_output', cpy)
+    if imgmat.shape[0] != img.height or imgmat.shape[1] != img.width:
+        pdb.gimp_message(" Do (Layer -> Layer to Image Size) first and try again.")
+    else:
+        if torch.cuda.is_available() and not cFlag:
+            gimp.progress_init("(Using GPU) Enlighten " + layer.name + "...")
+        else:
+            gimp.progress_init("(Using CPU) Enlighten " + layer.name + "...")
+
+        if imgmat.shape[2] == 4:  # get rid of alpha channel
+            imgmat = imgmat[:,:,0:3]
+        cpy = getEnlighten(imgmat,cFlag)
+        createResultLayer(img, 'new_output', cpy)
 
 
 register(
