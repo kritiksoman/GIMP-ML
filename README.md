@@ -1,11 +1,12 @@
 <img src="https://github.com/kritiksoman/tmp/blob/master/cover.png" width="1280" height="180"> <br>
 # A.I. for GNU Image Manipulation Program
-### [<img src="https://github.com/kritiksoman/tmp/blob/master/yt.png" width="70" height="50">](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) [<img src="https://github.com/kritiksoman/tmp/blob/master/inst.png" width="50" height="50">](https://www.instagram.com/explore/tags/gimpml/) [<img src="https://github.com/kritiksoman/tmp/blob/master/arxiv.png" width="100" height="50">](https://arxiv.org/abs/2004.13060) [<img src="https://github.com/kritiksoman/tmp/blob/master/manual.png" width="100" height="50">](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual) [<img src="https://github.com/kritiksoman/tmp/blob/master/ref.png" width="100" height="50">](https://github.com/kritiksoman/GIMP-ML/wiki/References) [<img src="https://github.com/kritiksoman/tmp/blob/master/wiki.png" width="100" height="30">](https://en.wikipedia.org/wiki/GIMP#Extensions)<br>
+### [<img src="https://github.com/kritiksoman/tmp/blob/master/yt.png" width="70" height="50">](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) [<img src="https://github.com/kritiksoman/tmp/blob/master/inst.png" width="50" height="50">](https://www.instagram.com/explore/tags/gimpml/) [<img src="https://github.com/kritiksoman/tmp/blob/master/arxiv.png" width="100" height="50">](https://arxiv.org/abs/2004.13060) [<img src="https://github.com/kritiksoman/tmp/blob/master/manual.png" width="100" height="50">](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual)[<img src="https://github.com/kritiksoman/tmp/blob/master/ref.png" width="100" height="50">](https://github.com/kritiksoman/GIMP-ML/wiki/References) <br>
  
 :star: :star: :star: :star: are welcome. New tools will be added and existing will be improved with time.<br>
 
 Updates: <br>
-[November 28] Added interpolate-frames. (Existing users should be able to update.)<br>
+[January 9] Added image inpainting. (Existing users should be able to update.)<br>
+[November 28] Added interpolate-frames.<br>
 [October 31] Use super-resolution as a filter for medium/large images.<br>
 [October 17] Added image enlightening.<br>
 [September 27] Added Force CPU use button and minor bug fixes. <br>
@@ -58,4 +59,5 @@ Please cite using the following bibtex entry:
 | [deep-denoising](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#de-noise) | [GPL3](https://github.com/SaoYan/DnCNN-PyTorch/blob/master/LICENSE) | BSD68 |
 | [enlighten](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#enlightening) | [BSD](https://github.com/VITA-Group/EnlightenGAN/blob/master/License) | [Custom](https://arxiv.org/pdf/1906.06972.pdf) |
 | [interpolate-frames](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#interpolate-frames) | [MIT](https://github.com/hzwer/arXiv2020-RIFE/blob/main/LICENSE) | [HD](https://arxiv.org/pdf/2011.06294.pdf) |
+| [inpainting](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#in-painting) | - | [DIV2K](http://ceur-ws.org/Vol-2744/short18.pdf) |
 
