@@ -59,5 +59,5 @@ Please cite using the following bibtex entry:
 | [deep-denoising](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#de-noise) | [GPL3](https://github.com/SaoYan/DnCNN-PyTorch/blob/master/LICENSE) | BSD68 |
 | [enlighten](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#enlightening) | [BSD](https://github.com/VITA-Group/EnlightenGAN/blob/master/License) | [Custom](https://arxiv.org/pdf/1906.06972.pdf) |
 | [interpolate-frames](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#interpolate-frames) | [MIT](https://github.com/hzwer/arXiv2020-RIFE/blob/main/LICENSE) | [HD](https://arxiv.org/pdf/2011.06294.pdf) |
-| [inpainting](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#in-painting) | - | [DIV2K](http://ceur-ws.org/Vol-2744/short18.pdf) |
+| [inpainting](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#in-painting) | Not specified | [DIV2K](http://ceur-ws.org/Vol-2744/short18.pdf) |
 
