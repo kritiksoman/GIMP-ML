@@ -241,5 +241,22 @@ def sync(path,flag):
 		gimp.progress_init("Downloading " + model +"(~" + str(fileSize) + "MB)...")
 		download_file_from_google_drive(file_id, destination,fileSize)
 
-
+ 	#inpainting
+	model = 'inpainting'
+	file_id = '1WmPevEnRcdUynVHL8pZNzHPmLQVCFjuE'
+	fileSize = 132 #in MB
+	mFName = 'model_places2.pth'
+	if not os.path.isdir(path + '/' + model):
+		os.mkdir(path + '/' + model)
+	destination = path + '/' + model + '/' + mFName
+	if not os.path.isfile(destination):
+		gimp.progress_init("Downloading " + model +"(~" + str(fileSize) + "MB)...")
+		download_file_from_google_drive(file_id, destination,fileSize)
+	file_id = '1hIcPqDp8JjzR5kmt275DaVgX2PEtahWS'
+	fileSize = 148 #in MB
+	mFName = 'refinement.pth'
+	destination = path + '/' + model + '/' + mFName
+	if not os.path.isfile(destination):
+		gimp.progress_init("Downloading " + model +"(~" + str(fileSize) + "MB)...")
+		download_file_from_google_drive(file_id, destination,fileSize)
 
