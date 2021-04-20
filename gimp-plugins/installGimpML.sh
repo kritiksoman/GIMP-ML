@@ -9,13 +9,13 @@ if [ ! -d "gimpenv" ]; then
 		       
 		elif [[ $(lsb_release -rs) == "20.04" ]]; then #for ubuntu 20.04
 			sudo apt install python2-minimal
-			wget https://bootstrap.pypa.io/get-pip.py 
+			wget https://bootstrap.pypa.io/pip/2.7/get-pip.py --output-document get-pip.py 
 			alias python='python2'
 			python get-pip.py	
 			sudo apt-get install libpython2.7
 
 		elif [[ $(lsb_release -rs) == "10" ]]; then #for debian 10
-			wget https://bootstrap.pypa.io/get-pip.py 
+			wget https://bootstrap.pypa.io/pip/2.7/get-pip.py --output-document get-pip.py
 			python get-pip.py
 		fi
 	fi
