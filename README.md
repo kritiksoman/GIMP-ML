@@ -5,6 +5,7 @@
 :star: :star: :star: :star: are welcome. New tools will be added and existing will be improved with time.<br>
 
 Updates: <br>
+[June 2] GIMP3 plugins in development.
 [January 9] Added image inpainting. (Existing users should be able to update.)<br>
 [November 28] Added interpolate-frames.<br>
 [October 31] Use super-resolution as a filter for medium/large images.<br>
