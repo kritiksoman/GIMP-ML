@@ -1,0 +1,16 @@
+numpy
+scipy
+typing
+requests
+opencv-python<=4.3
+pretrainedmodels
+
+[:python_version <= "2.7"]
+torchvision==0.5.0
+future
+torch==1.4.0
+enum
+
+[:python_version > "2.7"]
+torchvision
+torch
