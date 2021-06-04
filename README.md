@@ -2,10 +2,10 @@
 # A.I. for GNU Image Manipulation Program
 ### [<img src="https://github.com/kritiksoman/tmp/blob/master/yt.png" width="70" height="50">](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) [<img src="https://github.com/kritiksoman/tmp/blob/master/inst.png" width="50" height="50">](https://www.instagram.com/explore/tags/gimpml/) [<img src="https://github.com/kritiksoman/tmp/blob/master/arxiv.png" width="100" height="50">](https://arxiv.org/abs/2004.13060) [<img src="https://github.com/kritiksoman/tmp/blob/master/manual.png" width="100" height="50">](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual)[<img src="https://github.com/kritiksoman/tmp/blob/master/ref.png" width="100" height="50">](https://github.com/kritiksoman/GIMP-ML/wiki/References) <br>
  
-:star: :star: :star: :star: are welcome. New tools will be added and existing will be improved with time.<br>
+:star: :star: :star: :star: are welcome. This branch will no longer be updated and would only work with GIMP 2.10. Only GIMP3-ML branch will be updated in future.<br>
 
-Updates: <br>
-[June 2] GIMP3 plugins in development.<br>
+[June 2] GIMP3-ML branch development started.<br>
+Old Updates: <br>
 [January 9] Added image inpainting. (Existing users should be able to update.)<br>
 [November 28] Added interpolate-frames.<br>
 [October 31] Use super-resolution as a filter for medium/large images.<br>
@@ -20,7 +20,7 @@ Updates: <br>
 ![image1](https://github.com/kritiksoman/tmp/blob/master/screenshot.png)
 
 # Installation Steps
-[1] Install [GIMP](https://www.gimp.org/downloads/) 2.10.<br>
+[1] Install [GIMP](https://www.gimp.org/downloads/) 2.10.10<br>
 [2] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
 [3] Open terminal, go to GIMP-ML/gimp-plugins and run : <br>
     ```bash installGimpML.sh```<br>
