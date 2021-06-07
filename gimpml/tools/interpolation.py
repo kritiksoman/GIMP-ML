@@ -1,0 +1,85 @@
+import pickle
+import os
+import sys
+
+plugin_loc = os.path.dirname(os.path.realpath(__file__)) + '/'
+sys.path.extend([plugin_loc + 'RIFE'])
+
+import cv2
+import torch
+from torch.nn import functional as F
+from rife_model import RIFE
+import numpy as np
+
+
+def get_inter(img_s, img_e, string_path, cpu_flag=False):
+    exp = 4
+    out_path = string_path
+
+    model = RIFE.Model(cpu_flag)
+    model.load_model(os.path.join(weight_path, 'interpolateframes'))
+    model.eval()
+    model.device(cpu_flag)
+
+    img0 = img_s
+    img1 = img_e
+
+    img0 = (torch.tensor(img0.transpose(2, 0, 1).copy()) / 255.).unsqueeze(0)
+    img1 = (torch.tensor(img1.transpose(2, 0, 1).copy()) / 255.).unsqueeze(0)
+    if torch.cuda.is_available() and not cpu_flag:
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+
+    img0 = img0.to(device)
+    img1 = img1.to(device)
+
+    n, c, h, w = img0.shape
+    ph = ((h - 1) // 32 + 1) * 32
+    pw = ((w - 1) // 32 + 1) * 32
+    padding = (0, pw - w, 0, ph - h)
+    img0 = F.pad(img0, padding)
+    img1 = F.pad(img1, padding)
+
+    img_list = [img0, img1]
+    idx = 0
+    t = exp * (len(img_list) - 1)
+    for i in range(exp):
+        tmp = []
+        for j in range(len(img_list) - 1):
+            mid = model.inference(img_list[j], img_list[j + 1])
+            tmp.append(img_list[j])
+            tmp.append(mid)
+        idx = idx + 1
+        try:
+            gimp.progress_update(float(idx)/float(t))
+            gimp.displays_flush()
+        except:
+            pass
+        tmp.append(img1)
+        img_list = tmp
+
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
+    for i in range(len(img_list)):
+        cv2.imwrite(os.path.join(out_path, 'img{}.png'.format(i)),
+                    (img_list[i][0] * 255).byte().cpu().numpy().transpose(1, 2, 0)[:h, :w, ::-1])
+
+
+
+if __name__ == "__main__":
+    config_path = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    weight_path = data_output["weight_path"]
+    image1 = cv2.imread(os.path.join(weight_path, '..', "cache0.png"))[:, :, ::-1]
+    image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"))[:, :, ::-1]
+    with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    force_cpu = data_output["force_cpu"]
+    gio_file = data_output["gio_file"]
+    get_inter(image1, image2, gio_file, cpu_flag=force_cpu)
+
+    # cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, [2, 1, 0, 3]])
+    # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
+    #     pickle.dump({"run_success": True}, file)

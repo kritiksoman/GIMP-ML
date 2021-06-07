@@ -1,6 +1,5 @@
 from setuptools import setup, find_packages
 import os
-
 here = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(here, "README.md"), "r") as fh:
     long_description = fh.read()
@@ -69,12 +68,12 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['torchvision==0.5.0; python_version <= "2.7"', 'torchvision; python_version > "2.7"',
-                      'numpy', 'future; python_version <= "2.7"',
-                      'torch==1.4.0; python_version <= "2.7"', 'torch; python_version > "2.7"',
-                      'scipy', 'gdown',
-                      'typing', 'enum; python_version <= "2.7"', 'requests', 'opencv-python<=4.3',
-                      'pretrainedmodels'],  # Optional
+    install_requires=['numpy', 'future; python_version <= "2.7"',
+                      'scipy', 'gdown', 'typing', 'enum; python_version <= "2.7"', 'requests', 'opencv-python<=4.3',
+                      'pretrainedmodels', "torch", "torchvision"],
+
+
+    # Optional
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
@@ -115,7 +114,7 @@ setup(
     #     ],
     # },
 
-    # List additional URLs that are relevant to your project as a dict.
+    # List additional is that are relevant to your project as a dict.
     #
     # This field corresponds to the "Project-URL" metadata fields:
     # https://packaging.python.org/specifications/core-metadata/#project-url-multiple-use
