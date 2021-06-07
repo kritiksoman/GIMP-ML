@@ -8,7 +8,7 @@ Join us on Slack --> [<img src="https://www.techrepublic.com/a/hub/i/r/2016/05/1
 ![image1](https://github.com/kritiksoman/GIMP-ML/blob/GIMP3-ML/screenshot.png)
 
 # Installation Steps
-[1] Install [GIMP](https://www.gimp.org/downloads/devel/) 2.99.6<br>
+[1] Install [GIMP](https://www.gimp.org/downloads/devel/) 2.99.6  (Only windows and linux) <br>
 [2] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
 [3] Change branch : <br>
 ```git checkout GIMP3-ML``` <br>
