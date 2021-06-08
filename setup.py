@@ -6,7 +6,7 @@ with open(os.path.join(here, "README.md"), "r") as fh:
 
 setup(
     name='gimpml',  # Required
-    version='0.0.5',  # Required
+    version='0.0.6',  # Required
     description='A.I. for GIMP',  # Optional
     long_description=long_description,  # Optional
     long_description_content_type='text/markdown',  # Optional (see note above)

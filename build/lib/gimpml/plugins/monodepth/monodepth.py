@@ -1,27 +1,19 @@
 #!/usr/bin/env python3
 #coding: utf-8
-
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """
+ .d8888b.  8888888 888b     d888 8888888b.       888b     d888 888
+d88P  Y88b   888   8888b   d8888 888   Y88b      8888b   d8888 888
+888    888   888   88888b.d88888 888    888      88888b.d88888 888
+888          888   888Y88888P888 888   d88P      888Y88888P888 888
+888  88888   888   888 Y888P 888 8888888P"       888 Y888P 888 888
+888    888   888   888  Y8P  888 888             888  Y8P  888 888
+Y88b  d88P   888   888   "   888 888             888   "   888 888
+ "Y8888P88 8888888 888       888 888             888       888 88888888
+
+
 Extracts the monocular depth of the current layer.
 """
-import pickle
-import csv
-import math
 import sys
-import time
 import gi
 gi.require_version('Gimp', '3.0')
 from gi.repository import Gimp
@@ -42,18 +34,12 @@ import pickle
 import os
 
 def monodepth(procedure, image, drawable, force_cpu, progress_bar):
-
-    #
-    # install_location = os.path.join(os.path.expanduser("~"), "GIMP-ML")
     config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "tools")
     with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
         data_output = pickle.load(file)
     weight_path = data_output["weight_path"]
     python_path = data_output["python_path"]
-    # python_path = r"D:/PycharmProjects/gimpenv3/Scripts/python.exe"
     plugin_path = os.path.join(config_path, 'monodepth.py')
-
-    # plugin_path = r"D:/PycharmProjects/GIMP3-ML-pip/gimpml/tools/monodepth.py"
 
     Gimp.context_push()
     image.undo_group_start()
@@ -63,8 +49,8 @@ def monodepth(procedure, image, drawable, force_cpu, progress_bar):
         GObject.Value(Gimp.RunMode, Gimp.RunMode.NONINTERACTIVE),
         GObject.Value(Gimp.Image, image),
         GObject.Value(GObject.TYPE_INT, 1),
-        GObject.Value(Gimp.ObjectArray, Gimp.ObjectArray.new(Gimp.Drawable, [drawable], 1)),
-        GObject.Value(Gio.File, Gio.File.new_for_path(os.path.join(weight_path, 'cache.png'))),
+        GObject.Value(Gimp.ObjectArray, Gimp.ObjectArray.new(Gimp.Drawable, drawable, 1)),
+        GObject.Value(Gio.File, Gio.File.new_for_path(os.path.join(weight_path, '..', 'cache.png'))),
         GObject.Value(GObject.TYPE_BOOLEAN, interlace),
         GObject.Value(GObject.TYPE_INT, compression),
         # write all PNG chunks except oFFs(ets)
@@ -74,9 +60,12 @@ def monodepth(procedure, image, drawable, force_cpu, progress_bar):
         GObject.Value(GObject.TYPE_BOOLEAN, True),
     ])
 
+    with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+        pickle.dump({"force_cpu": bool(force_cpu)}, file)
+
     subprocess.call([python_path, plugin_path])
 
-    result = Gimp.file_load(Gimp.RunMode.NONINTERACTIVE, Gio.file_new_for_path(os.path.join(weight_path, 'cache.png')))
+    result = Gimp.file_load(Gimp.RunMode.NONINTERACTIVE, Gio.file_new_for_path(os.path.join(weight_path, '..', 'cache.png')))
     result_layer = result.get_active_layer()
     copy = Gimp.Layer.new_from_drawable(result_layer, image)
     copy.set_name("Mono Depth")
@@ -90,7 +79,7 @@ def monodepth(procedure, image, drawable, force_cpu, progress_bar):
 
 
 
-def run(procedure, run_mode, image, layer, args, data):
+def run(procedure, run_mode, image, n_drawables, layer, args, data):
     # gio_file = args.index(0)
     # bucket_size = args.index(0)
     force_cpu = args.index(1)

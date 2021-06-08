@@ -1,50 +1,38 @@
 import pickle
 import os
 import sys
-import cv2
-
 
 plugin_loc = os.path.dirname(os.path.realpath(__file__)) + '/'
-
-# base_loc = "D:/PycharmProjects/"
 sys.path.extend([plugin_loc + 'MiDaS'])
-# data_path = "D:/PycharmProjects/GIMP3-ML-pip/gimpml/"
 
 from mono_run import run_depth
 from monodepth_net import MonoDepthNet
 import MiDaS_utils as MiDaS_utils
 import numpy as np
 import cv2
-import torch
+# import torch
 
 
-def get_mono_depth(input_image, cFlag = False):
+def get_mono_depth(input_image, cpu_flag=False):
     image = input_image / 255.0
-    out = run_depth(image, os.path.join(weight_path, 'MiDaS', 'model.pt'), MonoDepthNet, MiDaS_utils, target_w=640, f=cFlag)
+    out = run_depth(image, os.path.join(weight_path, 'MiDaS', 'model.pt'), MonoDepthNet, MiDaS_utils, target_w=640,
+                    f=cpu_flag)
     out = np.repeat(out[:, :, np.newaxis], 3, axis=2)
     d1, d2 = input_image.shape[:2]
     out = cv2.resize(out, (d2, d1))
-    # cv2.imwrite("/Users/kritiksoman/PycharmProjects/new/out.png", out)
     return out
 
 
 if __name__ == "__main__":
-    # # This will run when script is run as sub-process
-    # dbfile = open(data_path + "data_input", 'rb')
-    # data_input = pickle.load(dbfile)
-    # dbfile.close()
-    # # print(data)
-    # data_output = {'args_input': {'processed': 1}, 'image_output': get_mono_depth(data_input['image'])}
-    #
-    # dbfile = open(data_path + "data_output", 'ab')
-    # pickle.dump(data_output, dbfile)  # source, destination
-    # dbfile.close()
     config_path = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
-    # with open('gimp_ml_config.pkl', 'rb') as file:
         data_output = pickle.load(file)
-    # base_loc = os.path.expanduser("~") + '/GIMP-ML/'
     weight_path = data_output["weight_path"]
-    image = cv2.imread(os.path.join(weight_path, "cache.png"))[:, :, ::-1]
-    output = get_mono_depth(image)
-    cv2.imwrite(os.path.join(weight_path, 'cache.png'), output[:, :, ::-1])
+    image = cv2.imread(os.path.join(weight_path, '..', "cache.png"))[:, :, ::-1]
+    with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    force_cpu = data_output["force_cpu"]
+    output = get_mono_depth(image, cpu_flag=force_cpu)
+    cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
+    # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
+    #     pickle.dump({"run_success": True}, file)

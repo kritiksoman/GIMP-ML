@@ -1,0 +1,48 @@
+import pickle
+import os
+import sys
+
+plugin_loc = os.path.dirname(os.path.realpath(__file__)) + '/'
+sys.path.extend([plugin_loc + 'PyTorch-Image-Dehazing'])
+
+import torch
+import net
+import numpy as np
+import cv2
+
+
+def get_dehaze(data_hazy, cpu_flag=False):
+    data_hazy = (data_hazy / 255.0)
+    data_hazy = torch.from_numpy(data_hazy).float()
+    data_hazy = data_hazy.permute(2, 0, 1)
+    dehaze_net = net.dehaze_net()
+
+    if torch.cuda.is_available() and not cpu_flag:
+        dehaze_net = dehaze_net.cuda()
+        dehaze_net.load_state_dict(torch.load(os.path.join(weight_path, 'deepdehaze', 'dehazer.pth')))
+        data_hazy = data_hazy.cuda()
+    else:
+        dehaze_net.load_state_dict(torch.load(os.path.join(weight_path, 'deepdehaze', 'dehazer.pth'),
+                                              map_location=torch.device("cpu")))
+
+        # gimp.progress_update(float(0.005))
+        # gimp.displays_flush()
+        data_hazy = data_hazy.unsqueeze(0)
+        clean_image = dehaze_net(data_hazy)
+        out = clean_image.detach().cpu().numpy()[0, :, :, :] * 255
+        out = np.clip(np.transpose(out, (1, 2, 0)), 0, 255).astype(np.uint8)
+        return out
+
+if __name__ == "__main__":
+    config_path = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    weight_path = data_output["weight_path"]
+    image = cv2.imread(os.path.join(weight_path, '..', "cache.png"))[:, :, ::-1]
+    with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    force_cpu = data_output["force_cpu"]
+    output = get_dehaze(image, cpu_flag=force_cpu)
+    cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
+    # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
+    #     pickle.dump({"run_success": True}, file)

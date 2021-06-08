@@ -18,8 +18,8 @@ def setup_python_weights(install_location=None):
     if os.name == 'nt':  # windows
         python_string += ".exe"
     python_path = os.path.join(os.path.dirname(sys.executable), python_string)
-    with open(os.path.join(install_location, 'gimp_ml_config.pkl'), 'ab') as file:
-        pickle.dump(python_path, file)
+    # with open(os.path.join(install_location, 'gimp_ml_config.pkl'), 'ab') as file:
+    #     pickle.dump(python_path, file)
     # print(r"\n\n*******************", python_path)
 
     weight_path = os.path.join(install_location, "weights")
@@ -27,12 +27,13 @@ def setup_python_weights(install_location=None):
         os.mkdir(weight_path)
 
     if os.name == 'nt':  # windows
-        print("Automatic downloading of weights not supported on Windows.")
-        print("Please downloads weights folder from: \n"
+        print("\n##########\n1>> Automatic downloading of weights not supported on Windows.")
+        print("2>> Please downloads weights folder from: \n"
               "https://drive.google.com/drive/folders/10IiBO4fuMiGQ-spBStnObbk9R-pGp6u8?usp=sharing")
         print("and place in: " + weight_path)
     else:  # linux
-        with open('model_info.csv') as csv_file:
+        file_path = os.path.dirname(os.path.realpath(__file__))
+        with open(os.path.join(file_path, 'model_info.csv')) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             headings = next(csv_reader)
             line_count = 0
@@ -62,9 +63,9 @@ def setup_python_weights(install_location=None):
     with open(os.path.join(plugin_loc, 'gimp_ml_config.pkl'), 'wb') as file:
         pickle.dump({"python_path": python_path, "weight_path": weight_path}, file)
 
-    print("Please add this path to Preferences-->Plug-ins : ",
+    print("3>> Please add this path to Preferences-->Plug-ins : ",
           os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "plugins"))
-
+    print("##########\n")
 
 if __name__ == "__main__":
     setup_python_weights()
