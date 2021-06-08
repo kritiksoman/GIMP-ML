@@ -1,10 +1,11 @@
-Branch for GIMP3 plugin development. <br>
+This branch is under development. Dedicated for GIMP 3 and Python 3. <br>
 <img src="https://github.com/kritiksoman/tmp/blob/master/cover.png" width="1280" height="180"> <br>
 
 # Contribution 
 [<img src="http://img.youtube.com/vi/vFFNp0xhEiU/0.jpg" width="800" height="600">](http://www.youtube.com/watch?v=vFFNp0xhEiU)<br> <br>
 Welcome people interested in contribution !! 
-Join us on Slack --> [<img src="https://woocommerce.com/wp-content/uploads/2015/02/Slack_RGB.png" width="100" height="50">](https://join.slack.com/t/gimp-mlworkspace/shared_invite/zt-rbaxvztx-GRvj941idw3sQ0trS686YA)<br>
+Join us on Slack --> [<img src="https://woocommerce.com/wp-content/uploads/2015/02/Slack_RGB.png" width="130" height="50">](https://join.slack.com/t/gimp-mlworkspace/shared_invite/zt-rbaxvztx-GRvj941idw3sQ0trS686YA)<br>
+Contribution guidelines will be available soon.<br>
 
 # Screenshot of Menu
 ![image1](https://github.com/kritiksoman/GIMP-ML/blob/GIMP3-ML/screenshot.png)
