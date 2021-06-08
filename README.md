@@ -21,3 +21,35 @@ On windows, run for CPU: <br>
 On windows, run for GPU: <br>
 ```GIMP3-ML/install.bat gpu```<br>
 [4] Follow steps that are printed in terminal or cmd. <br>
+
+
+# Use as a Python Package
+```Python
+import cv2
+import gimpml
+
+image = cv2.imread('sampleinput/img.png')
+alpha = cv2.imread('sampleinput/alpha.png')
+
+out = gimpml.kmeans(image)
+cv2.imwrite('output/tmp-kmeans.jpg', out)
+
+out = gimpml.deblur(image)
+cv2.imwrite('output/tmp-deblur.jpg', out)
+
+out = gimpml.deepcolor(image)
+cv2.imwrite('output/tmp-deepcolor.jpg', out)
+
+out = gimpml.dehaze(image)
+cv2.imwrite('output/tmp-dehaze.jpg', out)
+
+out = gimpml.denoise(image)
+cv2.imwrite('output/tmp-denoise.jpg', out)
+
+out = gimpml.matting(image, alpha)
+cv2.imwrite('output/tmp-matting.png', out)  # save as png
+
+out = gimpml.enlighten(image)
+cv2.imwrite('output/tmp-enlighten.jpg', out)
+
+```
