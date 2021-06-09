@@ -11,7 +11,17 @@ import cv2
 from data import colorize_image as CI
 
 
-def get_deepcolor(layerimg, layerc = None, cpu_flag = False):
+def get_weight_path():
+    config_path = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    weight_path = data_output["weight_path"]
+    return weight_path
+
+
+def get_deepcolor(layerimg, layerc=None, cpu_flag=False, weight_path=None):
+    if weight_path is None:
+        weight_path = get_weight_path()
     if layerc is not None:
         input_ab = cv2.cvtColor(layerc[:, :, 0:3].astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
         mask = layerc[:, :, 3] > 0
@@ -38,10 +48,7 @@ def get_deepcolor(layerimg, layerc = None, cpu_flag = False):
 
 
 if __name__ == "__main__":
-    config_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
-        data_output = pickle.load(file)
-    weight_path = data_output["weight_path"]
+    weight_path = get_weight_path()
     image1 = cv2.imread(os.path.join(weight_path, '..', "cache0.png"), cv2.IMREAD_UNCHANGED)
     image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"), cv2.IMREAD_UNCHANGED)
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
@@ -51,11 +58,11 @@ if __name__ == "__main__":
             image1.shape[0] * image1.shape[1] * 4) > 0.8:
         image2 = image2[:, :, [2, 1, 0]]
         image1 = image1[:, :, [2, 1, 0, 3]]
-        output = get_deepcolor(image2, image1, cpu_flag=force_cpu)
+        output = get_deepcolor(image2, image1, cpu_flag=force_cpu, weight_path=weight_path)
     else:
         image1 = image1[:, :, [2, 1, 0]]
         image2 = image2[:, :, [2, 1, 0, 3]]
-        output = get_deepcolor(image1, image2, cpu_flag=force_cpu)
+        output = get_deepcolor(image1, image2, cpu_flag=force_cpu, weight_path=weight_path)
     cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
     # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
     #     pickle.dump({"run_success": True}, file)

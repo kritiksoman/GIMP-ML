@@ -13,8 +13,17 @@ from enlighten_models.models import create_model
 from enlighten_data.base_dataset import get_transform
 
 
+def get_weight_path():
+    config_path = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    weight_path = data_output["weight_path"]
+    return weight_path
 
-def get_enlighten(input_image, cpu_flag=False):
+
+def get_enlighten(input_image, cpu_flag=False, weight_path=None):
+    if weight_path is None:
+        weight_path = get_weight_path()
     opt = Namespace(D_P_times2=False, IN_vgg=False, aspect_ratio=1.0, batchSize=1,
                     checkpoints_dir=weight_path, dataroot='test_dataset',
                     dataset_mode='unaligned', display_id=1, display_port=8097,
@@ -56,15 +65,12 @@ def get_enlighten(input_image, cpu_flag=False):
 
 
 if __name__ == "__main__":
-    config_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
-        data_output = pickle.load(file)
-    weight_path = data_output["weight_path"]
+    weight_path = get_weight_path()
     image = cv2.imread(os.path.join(weight_path, '..', "cache.png"))[:, :, ::-1]
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
         data_output = pickle.load(file)
     force_cpu = data_output["force_cpu"]
-    output = get_enlighten(image, cpu_flag=force_cpu)
+    output = get_enlighten(image, cpu_flag=force_cpu, weight_path=weight_path)
     cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
     # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
     #     pickle.dump({"run_success": True}, file)

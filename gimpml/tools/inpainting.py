@@ -14,6 +14,14 @@ from DFNet_core import DFNet
 from RefinementNet_core import RefinementNet
 
 
+def get_weight_path():
+    config_path = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    weight_path = data_output["weight_path"]
+    return weight_path
+
+
 def to_numpy(tensor):
     tensor = tensor.mul(255).byte().data.cpu().numpy()
     tensor = np.transpose(tensor, [0, 2, 3, 1])
@@ -109,7 +117,9 @@ def pad_image(image):
     return padded
 
 
-def get_inpaint(img, mask, cpu_flag=False):
+def get_inpaint(img, mask, cpu_flag=False, weight_path=None):
+    if weight_path is None:
+        weight_path = get_weight_path()
     if torch.cuda.is_available() and not cpu_flag:
         device = torch.device('cuda')
     else:
@@ -143,10 +153,7 @@ def get_inpaint(img, mask, cpu_flag=False):
 
 
 if __name__ == "__main__":
-    config_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
-        data_output = pickle.load(file)
-    weight_path = data_output["weight_path"]
+    weight_path = get_weight_path()
     image1 = cv2.imread(os.path.join(weight_path, '..', "cache0.png"))[:, :, ::-1]
     image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"))[:, :, ::-1]
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
@@ -154,9 +161,9 @@ if __name__ == "__main__":
     force_cpu = data_output["force_cpu"]
     if (np.sum(image1 == [0, 0, 0]) + np.sum(image1 == [255, 255, 255])) / (
             image1.shape[0] * image1.shape[1] * 3) > 0.8:
-        output = get_inpaint(image2, image1, cpu_flag=force_cpu)
+        output = get_inpaint(image2, image1, cpu_flag=force_cpu, weight_path=weight_path)
     else:
-        output = get_inpaint(image1, image2, cpu_flag=force_cpu)
+        output = get_inpaint(image1, image2, cpu_flag=force_cpu, weight_path=weight_path)
     cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
     # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
     #     pickle.dump({"run_success": True}, file)

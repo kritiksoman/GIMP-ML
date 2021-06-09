@@ -13,7 +13,17 @@ from PIL import Image
 import cv2
 
 
-def get_super(input_image, s=4, cpu_flag=False, fFlag=True):
+def get_weight_path():
+    config_path = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    weight_path = data_output["weight_path"]
+    return weight_path
+
+
+def get_super(input_image, s=4, cpu_flag=False, fFlag=True, weight_path=None):
+    if weight_path is None:
+        weight_path = get_weight_path()
     opt = Namespace(cuda=torch.cuda.is_available() and not cpu_flag,
                     model=os.path.join(weight_path, "superresolution", "model_srresnet.pth"),
                     dataset='Set5', scale=s, gpus=0)
@@ -74,10 +84,7 @@ def get_super(input_image, s=4, cpu_flag=False, fFlag=True):
 
 
 if __name__ == "__main__":
-    config_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
-        data_output = pickle.load(file)
-    weight_path = data_output["weight_path"]
+    weight_path = get_weight_path()
     image = cv2.imread(os.path.join(weight_path, '..', "cache.png"))[:, :, ::-1]
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
         data_output = pickle.load(file)
@@ -85,7 +92,7 @@ if __name__ == "__main__":
     s = data_output["scale"]
     filter = data_output["filter"]
 
-    output = get_super(image, s=s, cpu_flag=force_cpu, fFlag=filter)
+    output = get_super(image, s=s, cpu_flag=force_cpu, fFlag=filter, weight_path=weight_path)
     cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
     # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
     #     pickle.dump({"run_success": True}, file)

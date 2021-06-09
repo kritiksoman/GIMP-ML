@@ -11,8 +11,17 @@ from torch.nn import functional as F
 from rife_model import RIFE
 import numpy as np
 
+def get_weight_path():
+    config_path = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    weight_path = data_output["weight_path"]
+    return weight_path
 
-def get_inter(img_s, img_e, string_path, cpu_flag=False):
+
+def get_inter(img_s, img_e, string_path, cpu_flag=False, weight_path=None):
+    if weight_path is None:
+        weight_path = get_weight_path()
     exp = 4
     out_path = string_path
 
@@ -68,17 +77,14 @@ def get_inter(img_s, img_e, string_path, cpu_flag=False):
 
 
 if __name__ == "__main__":
-    config_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
-        data_output = pickle.load(file)
-    weight_path = data_output["weight_path"]
+    weight_path = get_weight_path()
     image1 = cv2.imread(os.path.join(weight_path, '..', "cache0.png"))[:, :, ::-1]
     image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"))[:, :, ::-1]
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
         data_output = pickle.load(file)
     force_cpu = data_output["force_cpu"]
     gio_file = data_output["gio_file"]
-    get_inter(image1, image2, gio_file, cpu_flag=force_cpu)
+    get_inter(image1, image2, gio_file, cpu_flag=force_cpu, weight_path=weight_path)
 
     # cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, [2, 1, 0, 3]])
     # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:

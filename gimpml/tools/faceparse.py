@@ -35,6 +35,14 @@ colors = np.array([[0, 0, 0],
 colors = colors.astype(np.uint8)
 
 
+def get_weight_path():
+    config_path = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    weight_path = data_output["weight_path"]
+    return weight_path
+
+
 def getlabelmat(mask, idx):
     x = np.zeros((mask.shape[0], mask.shape[1], 3))
     x[mask == idx, 0] = colors[idx][0]
@@ -50,7 +58,9 @@ def colorMask(mask):
     return np.uint8(x)
 
 
-def get_face(input_image, cpu_flag=False):
+def get_face(input_image, cpu_flag=False, weight_path=None):
+    if weight_path is None:
+        weight_path = get_weight_path()
     save_pth = os.path.join(weight_path, 'faceparse', '79999_iter.pth')
     input_image = Image.fromarray(input_image)
 
@@ -89,15 +99,12 @@ def get_face(input_image, cpu_flag=False):
 
 
 if __name__ == "__main__":
-    config_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
-        data_output = pickle.load(file)
-    weight_path = data_output["weight_path"]
+    weight_path = get_weight_path()
     image = cv2.imread(os.path.join(weight_path, '..', "cache.png"))[:, :, ::-1]
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
         data_output = pickle.load(file)
     force_cpu = data_output["force_cpu"]
-    output = get_face(image, cpu_flag=force_cpu)
+    output = get_face(image, cpu_flag=force_cpu, weight_path=weight_path)
     cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
     # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
     #     pickle.dump({"run_success": True}, file)
