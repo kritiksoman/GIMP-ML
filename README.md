@@ -4,7 +4,7 @@
  
 :star: :star: :star: :star: are welcome. This branch will no longer be updated and would only work with GIMP 2.10. Only GIMP3-ML branch will be updated in future.<br>
 
-[June 2] GIMP3-ML branch development started.<br>
+[June 2] [GIMP3-ML](https://github.com/kritiksoman/GIMP-ML/tree/GIMP3-ML) branch development started.<br>
 Old Updates: <br>
 [January 9] Added image inpainting. (Existing users should be able to update.)<br>
 [November 28] Added interpolate-frames.<br>
