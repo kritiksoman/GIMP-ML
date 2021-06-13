@@ -23,6 +23,9 @@ On windows, run for GPU: <br>
 ```GIMP-ML\install.bat gpu```<br>
 [4] Follow steps that are printed in terminal or cmd. <br>
 
+### Windows <br>
+[<img src="http://img.youtube.com/vi/Rc88_qHSEjc/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=Rc88_qHSEjc)<br> <br>
+
 
 # Use as a Python Package
 ```Python
