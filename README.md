@@ -26,6 +26,9 @@ On windows, run for GPU: <br>
 ### Windows <br>
 [<img src="http://img.youtube.com/vi/Rc88_qHSEjc/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=Rc88_qHSEjc)<br> <br>
 
+### Linux <br>
+[<img src="http://img.youtube.com/vi/MUdUzxYDwaU/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=MUdUzxYDwaU)<br> <br>
+
 
 # Use as a Python Package
 ```Python
