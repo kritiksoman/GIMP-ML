@@ -16,11 +16,11 @@ Contribution guidelines will be available soon.<br>
 [3] Change branch : <br>
 ```git checkout GIMP3-ML``` <br>
 [3] On linux, run for GPU/CPU: <br>
-```bash GIMP3-ML/install.bat```<br>
+```bash GIMP-ML/install.bat```<br>
 On windows, run for CPU: <br>
-```GIMP3-ML/install.bat```<br>
+```GIMP-ML\install.bat```<br>
 On windows, run for GPU: <br>
-```GIMP3-ML/install.bat gpu```<br>
+```GIMP-ML\install.bat gpu```<br>
 [4] Follow steps that are printed in terminal or cmd. <br>
 
 
