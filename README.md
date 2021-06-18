@@ -62,3 +62,5 @@ Please cite using the following bibtex entry:
 | [interpolate-frames](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#interpolate-frames) | [MIT](https://github.com/hzwer/arXiv2020-RIFE/blob/main/LICENSE) | [HD](https://arxiv.org/pdf/2011.06294.pdf) |
 | [inpainting](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#in-painting) | [CC BY-NC-SA 4.0](https://github.com/a-mos/High_Resolution_Image_Inpainting/blob/master/LICENSE.md) | [DIV2K](http://ceur-ws.org/Vol-2744/short18.pdf) |
 
+# Contribution
+If anyone is interested in contribution, then please see our GIMP3-ML branch--> [Link](https://github.com/kritiksoman/GIMP-ML/tree/GIMP3-ML)
