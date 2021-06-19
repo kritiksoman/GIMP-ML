@@ -1,6 +1,12 @@
 This branch is under development. Dedicated for GIMP 3 and Python 3. :star: :star: :star: :star: are welcome. <br>
 <img src="https://github.com/kritiksoman/tmp/blob/master/cover.png" width="1280" height="180"> <br>
 
+# Objectives
+[1] Model Ensembling. <br>
+[2] Deep learning inference package for different computer vision tasks. <br>
+[3] Bridge gap between CV research work and real world data. <br>
+[4] Add AI to routine image editing workflows. <br>
+
 # Contribution 
 [<img src="http://img.youtube.com/vi/vFFNp0xhEiU/0.jpg" width="800" height="600">](http://www.youtube.com/watch?v=vFFNp0xhEiU)<br> <br>
 Welcome people interested in contribution !! 
