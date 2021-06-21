@@ -44,7 +44,7 @@ Please cite using the following bibtex entry:
 }
 ```
 
-# Tools
+# Model Zoo
 | Name | License | Dataset |
 | ------------- |:-------------:| :-------------:| 
 | [facegen](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#face-portrait-generation) | [CC BY-NC-SA 4.0](https://github.com/switchablenorms/CelebAMask-HQ#dataset-agreement) | CelebAMask-HQ |
