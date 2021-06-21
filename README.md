@@ -67,7 +67,7 @@ cv2.imwrite('output/tmp-enlighten.jpg', out)
 
 ```
 
-# Tools
+# Model Zoo
 | Name | License | Dataset |
 | ------------- |:-------------:| :-------------:| 
 | [deblur](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#de-blur) | [BSD 3-clause](https://github.com/VITA-Group/DeblurGANv2/blob/master/LICENSE) | GoPro |
