@@ -65,6 +65,31 @@ cv2.imwrite('output/tmp-matting.png', out)  # save as png
 out = gimpml.enlighten(image)
 cv2.imwrite('output/tmp-enlighten.jpg', out)
 
+face = cv2.imread('sampleinput/face.png')
+out = gimpml.parseface(face[:, :, ::-1])
+cv2.imwrite('output/tmp-parseface.png', out[:, :, ::-1])
+
+mask1 = cv2.imread('sampleinput/mask1.png')
+mask2 = cv2.imread('sampleinput/mask2.png')
+out = gimpml.interpolateframe(mask1, mask2, 'output/interpolateframes')
+
+face = cv2.imread('sampleinput/face.png')
+out = gimpml.depth(face[:, :, ::-1])
+cv2.imwrite('output/tmp-depth.png', out[:, :, ::-1])
+
+image = cv2.imread('sampleinput/face.png')
+out = gimpml.semseg(image[:, :, ::-1])
+cv2.imwrite('output/tmp-semseg.png', out[:, :, ::-1])
+
+image = cv2.imread('sampleinput/face.png')
+out = gimpml.super(image[:, :, ::-1])
+cv2.imwrite('output/tmp-super.png', out[:, :, ::-1])
+
+image = cv2.imread('sampleinput/inpaint.png')
+mask = cv2.imread('sampleinput/inpaint-mask.png')
+out = gimpml.inpaint(image[:, :, ::-1], mask[:, :, 0])
+cv2.imwrite('output/tmp-inpaint.png', out[:, :, ::-1])
+
 ```
 
 # Model Zoo
@@ -82,6 +107,6 @@ cv2.imwrite('output/tmp-enlighten.jpg', out)
 | [denoising](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#de-noise) | [GPL3](https://github.com/SaoYan/DnCNN-PyTorch/blob/master/LICENSE) | BSD68 |
 | [enlighten](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#enlightening) | [BSD](https://github.com/VITA-Group/EnlightenGAN/blob/master/License) | [Custom](https://arxiv.org/pdf/1906.06972.pdf) |
 | [interpolate-frames](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#interpolate-frames) | [MIT](https://github.com/hzwer/arXiv2020-RIFE/blob/main/LICENSE) | [HD](https://arxiv.org/pdf/2011.06294.pdf) |
-| [inpainting](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#in-painting) | [CC BY-NC-SA 4.0](https://github.com/a-mos/High_Resolution_Image_Inpainting/blob/master/LICENSE.md) | [DIV2K](http://ceur-ws.org/Vol-2744/short18.pdf) |
+| [inpainting](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#in-painting) | [CC BY-NC 4.0](https://github.com/knazeri/edge-connect/blob/master/LICENSE.md) | [CelebA, CelebHQ, Places2, Paris StreetView](https://openaccess.thecvf.com/content_ICCVW_2019/papers/AIM/Nazeri_EdgeConnect_Structure_Guided_Image_Inpainting_using_Edge_Prediction_ICCVW_2019_paper.pdf) |
 
 
