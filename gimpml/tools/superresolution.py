@@ -11,7 +11,8 @@ from torch.autograd import Variable
 import numpy as np
 from PIL import Image
 import cv2
-
+import warnings
+warnings.filterwarnings("ignore")
 
 def get_weight_path():
     config_path = os.path.dirname(os.path.realpath(__file__))

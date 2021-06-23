@@ -24,7 +24,7 @@ def lab2rgb_transpose(img_l, img_ab):
             returned value is XxXx3 '''
     pred_lab = np.concatenate((img_l, img_ab), axis=0).transpose((1, 2, 0))
     # im = color.lab2rgb(pred_lab)
-    im = cv2.cvtColor(pred_lab.astype('float32'),cv2.COLOR_LAB2RGB)
+    im = cv2.cvtColor(pred_lab.astype('float32'), cv2.COLOR_LAB2RGB)
     pred_rgb = (np.clip(im, 0, 1) * 255).astype('uint8')
     return pred_rgb
 
@@ -204,7 +204,7 @@ class ColorizeImageBase():
 
 class ColorizeImageTorch(ColorizeImageBase):
     def __init__(self, Xd=256, maskcent=False):
-        print('ColorizeImageTorch instantiated')
+        # print('ColorizeImageTorch instantiated')
         ColorizeImageBase.__init__(self, Xd)
         self.l_norm = 1.
         self.ab_norm = 1.
@@ -220,8 +220,8 @@ class ColorizeImageTorch(ColorizeImageBase):
     def prep_net(self, gpu_id=None, path='', dist=False):
         import torch
         import pytorch.model as model
-        print('path = %s' % path)
-        print('Model set! dist mode? ', dist)
+        # print('path = %s' % path)
+        # print('Model set! dist mode? ', dist)
         self.net = model.SIGGRAPHGenerator(dist=dist)
         state_dict = torch.load(path)
         if hasattr(state_dict, '_metadata'):
