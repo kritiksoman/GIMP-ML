@@ -3,6 +3,13 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="/install.bat">
+          <value>
+            <Attribute>
+              <option name="separator" value=";" />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="C:\Users\Kritik Soman\AppData\Roaming\JetBrains\PyCharmCE2020.2\scratches\backtranslate.py">
           <value>
             <Attribute>

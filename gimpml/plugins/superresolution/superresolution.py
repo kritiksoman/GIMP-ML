@@ -123,7 +123,7 @@ def super_resolution(procedure, image, drawable, scale, filter, force_cpu, progr
         GObject.Value(Gimp.RunMode, Gimp.RunMode.NONINTERACTIVE),
         GObject.Value(Gimp.Image, image),
         GObject.Value(GObject.TYPE_INT, 1),
-        GObject.Value(Gimp.ObjectArray, Gimp.ObjectArray.new(Gimp.Drawable, drawable, 1)),
+        GObject.Value(Gimp.ObjectArray, Gimp.ObjectArray.new(Gimp.Drawable, drawable, 0)),
         GObject.Value(Gio.File, Gio.File.new_for_path(os.path.join(weight_path, '..', 'cache.png'))),
         GObject.Value(GObject.TYPE_BOOLEAN, interlace),
         GObject.Value(GObject.TYPE_INT, compression),

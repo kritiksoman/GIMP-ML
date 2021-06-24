@@ -70,7 +70,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=['numpy', 'future; python_version <= "2.7"',
                       'scipy', 'gdown', 'typing', 'enum; python_version <= "2.7"', 'requests', 'opencv-python<=4.3',
-                      'pretrainedmodels', "torch", "torchvision"],
+                      'pretrainedmodels']#, "torch==1.8", "torchvision"],
 
 
     # Optional

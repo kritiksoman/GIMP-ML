@@ -26,11 +26,14 @@ def setup_python_weights(install_location=None):
     if not os.path.isdir(weight_path):
         os.mkdir(weight_path)
 
+    step = 1
     if os.name == 'nt':  # windows
-        print("\n##########\n1>> Automatic downloading of weights not supported on Windows.")
-        print("2>> Please downloads weights folder from: \n"
-              "https://drive.google.com/drive/folders/10IiBO4fuMiGQ-spBStnObbk9R-pGp6u8?usp=sharing")
+        print("\n##########\n{}>> Automatic downloading of weights not supported on Windows.".format(step))
+        step += 1
+        print("{}>> Please downloads weights folder from: \n"
+              "https://drive.google.com/drive/folders/10IiBO4fuMiGQ-spBStnObbk9R-pGp6u8?usp=sharing".format(step))
         print("and place in: " + weight_path)
+        step += 1
     else:  # linux
         file_path = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(file_path, 'model_info.csv')) as csv_file:
@@ -38,13 +41,13 @@ def setup_python_weights(install_location=None):
             headings = next(csv_reader)
             line_count = 0
             for row in csv_reader:
-                model = row[0]
+                model = os.path.join(*row[0].split("/"))
                 file_id = row[1]
                 fileSize = float(row[2])  # in MB
                 mFName = row[3]
                 md5sum = row[4]
                 if not os.path.isdir(os.path.join(weight_path, model)):
-                    os.mkdir(os.path.join(weight_path, model))
+                    os.makedirs(os.path.join(weight_path, model))
                 destination = os.path.join(os.path.join(weight_path, model), mFName)
                 if os.path.isfile(destination):
                     md5_hash = hashlib.md5()
@@ -63,7 +66,7 @@ def setup_python_weights(install_location=None):
     with open(os.path.join(plugin_loc, 'gimp_ml_config.pkl'), 'wb') as file:
         pickle.dump({"python_path": python_path, "weight_path": weight_path}, file)
 
-    print("3>> Please add this path to Preferences-->Plug-ins : ",
+    print("{}>> Please add this path to Preferences --> Plug-ins in GIMP : ".format(step),
           os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "plugins"))
     print("##########\n")
 

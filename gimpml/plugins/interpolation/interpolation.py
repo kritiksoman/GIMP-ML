@@ -60,7 +60,7 @@ def interpolation(procedure, image, n_drawables, drawables, force_cpu, progress_
             GObject.Value(Gimp.RunMode, Gimp.RunMode.NONINTERACTIVE),
             GObject.Value(Gimp.Image, image),
             GObject.Value(GObject.TYPE_INT, 1),
-            GObject.Value(Gimp.ObjectArray, Gimp.ObjectArray.new(Gimp.Drawable, [drawable], 1)),
+            GObject.Value(Gimp.ObjectArray, Gimp.ObjectArray.new(Gimp.Drawable, [drawable], 0)),
             GObject.Value(Gio.File,
                           Gio.File.new_for_path(os.path.join(weight_path, '..', 'cache' + str(index) + '.png'))),
             GObject.Value(GObject.TYPE_BOOLEAN, interlace),
@@ -77,16 +77,16 @@ def interpolation(procedure, image, n_drawables, drawables, force_cpu, progress_
 
     subprocess.call([python_path, plugin_path])
 
-    result = Gimp.file_load(Gimp.RunMode.NONINTERACTIVE,
-                            Gio.file_new_for_path(os.path.join(weight_path, '..', 'cache.png')))
-    result_layer = result.get_active_layer()
-    copy = Gimp.Layer.new_from_drawable(result_layer, image)
-    copy.set_name("interpolation")
-    copy.set_mode(Gimp.LayerMode.NORMAL_LEGACY)  # DIFFERENCE_LEGACY
-    image.insert_layer(copy, None, -1)
-
-    image.undo_group_end()
-    Gimp.context_pop()
+    # result = Gimp.file_load(Gimp.RunMode.NONINTERACTIVE,
+    #                         Gio.file_new_for_path(os.path.join(weight_path, '..', 'cache.png')))
+    # result_layer = result.get_active_layer()
+    # copy = Gimp.Layer.new_from_drawable(result_layer, image)
+    # copy.set_name("interpolation")
+    # copy.set_mode(Gimp.LayerMode.NORMAL_LEGACY)  # DIFFERENCE_LEGACY
+    # image.insert_layer(copy, None, -1)
+    #
+    # image.undo_group_end()
+    # Gimp.context_pop()
 
     return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
 
