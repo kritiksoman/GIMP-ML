@@ -49,12 +49,17 @@ def get_deepcolor(layerimg, layerc=None, cpu_flag=False, weight_path=None):
 
 if __name__ == "__main__":
     weight_path = get_weight_path()
-    image1 = cv2.imread(os.path.join(weight_path, '..', "cache0.png"), cv2.IMREAD_UNCHANGED)
-    image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"), cv2.IMREAD_UNCHANGED)
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
         data_output = pickle.load(file)
+    n_drawables = data_output["n_drawables"]
+    image1 = cv2.imread(os.path.join(weight_path, '..', "cache0.png"), cv2.IMREAD_UNCHANGED)
+    image2 = None
+    if n_drawables == 2:
+        image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"), cv2.IMREAD_UNCHANGED)
     force_cpu = data_output["force_cpu"]
-    if image1.shape[2] == 4 and (np.sum(image1 == [0, 0, 0, 0])) / (
+    if n_drawables == 1:
+        output = get_deepcolor(image1, cpu_flag=force_cpu, weight_path=weight_path)
+    elif image1.shape[2] == 4 and (np.sum(image1 == [0, 0, 0, 0])) / (
             image1.shape[0] * image1.shape[1] * 4) > 0.8:
         image2 = image2[:, :, [2, 1, 0]]
         image1 = image1[:, :, [2, 1, 0, 3]]

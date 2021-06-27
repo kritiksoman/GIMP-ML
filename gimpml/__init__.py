@@ -13,3 +13,4 @@ from .tools.complete_install import setup_python_weights
 from .tools.semseg import get_seg as semseg
 from .tools.superresolution import get_super as super
 from .tools.inpainting import get_inpaint as inpaint
+# from .plugins.plugin_utils import show_error_dialog

@@ -1,3 +1,5 @@
 include gimpml/plugins/colorpalette/color_palette.png
+include gimpml/plugins/images/plugin_logo.png
+include gimpml/plugins/images/error_icon.png
 include gimpml/tools/model_info.csv
 

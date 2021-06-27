@@ -1,4 +1,4 @@
-This branch is under development. Dedicated for GIMP 3 and Python 3. :star: :star: :star: :star: are welcome. <br>
+;This branch is under development. Dedicated for GIMP 3 and Python 3. :star: :star: :star: :star: are welcome. <br>
 <img src="https://github.com/kritiksoman/tmp/blob/master/cover.png" width="1280" height="180"> <br>
 
 # Objectives

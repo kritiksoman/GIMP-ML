@@ -217,8 +217,7 @@ class InPainting(Gimp.PlugIn):
         if name == 'inpainting':
             procedure = Gimp.ImageProcedure.new(self, name, Gimp.PDBProcType.PLUGIN, run, None)
             procedure.set_image_types("*")
-            procedure.set_sensitivity_mask(
-                Gimp.ProcedureSensitivityMask.DRAWABLE | Gimp.ProcedureSensitivityMask.DRAWABLES)
+            procedure.set_sensitivity_mask(Gimp.ProcedureSensitivityMask.DRAWABLES)
             procedure.set_documentation(
                 N_("Extracts the monocular depth of the current layer."),
                 globals()["__doc__"],  # This includes the docstring, on the top of the file
