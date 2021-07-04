@@ -11,7 +11,7 @@ Y88b  d88P   888   888   "   888 888             888   "   888 888
  "Y8888P88 8888888 888       888 888             888       888 88888888
 
 
-Extracts the monocular depth of the current layer.
+Performs RGB to greyscale conversion of the current layer with optional color mask layer.
 """
 import sys
 import gi
@@ -53,27 +53,36 @@ def show_dialog(message, title, icon="logo"):
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, homogeneous=False, spacing=10)
     dialog.get_content_area().add(vbox)
     vbox.show()
+
+    # Create grid to set all the properties inside.
+    grid = Gtk.Grid()
+    grid.set_column_homogeneous(False)
+    grid.set_border_width(10)
+    grid.set_column_spacing(10)
+    grid.set_row_spacing(10)
+    vbox.add(grid)
+    grid.show()
+
     # Show Logo
     logo = Gtk.Image.new_from_file(image_paths[icon])
-    vbox.pack_start(logo, False, False, 1)
+    # vbox.pack_start(logo, False, False, 1)
+    grid.attach(logo, 0, 0, 1, 1)
     logo.show()
     # Show message
     label = Gtk.Label(label=_(message))
-    vbox.pack_start(label, False, False, 1)
+    # vbox.pack_start(label, False, False, 1)
+    grid.attach(label, 1, 0, 1, 1)
     label.show()
     dialog.show()
     dialog.run()
     return
 
 
-def coloring(procedure, image, n_drawables, drawables, force_cpu, progress_bar):
+def coloring(procedure, image, n_drawables, drawables, force_cpu, progress_bar, config_path_output):
     # Save inference parameters and layers
-    config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "tools")
-    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
-        data_output = pickle.load(file)
-    weight_path = data_output["weight_path"]
-    python_path = data_output["python_path"]
-    plugin_path = os.path.join(config_path, 'coloring.py')
+    weight_path = config_path_output["weight_path"]
+    python_path = config_path_output["python_path"]
+    plugin_path = config_path_output["plugin_path"]
 
     Gimp.context_push()
     image.undo_group_start()
@@ -97,33 +106,49 @@ def coloring(procedure, image, n_drawables, drawables, force_cpu, progress_bar):
         ])
 
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
-        pickle.dump({"force_cpu": bool(force_cpu), "n_drawables": n_drawables}, file)
+        pickle.dump({"force_cpu": bool(force_cpu), "n_drawables": n_drawables, "inference_status": "started"}, file)
 
-    # Run inference
+    # Run inference and load as layer
     subprocess.call([python_path, plugin_path])
-    result = Gimp.file_load(Gimp.RunMode.NONINTERACTIVE,
-                            Gio.file_new_for_path(os.path.join(weight_path, '..', 'cache.png')))
-    result_layer = result.get_active_layer()
-    copy = Gimp.Layer.new_from_drawable(result_layer, image)
-    copy.set_name("Coloring")
-    copy.set_mode(Gimp.LayerMode.NORMAL_LEGACY)  # DIFFERENCE_LEGACY
-    image.insert_layer(copy, None, -1)
-    image.undo_group_end()
-    Gimp.context_pop()
+    with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    if data_output["inference_status"] == "success":
+        result = Gimp.file_load(Gimp.RunMode.NONINTERACTIVE,
+                                Gio.file_new_for_path(os.path.join(weight_path, '..', 'cache.png')))
+        result_layer = result.get_active_layer()
+        copy = Gimp.Layer.new_from_drawable(result_layer, image)
+        copy.set_name("Coloring")
+        copy.set_mode(Gimp.LayerMode.NORMAL_LEGACY)  # DIFFERENCE_LEGACY
+        image.insert_layer(copy, None, -1)
+        image.undo_group_end()
+        Gimp.context_pop()
 
-    # Remove temporary layers that were saved
-    my_dir = os.path.join(weight_path, '..')
-    for f_name in os.listdir(my_dir):
-        if f_name.startswith("cache"):
-            os.remove(os.path.join(my_dir, f_name))
+        # Remove temporary layers that were saved
+        my_dir = os.path.join(weight_path, '..')
+        for f_name in os.listdir(my_dir):
+            if f_name.startswith("cache"):
+                os.remove(os.path.join(my_dir, f_name))
 
-    return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+        return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+    else:
+        show_dialog("Inference not successful. See error_log.txt in GIMP-ML folder.", "Error !", "error")
+        return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+
+
 
 
 def run(procedure, run_mode, image, n_drawables, layer, args, data):
     force_cpu = args.index(1)
 
     if run_mode == Gimp.RunMode.INTERACTIVE:
+        # Get all paths
+        config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "tools")
+        with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
+            config_path_output = pickle.load(file)
+        python_path = config_path_output["python_path"]
+        config_path_output["plugin_path"] = os.path.join(config_path, 'coloring.py')
+
+
         config = procedure.create_config()
         config.set_property("force_cpu", force_cpu)
         config.begin_run(image, run_mode, args)
@@ -133,13 +158,14 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
 
         # Check number of selected layers
         if n_drawables > 2:
-            show_dialog("Please select only greyscale image and color mask layer.", "Error !", "error")
+            show_dialog("Please select only greyscale layer and color mask layer.", "Error !", "error")
             return procedure.new_return_values(Gimp.PDBStatusType.CANCEL, GLib.Error())
         elif n_drawables == 1:
             n_drawables_text = _("|  No Color Mask Selected")
         elif n_drawables == 2:
             n_drawables_text = _("|  Color Mask Selected")
 
+        # Create UI
         dialog = GimpUi.Dialog(use_header_bar=use_header_bar, title=_("Coloring..."))
         dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
         dialog.add_button("_Help", Gtk.ResponseType.APPLY)
@@ -172,13 +198,6 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
         vbox.pack_start(label, False, False, 1)
         label.show()
 
-        # Force CPU parameter
-        spin = GimpUi.prop_check_button_new(config, "force_cpu", _("Force _CPU"))
-        spin.set_tooltip_text(_("If checked, CPU is used for model inference."
-                                " Otherwise, GPU will be used if available."))
-        grid.attach(spin, 0, 0, 1, 1)
-        spin.show()
-
         # Show n_drawables text
         label = Gtk.Label(label=n_drawables_text)
         grid.attach(label, 1, 0, 1, 1)
@@ -189,11 +208,20 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
         vbox.add(progress_bar)
         progress_bar.show()
 
+        # Force CPU Button
+        spin = GimpUi.prop_check_button_new(config, "force_cpu", _("Force _CPU"))
+        spin.set_tooltip_text(_("If checked, CPU is used for model inference."
+                                " Otherwise, GPU will be used if available."))
+        grid.attach(spin, 0, 0, 1, 1)
+        spin.show()
+
+        # Wait for user to click
         dialog.show()
         while True:
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
-                result = coloring(procedure, image, n_drawables, layer, force_cpu, progress_bar)
+                force_cpu = config.get_property("force_cpu")
+                result = coloring(procedure, image, n_drawables, layer, force_cpu, progress_bar, config_path_output)
                 # If the execution was successful, save parameters so they will be restored next time we show dialog.
                 if result.index(0) == Gimp.PDBStatusType.SUCCESS and config is not None:
                     config.end_run(Gimp.PDBStatusType.SUCCESS)
@@ -241,7 +269,7 @@ class Coloring(Gimp.PlugIn):
             procedure.set_sensitivity_mask(
                 Gimp.ProcedureSensitivityMask.DRAWABLE | Gimp.ProcedureSensitivityMask.DRAWABLES)
             procedure.set_documentation(
-                N_("Extracts the monocular depth of the current layer."),
+                N_("Performs RGB to greyscale conversion of the current layer with optional color mask layer."),
                 globals()["__doc__"],  # This includes the docstring, on the top of the file
                 name)
             procedure.set_menu_label(N_("_Coloring..."))

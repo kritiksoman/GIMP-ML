@@ -42,8 +42,9 @@ def get_deepcolor(layerimg, layerc=None, cpu_flag=False, weight_path=None):
     colorModel.prep_net(gpu_id, os.path.join(weight_path, 'colorize', 'caffemodel.pth'))
     colorModel.load_image(layerimg)  # load an image
 
-    img_out = colorModel.net_forward(input_ab, mask, f=cpu_flag)  # run model, returns 256x256 image
-    img_out_fullres = colorModel.get_img_fullres()  # get image at full resolution
+    with torch.no_grad():
+        img_out = colorModel.net_forward(input_ab, mask, f=cpu_flag)  # run model, returns 256x256 image
+        img_out_fullres = colorModel.get_img_fullres()  # get image at full resolution
     return img_out_fullres
 
 
@@ -57,17 +58,30 @@ if __name__ == "__main__":
     if n_drawables == 2:
         image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"), cv2.IMREAD_UNCHANGED)
     force_cpu = data_output["force_cpu"]
-    if n_drawables == 1:
-        output = get_deepcolor(image1, cpu_flag=force_cpu, weight_path=weight_path)
-    elif image1.shape[2] == 4 and (np.sum(image1 == [0, 0, 0, 0])) / (
-            image1.shape[0] * image1.shape[1] * 4) > 0.8:
-        image2 = image2[:, :, [2, 1, 0]]
-        image1 = image1[:, :, [2, 1, 0, 3]]
-        output = get_deepcolor(image2, image1, cpu_flag=force_cpu, weight_path=weight_path)
-    else:
-        image1 = image1[:, :, [2, 1, 0]]
-        image2 = image2[:, :, [2, 1, 0, 3]]
-        output = get_deepcolor(image1, image2, cpu_flag=force_cpu, weight_path=weight_path)
-    cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
-    # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
-    #     pickle.dump({"run_success": True}, file)
+    try:
+        if n_drawables == 1:
+            output = get_deepcolor(image1, cpu_flag=force_cpu, weight_path=weight_path)
+        elif image1.shape[2] == 4 and (np.sum(image1 == [0, 0, 0, 0])) / (
+                image1.shape[0] * image1.shape[1] * 4) > 0.8:
+            image2 = image2[:, :, [2, 1, 0]]
+            image1 = image1[:, :, [2, 1, 0, 3]]
+            output = get_deepcolor(image2, image1, cpu_flag=force_cpu, weight_path=weight_path)
+        else:
+            image1 = image1[:, :, [2, 1, 0]]
+            image2 = image2[:, :, [2, 1, 0, 3]]
+            output = get_deepcolor(image1, image2, cpu_flag=force_cpu, weight_path=weight_path)
+        cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
+        with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+            pickle.dump({"inference_status": "success", "force_cpu": force_cpu}, file)
+
+        # Remove old temporary error files that were saved
+        my_dir = os.path.join(weight_path, '..')
+        for f_name in os.listdir(my_dir):
+            if f_name.startswith("error_log"):
+                os.remove(os.path.join(my_dir, f_name))
+
+    except Exception as error:
+        with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+            pickle.dump({"inference_status": "failed"}, file)
+        with open(os.path.join(weight_path, '..', 'error_log.txt'), 'w') as file:
+            file.write(str(error))

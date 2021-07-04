@@ -17,11 +17,11 @@ class BaseModel(nn.Module):
         self.gen_weights_path = os.path.join(config.PATH, name + '_gen.pth')
         self.dis_weights_path = os.path.join(config.PATH, name + '_dis.pth')
 
-    def load(self):
+    def load(self, device):
         if os.path.exists(self.gen_weights_path):
             # print('Loading %s generator...' % self.name)
 
-            if torch.cuda.is_available():
+            if torch.cuda.is_available() and device.type != 'cpu':
                 data = torch.load(self.gen_weights_path)
             else:
                 data = torch.load(self.gen_weights_path, map_location=lambda storage, loc: storage)

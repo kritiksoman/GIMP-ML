@@ -14,7 +14,6 @@ import os
 from src.config import Config
 
 
-
 def get_weight_path():
     config_path = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
@@ -22,7 +21,8 @@ def get_weight_path():
     weight_path = data_output["weight_path"]
     return weight_path
 
-def get_inpaint(images, masks, cpu_flag=False, weight_path=None):
+
+def get_inpaint(images, masks, cpu_flag=False, model_name='places2', weight_path=None):
     if weight_path is None:
         weight_path = get_weight_path()
     config = Config()
@@ -34,7 +34,7 @@ def get_inpaint(images, masks, cpu_flag=False, weight_path=None):
                     'L1_LOSS_WEIGHT': 1, 'FM_LOSS_WEIGHT': 10, 'STYLE_LOSS_WEIGHT': 250, 'CONTENT_LOSS_WEIGHT': 0.1,
                     'INPAINT_ADV_LOSS_WEIGHT': 0.1, 'GAN_LOSS': 'nsgan', 'GAN_POOL_SIZE': 0, 'SAVE_INTERVAL': 1000,
                     'SAMPLE_INTERVAL': 1000, 'SAMPLE_SIZE': 12, 'EVAL_INTERVAL': 0, 'LOG_INTERVAL': 10,
-                    'PATH': os.path.join(weight_path, 'edgeconnect', 'places2')}
+                    'PATH': os.path.join(weight_path, 'edgeconnect', model_name)}
 
     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(e) for e in config.GPU)
 
@@ -61,7 +61,7 @@ def get_inpaint(images, masks, cpu_flag=False, weight_path=None):
 
     images_gray = cv2.cvtColor(images, cv2.COLOR_RGB2GRAY)
 
-    masks = masks/255
+    masks = masks / 255
     sigma = config.SIGMA
     # TODO: fix canny edge
     if not sigma % 2:
@@ -86,36 +86,62 @@ def get_inpaint(images, masks, cpu_flag=False, weight_path=None):
 
     # edge model
     if config.MODEL == 1:
-        outputs = model.edge_model(images_gray, edges, masks)
+        with torch.no_grad():
+            outputs = model.edge_model(images_gray, edges, masks)
         outputs_merged = (outputs * masks) + (edges * (1 - masks))
 
     # inpaint model
     elif config.MODEL == 2:
-        outputs = model.inpaint_model(images, edges, masks)
+        with torch.no_grad():
+            outputs = model.inpaint_model(images, edges, masks)
         outputs_merged = (outputs * masks) + (images * (1 - masks))
 
     # inpaint with edge model / joint model
     else:
-        edges = model.edge_model(images_gray, edges, masks).detach()
-        outputs = model.inpaint_model(images, edges, masks)
+        with torch.no_grad():
+            edges = model.edge_model(images_gray, edges, masks).detach()
+            outputs = model.inpaint_model(images, edges, masks)
         outputs_merged = (outputs * masks) + (images * (1 - masks))
 
     output = model.postprocess(outputs_merged)[0]
-    return np.uint8(output)
+    return np.uint8(output.cpu())
 
 
 if __name__ == "__main__":
     weight_path = get_weight_path()
-    image1 = cv2.imread(os.path.join(weight_path, '..', "cache0.png"))[:, :, ::-1]
-    image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"))[:, :, ::-1]
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
         data_output = pickle.load(file)
+    n_drawables = data_output["n_drawables"]
+    image1 = cv2.imread(os.path.join(weight_path, '..', "cache0.png"))[:, :, ::-1]
+    image2 = None
+    if n_drawables == 2:
+        image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"))[:, :, ::-1]
     force_cpu = data_output["force_cpu"]
-    if (np.sum(image1 == [0, 0, 0]) + np.sum(image1 == [255, 255, 255])) / (
-            image1.shape[0] * image1.shape[1] * 3) > 0.8:
-        output = get_inpaint(image2, image1[:, :, 0], cpu_flag=force_cpu, weight_path=weight_path)
-    else:
-        output = get_inpaint(image1, image2[:, :, 0], cpu_flag=force_cpu, weight_path=weight_path)
-    cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
-    # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
-    #     pickle.dump({"run_success": True}, file)
+    model_name = data_output["model_name"]
+    h, w, c = image1.shape
+    image1 = cv2.resize(image1, (512, 512))
+    image2 = cv2.resize(image2, (512, 512))
+
+    try:
+        if (np.sum(image1 == [0, 0, 0]) + np.sum(image1 == [255, 255, 255])) / (
+                image1.shape[0] * image1.shape[1] * 3) > 0.8:
+            output = get_inpaint(image2, image1[:, :, 0], cpu_flag=force_cpu, model_name=model_name,
+                                 weight_path=weight_path)
+        else:
+            output = get_inpaint(image1, image2[:, :, 0], cpu_flag=force_cpu, model_name=model_name,
+                                 weight_path=weight_path)
+        output = cv2.resize(output, (w, h))
+        cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
+        with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+            pickle.dump({"inference_status": "success", "force_cpu": force_cpu, "model_name": model_name}, file)
+
+        # Remove old temporary error files that were saved
+        my_dir = os.path.join(weight_path, '..')
+        for f_name in os.listdir(my_dir):
+            if f_name.startswith("error_log"):
+                os.remove(os.path.join(my_dir, f_name))
+    except Exception as error:
+        with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+            pickle.dump({"inference_status": "failed"}, file)
+        with open(os.path.join(weight_path, '..', 'error_log.txt'), 'w') as file:
+            file.write(str(error))

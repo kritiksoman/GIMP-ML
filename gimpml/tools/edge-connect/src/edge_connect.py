@@ -22,6 +22,7 @@ class EdgeConnect():
 
         self.debug = False
         self.model_name = model_name
+        self.device = config.DEVICE
         self.edge_model = EdgeModel(config).to(config.DEVICE)
         self.inpaint_model = InpaintingModel(config).to(config.DEVICE)
 
@@ -49,14 +50,14 @@ class EdgeConnect():
 
     def load(self):
         if self.config.MODEL == 1:
-            self.edge_model.load()
+            self.edge_model.load(self.device)
 
         elif self.config.MODEL == 2:
-            self.inpaint_model.load()
+            self.inpaint_model.load(self.device)
 
         else:
-            self.edge_model.load()
-            self.inpaint_model.load()
+            self.edge_model.load(self.device)
+            self.inpaint_model.load(self.device)
 
     def save(self):
         if self.config.MODEL == 1:
