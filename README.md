@@ -111,3 +111,14 @@ cv2.imwrite('output/tmp-inpaint.png', out[:, :, ::-1])
 | [inpainting](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#in-painting) | [CC BY-NC 4.0](https://github.com/knazeri/edge-connect/blob/master/LICENSE.md) | [CelebA, CelebHQ, Places2, Paris StreetView](https://openaccess.thecvf.com/content_ICCVW_2019/papers/AIM/Nazeri_EdgeConnect_Structure_Guided_Image_Inpainting_using_Edge_Prediction_ICCVW_2019_paper.pdf) |
 
 
+# Citation
+Please cite using the following bibtex entry:
+
+```
+@article{soman2020GIMPML,
+  title={GIMP-ML: Python Plugins for using Computer Vision Models in GIMP},
+  author={Soman, Kritik},
+  journal={arXiv preprint arXiv:2004.13060},
+  year={2020}
+}
+```
