@@ -1,7 +1,8 @@
-## In-painting
+## In-painting (Edge-connect model)
 Requires 2 inputs:<br>
 [1] Image Layer. <br>
 [2] Mask Layer containing mask of object to be removed. Background should be black (255,255,255) and object should be white (0,0,0). <br>
+The mask layer should be created using paintbrush tool having 100 hardness and size as 15px. 
 Both layers should be selected and then the plugin should be run from the GIMP-ML menu.
 
 ## Interpolate-frames

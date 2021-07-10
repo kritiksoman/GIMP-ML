@@ -246,6 +246,12 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
         # vbox.pack_start(label, False, False, 1)
         label.show()
 
+        # Show n_drawables text
+        label = Gtk.Label(label="256 X 256 px | ")
+        grid.attach(label, 1, 0, 1, 1)
+        # vbox.pack_start(label, False, False, 1)
+        label.show()
+
         progress_bar = Gtk.ProgressBar()
         vbox.add(progress_bar)
         progress_bar.show()
@@ -254,15 +260,15 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
         spin = GimpUi.prop_check_button_new(config, "force_cpu", _("Force _CPU"))
         spin.set_tooltip_text(_("If checked, CPU is used for model inference."
                                 " Otherwise, GPU will be used if available."))
-        grid.attach(spin, 1, 0, 1, 1)
+        grid.attach(spin, 2, 0, 1, 1)
         spin.show()
 
         # Model Name parameter
         label = Gtk.Label.new_with_mnemonic(_("_Model Name"))
-        grid.attach(label, 2, 0, 1, 1)
+        grid.attach(label, 3, 0, 1, 1)
         label.show()
         combo = GimpUi.prop_string_combo_box_new(config, "model_name", model_name_enum.get_tree_model(), 0, 1)
-        grid.attach(combo, 3, 0, 1, 1)
+        grid.attach(combo, 4, 0, 1, 1)
         combo.show()
 
         # Wait for user to click

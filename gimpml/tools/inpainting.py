@@ -12,7 +12,7 @@ from src.edge_connect import EdgeConnect
 import random
 import os
 from src.config import Config
-
+from skimage.feature import canny
 
 def get_weight_path():
     config_path = os.path.dirname(os.path.realpath(__file__))
@@ -61,15 +61,22 @@ def get_inpaint(images, masks, cpu_flag=False, model_name='places2', weight_path
 
     images_gray = cv2.cvtColor(images, cv2.COLOR_RGB2GRAY)
 
-    masks = masks / 255
+    # masks = masks / 255
     sigma = config.SIGMA
-    # TODO: fix canny edge
-    if not sigma % 2:
-        sigma += 1
-    max_val = np.max(images_gray)
-    img = cv2.GaussianBlur(images_gray, (sigma * 3, sigma * 3), sigma)
-    img = cv2.Canny(img, 0.1 * max_val, 0.2 * max_val)
-    edge = img * (1 - masks.astype(float))
+    # # TODO: fix canny edge
+    # if not sigma % 2:
+    #     sigma += 1
+    # max_val = np.max(images_gray)
+    # img = cv2.GaussianBlur(images_gray, (sigma * 3, sigma * 3), sigma)
+    # img = cv2.Canny(img, 0.1 * max_val, 0.2 * max_val)
+    # edge = img * (1 - masks.astype(float))
+    # images_gray = images_gray / 255
+    # images = images / 255
+    if sigma == -1:
+        sigma = random.randint(1, 4)
+
+    masks = masks / 255
+    edge = canny(images_gray, sigma=sigma, mask=(1 - masks).astype(bool)).astype(np.float32)
     images_gray = images_gray / 255
     images = images / 255
 
@@ -112,28 +119,28 @@ if __name__ == "__main__":
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
         data_output = pickle.load(file)
     n_drawables = data_output["n_drawables"]
-    image1 = cv2.imread(os.path.join(weight_path, '..', "cache0.png"))[:, :, ::-1]
+    image1 = cv2.imread(os.path.join(weight_path, '..', "cache0.png"))
     image2 = None
     if n_drawables == 2:
-        image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"))[:, :, ::-1]
+        image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"))
     force_cpu = data_output["force_cpu"]
     model_name = data_output["model_name"]
     h, w, c = image1.shape
-    image1 = cv2.resize(image1, (512, 512))
-    image2 = cv2.resize(image2, (512, 512))
+    image1 = cv2.resize(image1, (256, 256))
+    image2 = cv2.resize(image2, (256, 256))
 
     try:
         if (np.sum(image1 == [0, 0, 0]) + np.sum(image1 == [255, 255, 255])) / (
                 image1.shape[0] * image1.shape[1] * 3) > 0.8:
-            output = get_inpaint(image2, image1[:, :, 0], cpu_flag=force_cpu, model_name=model_name,
+            output = get_inpaint(image2[:, :, ::-1], image1[:, :, 0], cpu_flag=force_cpu, model_name=model_name,
                                  weight_path=weight_path)
         else:
-            output = get_inpaint(image1, image2[:, :, 0], cpu_flag=force_cpu, model_name=model_name,
+            output = get_inpaint(image1[:, :, ::-1], image2[:, :, 0], cpu_flag=force_cpu, model_name=model_name,
                                  weight_path=weight_path)
         output = cv2.resize(output, (w, h))
         cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
         with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
-            pickle.dump({"inference_status": "success", "force_cpu": force_cpu, "model_name": model_name}, file)
+            pickle.dump({"inference_status": "success", "force_cpu": force_cpu, "model_name": model_name, "n_drawables": n_drawables}, file)
 
         # Remove old temporary error files that were saved
         my_dir = os.path.join(weight_path, '..')

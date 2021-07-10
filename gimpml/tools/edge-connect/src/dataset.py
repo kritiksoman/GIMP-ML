@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from PIL import Image
 # from scipy.misc import imread
 import cv2
-# from skimage.feature import canny
+from skimage.feature import canny
 # from skimage.color import rgb2gray, gray2rgb
 from .utils import create_mask
 # from .canny_opencv import canny
@@ -100,14 +100,14 @@ class Dataset(torch.utils.data.Dataset):
         if sigma == 0:
             sigma = random.randint(1, 4)
 
-        # TODO: fix canny edge
-        if not sigma % 2:
-            sigma += 1
-        max_val = np.max(img)
-        img = cv2.GaussianBlur(img, (sigma*3, sigma*3), sigma)
-        img = cv2.Canny(img, 0.1*max_val, 0.2*max_val)
-        return img*mask.astype(np.float)
-        # return canny(img, sigma=sigma, mask=mask).astype(np.float)
+        # # TODO: fix canny edge
+        # if not sigma % 2:
+        #     sigma += 1
+        # max_val = np.max(img)
+        # img = cv2.GaussianBlur(img, (sigma*3, sigma*3), sigma)
+        # img = cv2.Canny(img, 0.1*max_val, 0.2*max_val)
+        # return img*mask.astype(np.float)
+        return canny(img, sigma=sigma, mask=mask).astype(np.float)
 
 
         # # external
