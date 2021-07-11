@@ -30,11 +30,10 @@ On windows, run for GPU: <br>
 [4] Follow steps that are printed in terminal or cmd. <br>
 FYI: weights link --> [Link](https://drive.google.com/drive/folders/10IiBO4fuMiGQ-spBStnObbk9R-pGp6u8?usp=sharing)
 
-### Windows <br>
-[<img src="http://img.youtube.com/vi/Rc88_qHSEjc/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=Rc88_qHSEjc)<br> <br>
 
-### Linux <br>
-[<img src="http://img.youtube.com/vi/MUdUzxYDwaU/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=MUdUzxYDwaU)<br> <br>
+| Windows | Linux |
+| ------------- |:-------------:| 
+|[<img src="http://img.youtube.com/vi/Rc88_qHSEjc/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=Rc88_qHSEjc)| [<img src="http://img.youtube.com/vi/MUdUzxYDwaU/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=MUdUzxYDwaU) |
 
 
 # Use as a Python Package
