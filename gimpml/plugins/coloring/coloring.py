@@ -112,6 +112,8 @@ def coloring(procedure, image, n_drawables, drawables, force_cpu, progress_bar, 
     subprocess.call([python_path, plugin_path])
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
         data_output = pickle.load(file)
+    image.undo_group_end()
+    Gimp.context_pop()
     if data_output["inference_status"] == "success":
         result = Gimp.file_load(Gimp.RunMode.NONINTERACTIVE,
                                 Gio.file_new_for_path(os.path.join(weight_path, '..', 'cache.png')))
@@ -120,8 +122,7 @@ def coloring(procedure, image, n_drawables, drawables, force_cpu, progress_bar, 
         copy.set_name("Coloring")
         copy.set_mode(Gimp.LayerMode.NORMAL_LEGACY)  # DIFFERENCE_LEGACY
         image.insert_layer(copy, None, -1)
-        image.undo_group_end()
-        Gimp.context_pop()
+
 
         # Remove temporary layers that were saved
         my_dir = os.path.join(weight_path, '..')

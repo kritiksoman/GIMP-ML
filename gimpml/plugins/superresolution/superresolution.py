@@ -143,6 +143,8 @@ def super_resolution(procedure, image, drawable, scale, filter, force_cpu, progr
         return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
 
     else:
+        image.undo_group_end()
+        Gimp.context_pop()
         show_dialog("Inference not successful. See error_log.txt in GIMP-ML folder.", "Error !", "error")
         return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
 

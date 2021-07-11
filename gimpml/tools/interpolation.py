@@ -78,14 +78,24 @@ def get_inter(img_s, img_e, string_path, cpu_flag=False, weight_path=None):
 
 if __name__ == "__main__":
     weight_path = get_weight_path()
-    image1 = cv2.imread(os.path.join(weight_path, '..', "cache0.png"))[:, :, ::-1]
-    image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"))[:, :, ::-1]
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
         data_output = pickle.load(file)
     force_cpu = data_output["force_cpu"]
     gio_file = data_output["gio_file"]
-    get_inter(image1, image2, gio_file, cpu_flag=force_cpu, weight_path=weight_path)
+    image1 = cv2.imread(os.path.join(weight_path, '..', "cache0.png"))[:, :, ::-1]
+    image2 = cv2.imread(os.path.join(weight_path, '..', "cache1.png"))[:, :, ::-1]
+    try:
+        get_inter(image1, image2, gio_file, cpu_flag=force_cpu, weight_path=weight_path)
+        with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+            pickle.dump({"inference_status": "success", "force_cpu": force_cpu}, file)
+        # Remove old temporary error files that were saved
+        my_dir = os.path.join(weight_path, '..')
+        for f_name in os.listdir(my_dir):
+            if f_name.startswith("error_log"):
+                os.remove(os.path.join(my_dir, f_name))
 
-    # cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, [2, 1, 0, 3]])
-    # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
-    #     pickle.dump({"run_success": True}, file)
+    except Exception as error:
+        with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+            pickle.dump({"inference_status": "failed"}, file)
+        with open(os.path.join(weight_path, '..', 'error_log.txt'), 'w') as file:
+            file.write(str(error))

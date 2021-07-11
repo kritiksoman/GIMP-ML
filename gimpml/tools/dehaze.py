@@ -38,7 +38,8 @@ def get_dehaze(data_hazy, cpu_flag=False, weight_path=None):
     # gimp.progress_update(float(0.005))
     # gimp.displays_flush()
     data_hazy = data_hazy.unsqueeze(0)
-    clean_image = dehaze_net(data_hazy)
+    with torch.no_grad():
+        clean_image = dehaze_net(data_hazy)
     out = clean_image.detach().cpu().numpy()[0, :, :, :] * 255
     out = np.clip(np.transpose(out, (1, 2, 0)), 0, 255).astype(np.uint8)
     return out
@@ -46,11 +47,23 @@ def get_dehaze(data_hazy, cpu_flag=False, weight_path=None):
 
 if __name__ == "__main__":
     weight_path = get_weight_path()
-    image = cv2.imread(os.path.join(weight_path, '..', "cache.png"))[:, :, ::-1]
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
         data_output = pickle.load(file)
     force_cpu = data_output["force_cpu"]
-    output = get_dehaze(image, cpu_flag=force_cpu, weight_path=weight_path)
-    cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
-    # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
-    #     pickle.dump({"run_success": True}, file)
+    image = cv2.imread(os.path.join(weight_path, '..', "cache.png"))[:, :, ::-1]
+    try:
+        output = get_dehaze(image, cpu_flag=force_cpu, weight_path=weight_path)
+        cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
+        with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+            pickle.dump({"inference_status": "success", "force_cpu": force_cpu}, file)
+
+        # Remove old temporary error files that were saved
+        my_dir = os.path.join(weight_path, '..')
+        for f_name in os.listdir(my_dir):
+            if f_name.startswith("error_log"):
+                os.remove(os.path.join(my_dir, f_name))
+    except Exception as error:
+        with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+            pickle.dump({"inference_status": "failed"}, file)
+        with open(os.path.join(weight_path, '..', 'error_log.txt'), 'w') as file:
+            file.write(str(error))

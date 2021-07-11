@@ -105,6 +105,8 @@ def enlighten(procedure, image, drawable, force_cpu, progress_bar, config_path_o
 
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
         pickle.dump({"force_cpu": bool(force_cpu), "inference_status": "started"}, file)
+    image.undo_group_end()
+    Gimp.context_pop()
 
     # Run inference and load as layer
     subprocess.call([python_path, plugin_path])
@@ -118,10 +120,8 @@ def enlighten(procedure, image, drawable, force_cpu, progress_bar, config_path_o
         copy.set_mode(Gimp.LayerMode.NORMAL_LEGACY)#DIFFERENCE_LEGACY
         image.insert_layer(copy, None, -1)
 
-        image.undo_group_end()
-        Gimp.context_pop()
 
-        return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+
         # Remove temporary layers that were saved
         my_dir = os.path.join(weight_path, '..')
         for f_name in os.listdir(my_dir):

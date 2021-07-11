@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#coding: utf-8
+# coding: utf-8
 """
  .d8888b.  8888888 888b     d888 8888888b.       888b     d888 888
 d88P  Y88b   888   8888b   d8888 888   Y88b      8888b   d8888 888
@@ -15,31 +15,74 @@ Deblur the current layer.
 """
 import sys
 import gi
+
 gi.require_version('Gimp', '3.0')
 from gi.repository import Gimp
+
 gi.require_version('GimpUi', '3.0')
 from gi.repository import GimpUi
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-
 import gettext
-_ = gettext.gettext
-def N_(message): return message
-
 import subprocess
 import pickle
 import os
 
-def deblur(procedure, image, drawable, force_cpu, progress_bar):
-    config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "tools")
-    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
-        data_output = pickle.load(file)
-    weight_path = data_output["weight_path"]
-    python_path = data_output["python_path"]
-    plugin_path = os.path.join(config_path, 'deblur.py')
+_ = gettext.gettext
+image_paths = {"colorpalette": os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'colorpalette',
+                                            'color_palette.png'),
+               "logo": os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'images',
+                                    'plugin_logo.png'),
+               "error": os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'images',
+                                     'error_icon.png')}
+
+
+def N_(message): return message
+
+
+def show_dialog(message, title, icon="logo"):
+    use_header_bar = Gtk.Settings.get_default().get_property("gtk-dialogs-use-header")
+    dialog = GimpUi.Dialog(use_header_bar=use_header_bar, title=_(title))
+    # Add buttons
+    dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
+    dialog.add_button("_OK", Gtk.ResponseType.APPLY)
+    vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, homogeneous=False, spacing=10)
+    dialog.get_content_area().add(vbox)
+    vbox.show()
+
+    # Create grid to set all the properties inside.
+    grid = Gtk.Grid()
+    grid.set_column_homogeneous(False)
+    grid.set_border_width(10)
+    grid.set_column_spacing(10)
+    grid.set_row_spacing(10)
+    vbox.add(grid)
+    grid.show()
+
+    # Show Logo
+    logo = Gtk.Image.new_from_file(image_paths[icon])
+    # vbox.pack_start(logo, False, False, 1)
+    grid.attach(logo, 0, 0, 1, 1)
+    logo.show()
+    # Show message
+    label = Gtk.Label(label=_(message))
+    # vbox.pack_start(label, False, False, 1)
+    grid.attach(label, 1, 0, 1, 1)
+    label.show()
+    dialog.show()
+    dialog.run()
+    return
+
+
+def deblur(procedure, image, drawable, force_cpu, progress_bar, config_path_output):
+    # Save inference parameters and layers
+    weight_path = config_path_output["weight_path"]
+    python_path = config_path_output["python_path"]
+    plugin_path = config_path_output["plugin_path"]
 
     Gimp.context_push()
     image.undo_group_start()
@@ -61,22 +104,37 @@ def deblur(procedure, image, drawable, force_cpu, progress_bar):
     ])
 
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
-        pickle.dump({"force_cpu": bool(force_cpu)}, file)
+        pickle.dump({"force_cpu": bool(force_cpu), "inference_status": "started"}, file)
 
+    # Run inference and load as layer
     subprocess.call([python_path, plugin_path])
-
-    result = Gimp.file_load(Gimp.RunMode.NONINTERACTIVE, Gio.file_new_for_path(os.path.join(weight_path, '..', 'cache.png')))
-    result_layer = result.get_active_layer()
-    copy = Gimp.Layer.new_from_drawable(result_layer, image)
-    copy.set_name("Deblur")
-    copy.set_mode(Gimp.LayerMode.NORMAL_LEGACY)#DIFFERENCE_LEGACY
-    image.insert_layer(copy, None, -1)
-
+    with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
     image.undo_group_end()
     Gimp.context_pop()
+    if data_output["inference_status"] == "success":
 
-    return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+        result = Gimp.file_load(Gimp.RunMode.NONINTERACTIVE,
+                                Gio.file_new_for_path(os.path.join(weight_path, '..', 'cache.png')))
+        result_layer = result.get_active_layer()
+        copy = Gimp.Layer.new_from_drawable(result_layer, image)
+        copy.set_name("Deblur")
+        copy.set_mode(Gimp.LayerMode.NORMAL_LEGACY)  # DIFFERENCE_LEGACY
+        image.insert_layer(copy, None, -1)
 
+
+
+        # Remove temporary layers that were saved
+        my_dir = os.path.join(weight_path, '..')
+        for f_name in os.listdir(my_dir):
+            if f_name.startswith("cache"):
+                os.remove(os.path.join(my_dir, f_name))
+
+        return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+
+    else:
+        show_dialog("Inference not successful. See error_log.txt in GIMP-ML folder.", "Error !", "error")
+        return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
 
 
 def run(procedure, run_mode, image, n_drawables, layer, args, data):
@@ -89,25 +147,25 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
     config = None
 
     if run_mode == Gimp.RunMode.INTERACTIVE:
+        # Get all paths
+        config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "tools")
+        with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
+            config_path_output = pickle.load(file)
+        python_path = config_path_output["python_path"]
+        config_path_output["plugin_path"] = os.path.join(config_path, 'deblur.py')
 
         config = procedure.create_config()
-
-        # Set properties from arguments. These properties will be changed by the UI.
-        #config.set_property("file", gio_file)
-        #config.set_property("bucket_size", bucket_size)
         config.set_property("force_cpu", force_cpu)
-        #config.set_property("output_format", output_format)
         config.begin_run(image, run_mode, args)
 
         GimpUi.init("deblur.py")
         use_header_bar = Gtk.Settings.get_default().get_property("gtk-dialogs-use-header")
-        dialog = GimpUi.Dialog(use_header_bar=use_header_bar,
-                             title=_("Deblur..."))
+        dialog = GimpUi.Dialog(use_header_bar=use_header_bar, title=_("Deblur..."))
         dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
-        dialog.add_button("_OK", Gtk.ResponseType.OK)
+        dialog.add_button("_Help", Gtk.ResponseType.APPLY)
+        dialog.add_button("_Run Inference", Gtk.ResponseType.OK)
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,
-                       homogeneous=False, spacing=10)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, homogeneous=False, spacing=10)
         dialog.get_content_area().add(vbox)
         vbox.show()
 
@@ -120,14 +178,6 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
         vbox.add(grid)
         grid.show()
 
-        # # Bucket size parameter
-        # label = Gtk.Label.new_with_mnemonic(_("_Bucket Size"))
-        # grid.attach(label, 0, 1, 1, 1)
-        # label.show()
-        # spin = GimpUi.prop_spin_button_new(config, "bucket_size", step_increment=0.001, page_increment=0.1, digits=3)
-        # grid.attach(spin, 1, 1, 1, 1)
-        # spin.show()
-
         # Force CPU parameter
         spin = GimpUi.prop_check_button_new(config, "force_cpu", _("Force _CPU"))
         spin.set_tooltip_text(_("If checked, CPU is used for model inference."
@@ -135,64 +185,52 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
         grid.attach(spin, 1, 2, 1, 1)
         spin.show()
 
-        # # Output format parameter
-        # label = Gtk.Label.new_with_mnemonic(_("_Output Format"))
-        # grid.attach(label, 0, 3, 1, 1)
-        # label.show()
-        # combo = GimpUi.prop_string_combo_box_new(config, "output_format", output_format_enum.get_tree_model(), 0, 1)
-        # grid.attach(combo, 1, 3, 1, 1)
-        # combo.show()
+        # Show Logo
+        logo = Gtk.Image.new_from_file(image_paths["logo"])
+        # grid.attach(logo, 0, 0, 1, 1)
+        vbox.pack_start(logo, False, False, 1)
+        logo.show()
+
+        # Show License
+        license_text = _("PLUGIN LICENSE : MIT")
+        label = Gtk.Label(label=license_text)
+        # grid.attach(label, 1, 1, 1, 1)
+        vbox.pack_start(label, False, False, 1)
+        label.show()
 
         progress_bar = Gtk.ProgressBar()
         vbox.add(progress_bar)
         progress_bar.show()
 
+        # Wait for user to click
         dialog.show()
-        if dialog.run() != Gtk.ResponseType.OK:
-            return procedure.new_return_values(Gimp.PDBStatusType.CANCEL,
-                                               GLib.Error())
-
-    result = deblur(procedure, image, layer, force_cpu, progress_bar)
-
-    # If the execution was successful, save parameters so they will be restored next time we show dialog.
-    if result.index(0) == Gimp.PDBStatusType.SUCCESS and config is not None:
-        config.end_run(Gimp.PDBStatusType.SUCCESS)
-
-    return result
+        while True:
+            response = dialog.run()
+            if response == Gtk.ResponseType.OK:
+                force_cpu = config.get_property("force_cpu")
+                result = deblur(procedure, image, layer, force_cpu, progress_bar, config_path_output)
+                # super_resolution(procedure, image, n_drawables, layer, force_cpu, progress_bar, config_path_output)
+                # If the execution was successful, save parameters so they will be restored next time we show dialog.
+                if result.index(0) == Gimp.PDBStatusType.SUCCESS and config is not None:
+                    config.end_run(Gimp.PDBStatusType.SUCCESS)
+                return result
+            elif response == Gtk.ResponseType.APPLY:
+                url = "https://github.com/kritiksoman/GIMP-ML/blob/GIMP3-ML/docs/MANUAL.md"
+                Gio.app_info_launch_default_for_uri(url, None)
+                continue
+            else:
+                dialog.destroy()
+                return procedure.new_return_values(Gimp.PDBStatusType.CANCEL, GLib.Error())
 
 
 class Deblur(Gimp.PlugIn):
-
     ## Parameters ##
     __gproperties__ = {
-        # "filename": (str,
-        #              # TODO: I wanted this property to be a path (and not just str) , so I could use
-        #              # prop_file_chooser_button_new to open a file dialog. However, it fails without an error message.
-        #              # Gimp.ConfigPath,
-        #              _("Histogram _File"),
-        #              _("Histogram _File"),
-        #              "deblur.csv",
-        #              # Gimp.ConfigPathType.FILE,
-        #              GObject.ParamFlags.READWRITE),
-        # "file": (Gio.File,
-        #          _("Histogram _File"),
-        #          "Histogram export file",
-        #          GObject.ParamFlags.READWRITE),
-        # "bucket_size":  (float,
-        #                  _("_Bucket Size"),
-        #                  "Bucket Size",
-        #                  0.001, 1.0, 0.01,
-        #                  GObject.ParamFlags.READWRITE),
         "force_cpu": (bool,
-                           _("Force _CPU"),
-                           "Force CPU",
-                           False,
-                           GObject.ParamFlags.READWRITE),
-        # "output_format": (str,
-        #                   _("Output format"),
-        #                   "Output format: 'pixel count', 'normalized', 'percent'",
-        #                   "pixel count",
-        #                   GObject.ParamFlags.READWRITE),
+                      _("Force _CPU"),
+                      "Force CPU",
+                      False,
+                      GObject.ParamFlags.READWRITE),
     }
 
     ## GimpPlugIn virtual methods ##
@@ -206,7 +244,7 @@ class Deblur(Gimp.PlugIn):
         if name == 'deblur':
             procedure = Gimp.ImageProcedure.new(self, name, Gimp.PDBProcType.PLUGIN, run, None)
             procedure.set_image_types("*")
-            procedure.set_documentation (
+            procedure.set_documentation(
                 N_("Deblur the current layer."),
                 globals()["__doc__"],  # This includes the docstring, on the top of the file
                 name)
@@ -215,12 +253,7 @@ class Deblur(Gimp.PlugIn):
                                       "GIMP-ML",
                                       "2021")
             procedure.add_menu_path("<Image>/Layer/GIMP-ML/")
-
-            # procedure.add_argument_from_property(self, "file")
-            # procedure.add_argument_from_property(self, "bucket_size")
             procedure.add_argument_from_property(self, "force_cpu")
-            # procedure.add_argument_from_property(self, "output_format")
-
         return procedure
 
 

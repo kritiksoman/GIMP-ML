@@ -1,11 +1,18 @@
 import pickle
 import os
 import sys
-
-
 import numpy as np
 from scipy.cluster.vq import kmeans2
 import cv2
+
+
+def get_weight_path():
+    config_path = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
+        data_output = pickle.load(file)
+    weight_path = data_output["weight_path"]
+    return weight_path
+
 
 def get_kmeans(image, locflag=False, n_clusters=3):
     if image.shape[2] == 4:  # get rid of alpha channel
@@ -33,16 +40,26 @@ def get_kmeans(image, locflag=False, n_clusters=3):
 
 
 if __name__ == "__main__":
-    config_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(config_path, 'gimp_ml_config.pkl'), 'rb') as file:
-        data_output = pickle.load(file)
-    weight_path = data_output["weight_path"]
-    image = cv2.imread(os.path.join(weight_path, '..', "cache.png"))[:, :, ::-1]
+    weight_path = get_weight_path()
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
         data_output = pickle.load(file)
     n_cluster = data_output["n_cluster"]
     position = data_output["position"]
-    output = get_kmeans(image, locflag=position, n_clusters=n_cluster)
-    cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
-    # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
-    #     pickle.dump({"run_success": True}, file)
+    image = cv2.imread(os.path.join(weight_path, '..', "cache.png"))[:, :, ::-1]
+    try:
+        output = get_kmeans(image, locflag=position, n_clusters=n_cluster)
+        cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
+        with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+            pickle.dump({"inference_status": "success"}, file)
+
+        # Remove old temporary error files that were saved
+        my_dir = os.path.join(weight_path, '..')
+        for f_name in os.listdir(my_dir):
+            if f_name.startswith("error_log"):
+                os.remove(os.path.join(my_dir, f_name))
+
+    except Exception as error:
+        with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+            pickle.dump({"inference_status": "failed"}, file)
+        with open(os.path.join(weight_path, '..', 'error_log.txt'), 'w') as file:
+            file.write(str(error))
