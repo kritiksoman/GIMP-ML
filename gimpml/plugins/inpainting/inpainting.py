@@ -246,7 +246,7 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
         # vbox.pack_start(label, False, False, 1)
         label.show()
 
-        # Show n_drawables text
+        # Show ideal image size text
         label = Gtk.Label(label="256 X 256 px | ")
         grid.attach(label, 1, 0, 1, 1)
         # vbox.pack_start(label, False, False, 1)

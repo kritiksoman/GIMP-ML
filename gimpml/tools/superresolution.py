@@ -12,7 +12,9 @@ import numpy as np
 from PIL import Image
 import cv2
 import warnings
+
 warnings.filterwarnings("ignore")
+
 
 def get_weight_path():
     config_path = os.path.dirname(os.path.realpath(__file__))
@@ -60,7 +62,8 @@ def get_super(input_image, s=4, cpu_flag=False, fFlag=True, weight_path=None):
                 j_end = min(j + wbin, h)
                 patch = im_input[:, :, i:i_end, j:j_end]
                 # patch_merge_out_numpy = denoiser(patch, c, pss, model, model_est, opt, cFlag)
-                HR_4x = model(patch)
+                with torch.no_grad():
+                    HR_4x = model(patch)
                 HR_4x = HR_4x.cpu().data[0].numpy().astype(np.float32) * 255.
                 HR_4x = np.clip(HR_4x, 0., 255.).transpose(1, 2, 0).astype(np.uint8)
 
@@ -74,7 +77,8 @@ def get_super(input_image, s=4, cpu_flag=False, fFlag=True, weight_path=None):
                     pass
             i = i_end
     else:
-        HR_4x = model(im_input)
+        with torch.no_grad():
+            HR_4x = model(im_input)
         HR_4x = HR_4x.cpu()
         im_h = HR_4x.data[0].numpy().astype(np.float32)
         im_h = im_h * 255.
@@ -86,14 +90,26 @@ def get_super(input_image, s=4, cpu_flag=False, fFlag=True, weight_path=None):
 
 if __name__ == "__main__":
     weight_path = get_weight_path()
-    image = cv2.imread(os.path.join(weight_path, '..', "cache.png"))[:, :, ::-1]
     with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'rb') as file:
         data_output = pickle.load(file)
     force_cpu = data_output["force_cpu"]
     s = data_output["scale"]
     filter = data_output["filter"]
+    image = cv2.imread(os.path.join(weight_path, '..', "cache.png"))[:, :, ::-1]
+    try:
+        output = get_super(image, s=s, cpu_flag=force_cpu, fFlag=filter, weight_path=weight_path)
+        cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
+        with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+            pickle.dump({"inference_status": "success", "force_cpu": force_cpu}, file)
 
-    output = get_super(image, s=s, cpu_flag=force_cpu, fFlag=filter, weight_path=weight_path)
-    cv2.imwrite(os.path.join(weight_path, '..', 'cache.png'), output[:, :, ::-1])
-    # with open(os.path.join(weight_path, 'gimp_ml_run.pkl'), 'wb') as file:
-    #     pickle.dump({"run_success": True}, file)
+        # Remove old temporary error files that were saved
+        my_dir = os.path.join(weight_path, '..')
+        for f_name in os.listdir(my_dir):
+            if f_name.startswith("error_log"):
+                os.remove(os.path.join(my_dir, f_name))
+
+    except Exception as error:
+        with open(os.path.join(weight_path, '..', 'gimp_ml_run.pkl'), 'wb') as file:
+            pickle.dump({"inference_status": "failed"}, file)
+        with open(os.path.join(weight_path, '..', 'error_log.txt'), 'w') as file:
+            file.write(str(error))
