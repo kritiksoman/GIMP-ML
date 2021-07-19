@@ -121,8 +121,6 @@ def monodepth(procedure, image, drawable, force_cpu, progress_bar, config_path_o
         copy.set_mode(Gimp.LayerMode.NORMAL_LEGACY)  # DIFFERENCE_LEGACY
         image.insert_layer(copy, None, -1)
 
-
-
         # Remove temporary layers that were saved
         my_dir = os.path.join(weight_path, '..')
         for f_name in os.listdir(my_dir):
@@ -191,17 +189,17 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
         vbox.pack_start(label, False, False, 1)
         label.show()
 
-        # Show ideal image size text
-        label = Gtk.Label(label="384 X 384 px | ")
-        grid.attach(label, 1, 0, 1, 1)
-        # vbox.pack_start(label, False, False, 1)
-        label.show()
+        # # Show ideal image size text
+        # label = Gtk.Label(label="384 X 384 px | ")
+        # grid.attach(label, 1, 0, 1, 1)
+        # # vbox.pack_start(label, False, False, 1)
+        # label.show()
 
         # Force CPU parameter
         spin = GimpUi.prop_check_button_new(config, "force_cpu", _("Force _CPU"))
         spin.set_tooltip_text(_("If checked, CPU is used for model inference."
                                 " Otherwise, GPU will be used if available."))
-        grid.attach(spin, 2, 0, 1, 1)
+        grid.attach(spin, 1, 0, 1, 1)
         spin.show()
 
         progress_bar = Gtk.ProgressBar()
