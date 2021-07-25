@@ -118,6 +118,7 @@ def semseg(procedure, image, drawable, force_cpu, progress_bar, config_path_outp
         copy = Gimp.Layer.new_from_drawable(result_layer, image)
         copy.set_name("Semantic Segmentation")
         copy.set_mode(Gimp.LayerMode.NORMAL_LEGACY)#DIFFERENCE_LEGACY
+        copy.set_opacity(50)
         image.insert_layer(copy, None, -1)
 
         # Remove temporary layers that were saved
@@ -199,6 +200,7 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
         while True:
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
+                force_cpu = config.get_property("force_cpu")
                 result = semseg(procedure, image, layer, force_cpu, progress_bar, config_path_output)
                 # If the execution was successful, save parameters so they will be restored next time we show dialog.
                 if result.index(0) == Gimp.PDBStatusType.SUCCESS and config is not None:
