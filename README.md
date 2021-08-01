@@ -13,10 +13,22 @@ Welcome people interested in contribution !!
 Join us on Slack --> [<img src="https://woocommerce.com/wp-content/uploads/2015/02/Slack_RGB.png" width="130" height="50">](https://join.slack.com/t/gimp-mlworkspace/shared_invite/zt-rbaxvztx-GRvj941idw3sQ0trS686YA)<br>
 Contribution guidelines available --> [Link](https://github.com/kritiksoman/GIMP-ML/blob/GIMP3-ML/CONTRIBUTION.md).<br>
 
-# Screenshot of Menu
+# Use as a Python Package
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kritiksoman/GIMP-ML/blob/GIMP3-ML/testscases/Demo%20Notebook.ipynb)
+```Python
+import cv2
+import gimpml
+image = cv2.imread('sampleinput/img.png')
+out = gimpml.kmeans(image)
+cv2.imwrite('output/tmp-kmeans.jpg', out)
+out = gimpml.deblur(image)
+cv2.imwrite('output/tmp-deblur.jpg', out)
+```
+
+# Use with GIMP
 ![image1](https://github.com/kritiksoman/GIMP-ML/blob/GIMP3-ML/screenshot.png)
 
-# Installation Steps
+## Installation Steps
 [1] Install [GIMP](https://www.gimp.org/downloads/devel/) 2.99.6  (Only windows and linux) <br>
 [2] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
 [3] Change branch : <br>
@@ -36,61 +48,6 @@ FYI: weights link --> [Link](https://drive.google.com/drive/folders/10IiBO4fuMiG
 |[<img src="http://img.youtube.com/vi/Rc88_qHSEjc/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=Rc88_qHSEjc)| [<img src="http://img.youtube.com/vi/MUdUzxYDwaU/0.jpg" width="400" height="300">](http://www.youtube.com/watch?v=MUdUzxYDwaU) |
 
 
-# Use as a Python Package
-```Python
-import cv2
-import gimpml
-
-image = cv2.imread('sampleinput/img.png')
-alpha = cv2.imread('sampleinput/alpha.png')
-
-out = gimpml.kmeans(image)
-cv2.imwrite('output/tmp-kmeans.jpg', out)
-
-out = gimpml.deblur(image)
-cv2.imwrite('output/tmp-deblur.jpg', out)
-
-out = gimpml.deepcolor(image)
-cv2.imwrite('output/tmp-deepcolor.jpg', out)
-
-out = gimpml.dehaze(image)
-cv2.imwrite('output/tmp-dehaze.jpg', out)
-
-out = gimpml.denoise(image)
-cv2.imwrite('output/tmp-denoise.jpg', out)
-
-out = gimpml.matting(image, alpha)
-cv2.imwrite('output/tmp-matting.png', out)  # save as png
-
-out = gimpml.enlighten(image)
-cv2.imwrite('output/tmp-enlighten.jpg', out)
-
-face = cv2.imread('sampleinput/face.png')
-out = gimpml.parseface(face[:, :, ::-1])
-cv2.imwrite('output/tmp-parseface.png', out[:, :, ::-1])
-
-mask1 = cv2.imread('sampleinput/mask1.png')
-mask2 = cv2.imread('sampleinput/mask2.png')
-out = gimpml.interpolateframe(mask1, mask2, 'output/interpolateframes')
-
-face = cv2.imread('sampleinput/face.png')
-out = gimpml.depth(face[:, :, ::-1])
-cv2.imwrite('output/tmp-depth.png', out[:, :, ::-1])
-
-image = cv2.imread('sampleinput/face.png')
-out = gimpml.semseg(image[:, :, ::-1])
-cv2.imwrite('output/tmp-semseg.png', out[:, :, ::-1])
-
-image = cv2.imread('sampleinput/face.png')
-out = gimpml.super(image[:, :, ::-1])
-cv2.imwrite('output/tmp-super.png', out[:, :, ::-1])
-
-image = cv2.imread('sampleinput/inpaint.png')
-mask = cv2.imread('sampleinput/inpaint-mask.png')
-out = gimpml.inpaint(image[:, :, ::-1], mask[:, :, 0])
-cv2.imwrite('output/tmp-inpaint.png', out[:, :, ::-1])
-
-```
 
 # Model Zoo
 | Name | License | Dataset |
