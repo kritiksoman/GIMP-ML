@@ -36,12 +36,12 @@ def get_weight_path():
 #     return out
 
 
-def get_mono_depth(input_image, cpu_flag=False, weight_path=None):
+def get_mono_depth(input_image, cpu_flag=False, weight_path=None, absolute_depth=False):
     if weight_path is None:
         weight_path = get_weight_path()
 
     with torch.no_grad():
-        out = run(input_image, os.path.join(weight_path, 'MiDaS', 'dpt_hybrid-midas-501f0c75.pt'), cpu_flag=cpu_flag, bits=2)
+        out = run(input_image, os.path.join(weight_path, 'MiDaS', 'dpt_hybrid-midas-501f0c75.pt'), cpu_flag=cpu_flag, bits=2, absolute_depth=absolute_depth)
         # out = run_depth(image, os.path.join(weight_path, 'MiDaS', 'model.pt'), MonoDepthNet, MiDaS_utils, target_w=640,
         #                 f=cpu_flag)
     out = np.repeat(out[:, :, np.newaxis], 3, axis=2)

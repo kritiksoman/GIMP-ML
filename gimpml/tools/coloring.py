@@ -36,8 +36,11 @@ def get_deepcolor(layerimg, layerc=None, cpu_flag=False, weight_path=None):
 
     gpu_id = 0 if torch.cuda.is_available() and not cpu_flag else None
 
-    if layerimg.shape[2] == 4:  # remove alpha channel in image if present
+    if len(layerimg.shape) == 3 and layerimg.shape[2] == 4:  # remove alpha channel in image if present
         layerimg = layerimg[:, :, 0:3]
+    elif len(layerimg.shape) == 2:
+        layerimg = np.repeat(layerimg[:, :, np.newaxis], 3, axis=2)
+
     colorModel = CI.ColorizeImageTorch(Xd=256)
     colorModel.prep_net(gpu_id, os.path.join(weight_path, 'colorize', 'caffemodel.pth'))
     colorModel.load_image(layerimg)  # load an image

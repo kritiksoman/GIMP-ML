@@ -56,7 +56,8 @@ def get_inter(img_s, img_e, string_path, cpu_flag=False, weight_path=None):
     for i in range(exp):
         tmp = []
         for j in range(len(img_list) - 1):
-            mid = model.inference(img_list[j], img_list[j + 1])
+            with torch.no_grad():
+                mid = model.inference(img_list[j], img_list[j + 1])
             tmp.append(img_list[j])
             tmp.append(mid)
         idx = idx + 1
