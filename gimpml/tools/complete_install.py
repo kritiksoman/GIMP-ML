@@ -55,13 +55,21 @@ def setup_python_weights(install_location=None):
                     except:
                         print("\nDownloading " + model_path + "(~" + str(file_size) + "MB)...")
                     url = 'https://drive.google.com/uc?id={0}'.format(file_id)
-                    gdown.cached_download(url, destination, md5=md5sum)
-    plugin_loc = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(plugin_loc, 'gimp_ml_config.pkl'), 'wb') as file:
+                    try:
+                        gdown.cached_download(url, destination, md5=md5sum)
+                    except:
+                        try:
+                            gdown.download(url, destination, quiet=False)
+                        except:
+                            print("Failed to download !")
+    # plugin_loc = os.path.dirname(os.path.realpath(__file__))
+    import gimpml
+    plugin_loc = os.path.dirname(gimpml.__file__)
+    with open(os.path.join(plugin_loc, 'tools', 'gimp_ml_config.pkl'), 'wb') as file:
         pickle.dump({"python_path": python_path, "weight_path": weight_path}, file)
 
     print("{}>> Please add this path to Preferences --> Plug-ins in GIMP : ".format(step),
-          os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "plugins"))
+          os.path.join(plugin_loc,  "plugins"))
     print("##########\n")
 
 

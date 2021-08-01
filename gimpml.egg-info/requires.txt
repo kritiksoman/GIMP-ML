@@ -5,8 +5,8 @@ typing
 requests
 opencv-python<=4.3
 pretrainedmodels
-torch
-torchvision
+scikit-image
+timm==0.4.5
 
 [:python_version <= "2.7"]
 future
