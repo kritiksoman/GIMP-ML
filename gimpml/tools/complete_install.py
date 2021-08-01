@@ -7,7 +7,7 @@ import pickle
 import csv
 import hashlib
 import gdown
-
+import gimpml
 
 def setup_python_weights(install_location=None):
     if not install_location:
@@ -32,7 +32,7 @@ def setup_python_weights(install_location=None):
         print("and place in: " + weight_path)
         step += 1
     else:  # linux
-        file_path = os.path.dirname(os.path.realpath(__file__))
+        file_path = os.path.join(os.path.dirname(gimpml.__file__), 'tools')
         with open(os.path.join(file_path, 'model_info.csv')) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             headings = next(csv_reader)
@@ -63,7 +63,6 @@ def setup_python_weights(install_location=None):
                         except:
                             print("Failed to download !")
     # plugin_loc = os.path.dirname(os.path.realpath(__file__))
-    import gimpml
     plugin_loc = os.path.dirname(gimpml.__file__)
     with open(os.path.join(plugin_loc, 'tools', 'gimp_ml_config.pkl'), 'wb') as file:
         pickle.dump({"python_path": python_path, "weight_path": weight_path}, file)
