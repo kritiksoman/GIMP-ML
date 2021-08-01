@@ -32,7 +32,7 @@ cv2.imwrite('output/tmp-deblur.jpg', out)
 [1] Install [GIMP](https://www.gimp.org/downloads/devel/) 2.99.6  (Only windows and linux) <br>
 [2] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
 [3] Change branch : <br>
-```git checkout GIMP3-ML``` <br>
+```git checkout --track origin/GIMP3-ML``` <br>
 [3] On linux, run for GPU/CPU: <br>
 ```bash GIMP-ML/install.bat```<br>
 On windows, run for CPU: <br>
