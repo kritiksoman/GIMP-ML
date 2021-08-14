@@ -3,7 +3,7 @@
 # Author : Jiayuan Mao
 # Email  : maojiayuan@gmail.com
 # Date   : 27/01/2018
-# 
+#
 # This file is part of Synchronized-BatchNorm-PyTorch.
 # https://github.com/vacancy/Synchronized-BatchNorm-PyTorch
 # Distributed under MIT License.
@@ -13,10 +13,10 @@ import functools
 from torch.nn.parallel.data_parallel import DataParallel
 
 __all__ = [
-    'CallbackContext',
-    'execute_replication_callbacks',
-    'DataParallelWithCallback',
-    'patch_replication_callback'
+    "CallbackContext",
+    "execute_replication_callbacks",
+    "DataParallelWithCallback",
+    "patch_replication_callback",
 ]
 
 
@@ -43,7 +43,7 @@ def execute_replication_callbacks(modules):
 
     for i, module in enumerate(modules):
         for j, m in enumerate(module.modules()):
-            if hasattr(m, '__data_parallel_replicate__'):
+            if hasattr(m, "__data_parallel_replicate__"):
                 m.__data_parallel_replicate__(ctxs[j], i)
 
 

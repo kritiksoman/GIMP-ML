@@ -7,15 +7,21 @@ import numpy as np
 import torchvision.transforms.functional as F
 from torch.utils.data import DataLoader
 from PIL import Image
+
 # from scipy.misc import imread
 import cv2
 from skimage.feature import canny
+
 # from skimage.color import rgb2gray, gray2rgb
 from .utils import create_mask
+
 # from .canny_opencv import canny
 
+
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, config, flist, edge_flist, mask_flist, augment=True, training=True):
+    def __init__(
+        self, config, flist, edge_flist, mask_flist, augment=True, training=True
+    ):
         super(Dataset, self).__init__()
         self.augment = augment
         self.training = training
@@ -41,7 +47,7 @@ class Dataset(torch.utils.data.Dataset):
         try:
             item = self.load_item(index)
         except:
-            print('loading error: ' + self.data[index])
+            print("loading error: " + self.data[index])
             item = self.load_item(0)
 
         return item
@@ -81,7 +87,12 @@ class Dataset(torch.utils.data.Dataset):
             edge = edge[:, ::-1, ...]
             mask = mask[:, ::-1, ...]
 
-        return self.to_tensor(img), self.to_tensor(img_gray), self.to_tensor(edge), self.to_tensor(mask)
+        return (
+            self.to_tensor(img),
+            self.to_tensor(img_gray),
+            self.to_tensor(edge),
+            self.to_tensor(mask),
+        )
 
     def load_edge(self, img, index, mask):
         sigma = self.sigma
@@ -108,7 +119,6 @@ class Dataset(torch.utils.data.Dataset):
         # img = cv2.Canny(img, 0.1*max_val, 0.2*max_val)
         # return img*mask.astype(np.float)
         return canny(img, sigma=sigma, mask=mask).astype(np.float)
-
 
         # # external
         # else:
@@ -141,14 +151,21 @@ class Dataset(torch.utils.data.Dataset):
         # half
         if mask_type == 2:
             # randomly choose right or left
-            return create_mask(imgw, imgh, imgw // 2, imgh, 0 if random.random() < 0.5 else imgw // 2, 0)
+            return create_mask(
+                imgw,
+                imgh,
+                imgw // 2,
+                imgh,
+                0 if random.random() < 0.5 else imgw // 2,
+                0,
+            )
 
         # external
         if mask_type == 3:
             mask_index = random.randint(0, len(self.mask_data) - 1)
             mask = cv2.imread(self.mask_data[mask_index])[:, :, ::-1]
             mask = self.resize(mask, imgh, imgw)
-            mask = (mask > 0).astype(np.uint8) * 255       # threshold due to interpolation
+            mask = (mask > 0).astype(np.uint8) * 255  # threshold due to interpolation
             return mask
 
         # test mode: load mask non random
@@ -172,7 +189,7 @@ class Dataset(torch.utils.data.Dataset):
             side = np.minimum(imgh, imgw)
             j = (imgh - side) // 2
             i = (imgw - side) // 2
-            img = img[j:j + side, i:i + side, ...]
+            img = img[j : j + side, i : i + side, ...]
 
         img = cv2.resize(img, (height, width))
 
@@ -185,13 +202,15 @@ class Dataset(torch.utils.data.Dataset):
         # flist: image file path, image directory path, text file flist path
         if isinstance(flist, str):
             if os.path.isdir(flist):
-                flist = list(glob.glob(flist + '/*.jpg')) + list(glob.glob(flist + '/*.png'))
+                flist = list(glob.glob(flist + "/*.jpg")) + list(
+                    glob.glob(flist + "/*.png")
+                )
                 flist.sort()
                 return flist
 
             if os.path.isfile(flist):
                 try:
-                    return np.genfromtxt(flist, dtype=np.str, encoding='utf-8')
+                    return np.genfromtxt(flist, dtype=np.str, encoding="utf-8")
                 except:
                     return [flist]
 
@@ -200,11 +219,8 @@ class Dataset(torch.utils.data.Dataset):
     def create_iterator(self, batch_size):
         while True:
             sample_loader = DataLoader(
-                dataset=self,
-                batch_size=batch_size,
-                drop_last=True
+                dataset=self, batch_size=batch_size, drop_last=True
             )
 
             for item in sample_loader:
                 yield item
-

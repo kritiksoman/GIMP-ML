@@ -14,10 +14,16 @@ trimap = cv2.imread(trimap_path)
 # print(trimap.shape)
 trimap = trimap[:, :, 0]
 # init model
-args = Namespace(crop_or_resize='whole', cuda=True, max_size=1600, resume='model/stage1_sad_57.1.pth', stage=1)
+args = Namespace(
+    crop_or_resize="whole",
+    cuda=True,
+    max_size=1600,
+    resume="model/stage1_sad_57.1.pth",
+    stage=1,
+)
 model = net.VGG16(args)
 ckpt = torch.load(args.resume)
-model.load_state_dict(ckpt['state_dict'], strict=True)
+model.load_state_dict(ckpt["state_dict"], strict=True)
 model = model.cuda()
 
 torch.cuda.empty_cache()
@@ -32,5 +38,3 @@ pred_mattes[trimap == 0] = 0
 # import matplotlib.pyplot as plt
 # plt.imshow(image)
 # plt.show()
-
-

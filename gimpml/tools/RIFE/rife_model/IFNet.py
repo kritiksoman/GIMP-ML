@@ -7,20 +7,35 @@ from rife_model.warplayer import warp
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 def conv_wo_act(in_planes, out_planes, kernel_size=3, stride=1, padding=1, dilation=1):
     return nn.Sequential(
-        nn.Conv2d(in_planes, out_planes, kernel_size=kernel_size, stride=stride,
-                  padding=padding, dilation=dilation, bias=False),
+        nn.Conv2d(
+            in_planes,
+            out_planes,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            bias=False,
+        ),
         nn.BatchNorm2d(out_planes),
     )
 
 
 def conv(in_planes, out_planes, kernel_size=3, stride=1, padding=1, dilation=1):
     return nn.Sequential(
-        nn.Conv2d(in_planes, out_planes, kernel_size=kernel_size, stride=stride,
-                  padding=padding, dilation=dilation, bias=False),
+        nn.Conv2d(
+            in_planes,
+            out_planes,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            bias=False,
+        ),
         nn.BatchNorm2d(out_planes),
-        nn.PReLU(out_planes)
+        nn.PReLU(out_planes),
     )
 
 
@@ -30,8 +45,7 @@ class ResBlock(nn.Module):
         if in_planes == out_planes and stride == 1:
             self.conv0 = nn.Identity()
         else:
-            self.conv0 = nn.Conv2d(in_planes, out_planes,
-                                   3, stride, 1, bias=False)
+            self.conv0 = nn.Conv2d(in_planes, out_planes, 3, stride, 1, bias=False)
         self.conv1 = conv(in_planes, out_planes, 3, stride, 1)
         self.conv2 = conv_wo_act(out_planes, out_planes, 3, 1, 1)
         self.relu1 = nn.PReLU(1)
@@ -66,8 +80,9 @@ class IFBlock(nn.Module):
 
     def forward(self, x):
         if self.scale != 1:
-            x = F.interpolate(x, scale_factor=1. / self.scale, mode="bilinear",
-                              align_corners=False)
+            x = F.interpolate(
+                x, scale_factor=1.0 / self.scale, mode="bilinear", align_corners=False
+            )
         x = self.conv0(x)
         x = self.res0(x)
         x = self.res1(x)
@@ -78,8 +93,9 @@ class IFBlock(nn.Module):
         x = self.conv1(x)
         flow = self.up(x)
         if self.scale != 1:
-            flow = F.interpolate(flow, scale_factor=self.scale, mode="bilinear",
-                                 align_corners=False)
+            flow = F.interpolate(
+                flow, scale_factor=self.scale, mode="bilinear", align_corners=False
+            )
         return flow
 
 
@@ -92,25 +108,23 @@ class IFNet(nn.Module):
         self.cFlag = cFlag
 
     def forward(self, x):
-        x = F.interpolate(x, scale_factor=0.5, mode="bilinear",
-                          align_corners=False)
+        x = F.interpolate(x, scale_factor=0.5, mode="bilinear", align_corners=False)
         flow0 = self.block0(x)
         F1 = flow0
         warped_img0 = warp(x[:, :3], F1, self.cFlag)
         warped_img1 = warp(x[:, 3:], -F1, self.cFlag)
         flow1 = self.block1(torch.cat((warped_img0, warped_img1, F1), 1))
-        F2 = (flow0 + flow1)
+        F2 = flow0 + flow1
         warped_img0 = warp(x[:, :3], F2, self.cFlag)
         warped_img1 = warp(x[:, 3:], -F2, self.cFlag)
         flow2 = self.block2(torch.cat((warped_img0, warped_img1, F2), 1))
-        F3 = (flow0 + flow1 + flow2)
+        F3 = flow0 + flow1 + flow2
         return F3, [F1, F2, F3]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     img0 = torch.zeros(3, 3, 256, 256).float().to(device)
-    img1 = torch.tensor(np.random.normal(
-        0, 1, (3, 3, 256, 256))).float().to(device)
+    img1 = torch.tensor(np.random.normal(0, 1, (3, 3, 256, 256))).float().to(device)
     imgs = torch.cat((img0, img1), 1)
     flownet = IFNet()
     flow, _ = flownet(imgs)

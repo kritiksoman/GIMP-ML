@@ -16,7 +16,15 @@ class ABN(nn.Module):
     This gathers a `BatchNorm2d` and an activation function in a single module
     """
 
-    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, activation="leaky_relu", slope=0.01):
+    def __init__(
+        self,
+        num_features,
+        eps=1e-5,
+        momentum=0.1,
+        affine=True,
+        activation="leaky_relu",
+        slope=0.01,
+    ):
         """Creates an Activated Batch Normalization module
 
         Parameters
@@ -45,10 +53,10 @@ class ABN(nn.Module):
             self.weight = nn.Parameter(torch.ones(num_features))
             self.bias = nn.Parameter(torch.zeros(num_features))
         else:
-            self.register_parameter('weight', None)
-            self.register_parameter('bias', None)
-        self.register_buffer('running_mean', torch.zeros(num_features))
-        self.register_buffer('running_var', torch.ones(num_features))
+            self.register_parameter("weight", None)
+            self.register_parameter("bias", None)
+        self.register_buffer("running_mean", torch.zeros(num_features))
+        self.register_buffer("running_var", torch.ones(num_features))
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -59,8 +67,16 @@ class ABN(nn.Module):
             nn.init.constant_(self.bias, 0)
 
     def forward(self, x):
-        x = functional.batch_norm(x, self.running_mean, self.running_var, self.weight, self.bias,
-                                  self.training, self.momentum, self.eps)
+        x = functional.batch_norm(
+            x,
+            self.running_mean,
+            self.running_var,
+            self.weight,
+            self.bias,
+            self.training,
+            self.momentum,
+            self.eps,
+        )
 
         if self.activation == ACT_RELU:
             return functional.relu(x, inplace=True)
@@ -72,19 +88,29 @@ class ABN(nn.Module):
             return x
 
     def __repr__(self):
-        rep = '{name}({num_features}, eps={eps}, momentum={momentum},' \
-              ' affine={affine}, activation={activation}'
+        rep = (
+            "{name}({num_features}, eps={eps}, momentum={momentum},"
+            " affine={affine}, activation={activation}"
+        )
         if self.activation == "leaky_relu":
-            rep += ', slope={slope})'
+            rep += ", slope={slope})"
         else:
-            rep += ')'
+            rep += ")"
         return rep.format(name=self.__class__.__name__, **self.__dict__)
 
 
 class InPlaceABN(ABN):
     """InPlace Activated Batch Normalization"""
 
-    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True, activation="leaky_relu", slope=0.01):
+    def __init__(
+        self,
+        num_features,
+        eps=1e-5,
+        momentum=0.1,
+        affine=True,
+        activation="leaky_relu",
+        slope=0.01,
+    ):
         """Creates an InPlace Activated Batch Normalization module
 
         Parameters
@@ -102,11 +128,23 @@ class InPlaceABN(ABN):
         slope : float
             Negative slope for the `leaky_relu` activation.
         """
-        super(InPlaceABN, self).__init__(num_features, eps, momentum, affine, activation, slope)
+        super(InPlaceABN, self).__init__(
+            num_features, eps, momentum, affine, activation, slope
+        )
 
     def forward(self, x):
-        return inplace_abn(x, self.weight, self.bias, self.running_mean, self.running_var,
-                           self.training, self.momentum, self.eps, self.activation, self.slope)
+        return inplace_abn(
+            x,
+            self.weight,
+            self.bias,
+            self.running_mean,
+            self.running_var,
+            self.training,
+            self.momentum,
+            self.eps,
+            self.activation,
+            self.slope,
+        )
 
 
 class InPlaceABNSync(ABN):
@@ -115,16 +153,26 @@ class InPlaceABNSync(ABN):
     """
 
     def forward(self, x):
-        return inplace_abn_sync(x, self.weight, self.bias, self.running_mean, self.running_var,
-                                   self.training, self.momentum, self.eps, self.activation, self.slope)
+        return inplace_abn_sync(
+            x,
+            self.weight,
+            self.bias,
+            self.running_mean,
+            self.running_var,
+            self.training,
+            self.momentum,
+            self.eps,
+            self.activation,
+            self.slope,
+        )
 
     def __repr__(self):
-        rep = '{name}({num_features}, eps={eps}, momentum={momentum},' \
-              ' affine={affine}, activation={activation}'
+        rep = (
+            "{name}({num_features}, eps={eps}, momentum={momentum},"
+            " affine={affine}, activation={activation}"
+        )
         if self.activation == "leaky_relu":
-            rep += ', slope={slope})'
+            rep += ", slope={slope})"
         else:
-            rep += ')'
+            rep += ")"
         return rep.format(name=self.__class__.__name__, **self.__dict__)
-
-

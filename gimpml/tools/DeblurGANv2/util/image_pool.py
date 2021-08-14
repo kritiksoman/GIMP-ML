@@ -5,7 +5,7 @@ from torch.autograd import Variable
 from collections import deque
 
 
-class ImagePool():
+class ImagePool:
     def __init__(self, pool_size):
         self.pool_size = pool_size
         self.sample_size = pool_size

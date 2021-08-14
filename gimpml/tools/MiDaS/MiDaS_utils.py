@@ -5,6 +5,7 @@ import re
 import numpy as np
 import cv2
 import torch
+
 # import imageio
 
 
@@ -126,7 +127,7 @@ def resize_image(img):
     """
     height_orig = img.shape[0]
     width_orig = img.shape[1]
-    unit_scale = 384.
+    unit_scale = 384.0
 
     if width_orig > height_orig:
         scale = width_orig / unit_scale
@@ -159,11 +160,10 @@ def resize_depth(depth, width, height):
     """
     depth = torch.squeeze(depth[0, :, :, :]).to("cpu")
     depth = cv2.blur(depth.numpy(), (3, 3))
-    depth_resized = cv2.resize(
-        depth, (width, height), interpolation=cv2.INTER_AREA
-    )
+    depth_resized = cv2.resize(depth, (width, height), interpolation=cv2.INTER_AREA)
 
     return depth_resized
+
 
 def write_depth(path, depth, bits=1):
     """Write depth map to pfm and png file.
@@ -177,7 +177,7 @@ def write_depth(path, depth, bits=1):
     depth_min = depth.min()
     depth_max = depth.max()
 
-    max_val = (2**(8*bits))-1
+    max_val = (2 ** (8 * bits)) - 1
 
     if depth_max - depth_min > np.finfo("float").eps:
         out = max_val * (depth - depth_min) / (depth_max - depth_min)
@@ -188,5 +188,5 @@ def write_depth(path, depth, bits=1):
         cv2.imwrite(path + ".png", out.astype("uint8"))
     elif bits == 2:
         cv2.imwrite(path + ".png", out.astype("uint16"))
-        
+
     return

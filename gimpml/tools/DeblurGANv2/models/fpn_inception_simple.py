@@ -4,6 +4,7 @@ from pretrainedmodels import inceptionresnetv2
 from torchsummary import summary
 import torch.nn.functional as F
 
+
 class FPNHead(nn.Module):
     def __init__(self, num_in, num_mid, num_out):
         super().__init__()
@@ -16,13 +17,16 @@ class FPNHead(nn.Module):
         x = nn.functional.relu(self.block1(x), inplace=True)
         return x
 
+
 class ConvBlock(nn.Module):
     def __init__(self, num_in, num_out, norm_layer):
         super().__init__()
 
-        self.block = nn.Sequential(nn.Conv2d(num_in, num_out, kernel_size=3, padding=1),
-                                 norm_layer(num_out),
-                                 nn.ReLU(inplace=True))
+        self.block = nn.Sequential(
+            nn.Conv2d(num_in, num_out, kernel_size=3, padding=1),
+            norm_layer(num_out),
+            nn.ReLU(inplace=True),
+        )
 
     def forward(self, x):
         x = self.block(x)
@@ -30,7 +34,6 @@ class ConvBlock(nn.Module):
 
 
 class FPNInceptionSimple(nn.Module):
-
     def __init__(self, norm_layer, output_ch=3, num_filters=128, num_filters_fpn=256):
         super().__init__()
 
@@ -79,11 +82,10 @@ class FPNInceptionSimple(nn.Module):
         final = self.final(smoothed)
         res = torch.tanh(final) + x
 
-        return torch.clamp(res, min = -1,max = 1)
+        return torch.clamp(res, min=-1, max=1)
 
 
 class FPN(nn.Module):
-
     def __init__(self, norm_layer, num_filters=256):
         """Creates an `FPN` instance for feature extraction.
         Args:
@@ -92,14 +94,14 @@ class FPN(nn.Module):
         """
 
         super().__init__()
-        self.inception = inceptionresnetv2(num_classes=1000, pretrained='imagenet')
+        self.inception = inceptionresnetv2(num_classes=1000, pretrained="imagenet")
 
         self.enc0 = self.inception.conv2d_1a
         self.enc1 = nn.Sequential(
             self.inception.conv2d_2a,
             self.inception.conv2d_2b,
             self.inception.maxpool_3a,
-        ) # 64
+        )  # 64
         self.enc2 = nn.Sequential(
             self.inception.conv2d_3b,
             self.inception.conv2d_4a,
@@ -109,11 +111,11 @@ class FPN(nn.Module):
             self.inception.mixed_5b,
             self.inception.repeat,
             self.inception.mixed_6a,
-        )   # 1088
+        )  # 1088
         self.enc4 = nn.Sequential(
             self.inception.repeat_1,
             self.inception.mixed_7a,
-        ) #2080
+        )  # 2080
 
         self.pad = nn.ReflectionPad2d(1)
         self.lateral4 = nn.Conv2d(2080, num_filters, kernel_size=1, bias=False)
@@ -134,13 +136,13 @@ class FPN(nn.Module):
         # Bottom-up pathway, from ResNet
         enc0 = self.enc0(x)
 
-        enc1 = self.enc1(enc0) # 256
+        enc1 = self.enc1(enc0)  # 256
 
-        enc2 = self.enc2(enc1) # 512
+        enc2 = self.enc2(enc1)  # 512
 
-        enc3 = self.enc3(enc2) # 1024
+        enc3 = self.enc3(enc2)  # 1024
 
-        enc4 = self.enc4(enc3) # 2048
+        enc4 = self.enc4(enc3)  # 2048
 
         # Lateral connections
 
@@ -155,6 +157,8 @@ class FPN(nn.Module):
         pad1 = (0, 1, 0, 1)
         map4 = lateral4
         map3 = lateral3 + nn.functional.upsample(map4, scale_factor=2, mode="nearest")
-        map2 = F.pad(lateral2, pad, "reflect") + nn.functional.upsample(map3, scale_factor=2, mode="nearest")
+        map2 = F.pad(lateral2, pad, "reflect") + nn.functional.upsample(
+            map3, scale_factor=2, mode="nearest"
+        )
         map1 = lateral1 + nn.functional.upsample(map2, scale_factor=2, mode="nearest")
         return F.pad(lateral0, pad1, "reflect"), map1, map2, map3, map4

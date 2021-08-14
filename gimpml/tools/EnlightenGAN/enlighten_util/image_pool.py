@@ -2,7 +2,9 @@ import random
 import numpy as np
 import torch
 from torch.autograd import Variable
-class ImagePool():
+
+
+class ImagePool:
     def __init__(self, pool_size):
         self.pool_size = pool_size
         if self.pool_size > 0:
@@ -22,7 +24,7 @@ class ImagePool():
             else:
                 p = random.uniform(0, 1)
                 if p > 0.5:
-                    random_id = random.randint(0, self.pool_size-1)
+                    random_id = random.randint(0, self.pool_size - 1)
                     tmp = self.images[random_id].clone()
                     self.images[random_id] = image
                     return_images.append(tmp)

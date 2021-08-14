@@ -7,10 +7,20 @@ from dpt.transforms import Resize, NormalizeImage, PrepareForNet
 import numpy as np
 
 
-def run(img, model_path, cpu_flag=False, model_type="dpt_hybrid", optimize=True, kitti_crop=False,
-        absolute_depth=False, bits=2):
-    device = torch.device("cuda" if torch.cuda.is_available() and not cpu_flag else "cpu")
-    img = img/ 255.0
+def run(
+    img,
+    model_path,
+    cpu_flag=False,
+    model_type="dpt_hybrid",
+    optimize=True,
+    kitti_crop=False,
+    absolute_depth=False,
+    bits=2,
+):
+    device = torch.device(
+        "cuda" if torch.cuda.is_available() and not cpu_flag else "cpu"
+    )
+    img = img / 255.0
 
     # load network
     if model_type == "dpt_large":  # DPT-Large
@@ -101,7 +111,7 @@ def run(img, model_path, cpu_flag=False, model_type="dpt_hybrid", optimize=True,
         height, width, _ = img.shape
         top = height - 352
         left = (width - 1216) // 2
-        img = img[top: top + 352, left: left + 1216, :]
+        img = img[top : top + 352, left : left + 1216, :]
 
     img_input = transform({"image": img})["image"]
 
@@ -121,9 +131,9 @@ def run(img, model_path, cpu_flag=False, model_type="dpt_hybrid", optimize=True,
                 mode="bicubic",
                 align_corners=False,
             )
-                .squeeze()
-                .cpu()
-                .numpy()
+            .squeeze()
+            .cpu()
+            .numpy()
         )
 
         if model_type == "dpt_hybrid_kitti":
@@ -146,6 +156,7 @@ def run(img, model_path, cpu_flag=False, model_type="dpt_hybrid", optimize=True,
             out = np.zeros(prediction.shape, dtype=prediction.dtype)
 
     return out
+
 
 #
 # img = cv2.imread(r'D:\win\Users\Kritik Soman\Pictures\image.jpg')[:, :, ::-1]

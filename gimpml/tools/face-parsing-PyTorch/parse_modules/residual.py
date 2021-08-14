@@ -6,14 +6,16 @@ from .bn import ABN
 
 
 class IdentityResidualBlock(nn.Module):
-    def __init__(self,
-                 in_channels,
-                 channels,
-                 stride=1,
-                 dilation=1,
-                 groups=1,
-                 norm_act=ABN,
-                 dropout=None):
+    def __init__(
+        self,
+        in_channels,
+        channels,
+        stride=1,
+        dilation=1,
+        groups=1,
+        norm_act=ABN,
+        dropout=None,
+    ):
         """Configurable identity-mapping residual block
 
         Parameters
@@ -50,29 +52,77 @@ class IdentityResidualBlock(nn.Module):
         self.bn1 = norm_act(in_channels)
         if not is_bottleneck:
             layers = [
-                ("conv1", nn.Conv2d(in_channels, channels[0], 3, stride=stride, padding=dilation, bias=False,
-                                    dilation=dilation)),
+                (
+                    "conv1",
+                    nn.Conv2d(
+                        in_channels,
+                        channels[0],
+                        3,
+                        stride=stride,
+                        padding=dilation,
+                        bias=False,
+                        dilation=dilation,
+                    ),
+                ),
                 ("bn2", norm_act(channels[0])),
-                ("conv2", nn.Conv2d(channels[0], channels[1], 3, stride=1, padding=dilation, bias=False,
-                                    dilation=dilation))
+                (
+                    "conv2",
+                    nn.Conv2d(
+                        channels[0],
+                        channels[1],
+                        3,
+                        stride=1,
+                        padding=dilation,
+                        bias=False,
+                        dilation=dilation,
+                    ),
+                ),
             ]
             if dropout is not None:
                 layers = layers[0:2] + [("dropout", dropout())] + layers[2:]
         else:
             layers = [
-                ("conv1", nn.Conv2d(in_channels, channels[0], 1, stride=stride, padding=0, bias=False)),
+                (
+                    "conv1",
+                    nn.Conv2d(
+                        in_channels,
+                        channels[0],
+                        1,
+                        stride=stride,
+                        padding=0,
+                        bias=False,
+                    ),
+                ),
                 ("bn2", norm_act(channels[0])),
-                ("conv2", nn.Conv2d(channels[0], channels[1], 3, stride=1, padding=dilation, bias=False,
-                                    groups=groups, dilation=dilation)),
+                (
+                    "conv2",
+                    nn.Conv2d(
+                        channels[0],
+                        channels[1],
+                        3,
+                        stride=1,
+                        padding=dilation,
+                        bias=False,
+                        groups=groups,
+                        dilation=dilation,
+                    ),
+                ),
                 ("bn3", norm_act(channels[1])),
-                ("conv3", nn.Conv2d(channels[1], channels[2], 1, stride=1, padding=0, bias=False))
+                (
+                    "conv3",
+                    nn.Conv2d(
+                        channels[1], channels[2], 1, stride=1, padding=0, bias=False
+                    ),
+                ),
             ]
             if dropout is not None:
                 layers = layers[0:4] + [("dropout", dropout())] + layers[4:]
         self.convs = nn.Sequential(OrderedDict(layers))
 
         if need_proj_conv:
-            self.proj_conv = nn.Conv2d(in_channels, channels[-1], 1, stride=stride, padding=0, bias=False)
+            self.proj_conv = nn.Conv2d(
+                in_channels, channels[-1], 1, stride=stride, padding=0, bias=False
+            )
 
     def forward(self, x):
         if hasattr(self, "proj_conv"):

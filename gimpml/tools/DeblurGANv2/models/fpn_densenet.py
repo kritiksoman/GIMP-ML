@@ -18,8 +18,9 @@ class FPNSegHead(nn.Module):
 
 
 class FPNDense(nn.Module):
-
-    def __init__(self, output_ch=3, num_filters=128, num_filters_fpn=256, pretrained=True):
+    def __init__(
+        self, output_ch=3, num_filters=128, num_filters_fpn=256, pretrained=True
+    ):
         super().__init__()
 
         # Feature Pyramid Network (FPN) with four feature maps of resolutions
@@ -67,7 +68,6 @@ class FPNDense(nn.Module):
 
 
 class FPN(nn.Module):
-
     def __init__(self, num_filters=256, pretrained=True):
         """Creates an `FPN` instance for feature extraction.
         Args:
@@ -79,9 +79,9 @@ class FPN(nn.Module):
 
         self.features = densenet121(pretrained=pretrained).features
 
-        self.enc0 = nn.Sequential(self.features.conv0,
-                                  self.features.norm0,
-                                  self.features.relu0)
+        self.enc0 = nn.Sequential(
+            self.features.conv0, self.features.norm0, self.features.relu0
+        )
         self.pool0 = self.features.pool0
         self.enc1 = self.features.denseblock1  # 256
         self.enc2 = self.features.denseblock2  # 512

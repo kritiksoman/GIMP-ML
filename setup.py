@@ -1,32 +1,30 @@
 from setuptools import setup, find_packages
 import os
+
 here = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(here, "README.md"), "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='gimpml',  # Required
-    version='0.0.6',  # Required
-    description='A.I. for GIMP',  # Optional
+    name="gimpml",  # Required
+    version="0.0.6",  # Required
+    description="A.I. for GIMP",  # Optional
     long_description=long_description,  # Optional
-    long_description_content_type='text/markdown',  # Optional (see note above)
-    url='https://github.com/kritiksoman/GIMP-ML',  # Optional
-    author='Kritik Soman',  # Optional
-    author_email='kritiksoman@ieee.org',  # Optional
+    long_description_content_type="text/markdown",  # Optional (see note above)
+    url="https://github.com/kritiksoman/GIMP-ML",  # Optional
+    author="Kritik Soman",  # Optional
+    author_email="kritiksoman@ieee.org",  # Optional
     classifiers=[  # Optional
         # How mature is this project? Common values are
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
-
+        "Development Status :: 3 - Alpha",
         # Indicate who your project is intended for
-        'Intended Audience :: Developers',
-        'Topic :: Software Development :: Build Tools',
-
+        "Intended Audience :: Developers",
+        "Topic :: Software Development :: Build Tools",
         # Pick your license as you wish
         # 'License :: OSI Approved :: MIT License',
-
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate you support Python 3. These classifiers are *not*
         # checked by 'pip install'. See instead 'python_requires' below.
@@ -34,16 +32,13 @@ setup(
         # 'Programming Language :: Python :: 3.5',
         # 'Programming Language :: Python :: 3.6',
         # 'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
+        "Programming Language :: Python :: 3.8",
         # 'Programming Language :: Python :: 2.7 :: Only',
     ],
-
-    keywords='sample, setuptools, development',  # Optional
-
+    keywords="sample, setuptools, development",  # Optional
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
     # package_dir={'': 'src'},  # Optional
-
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
     #
@@ -60,7 +55,7 @@ setup(
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. See
     # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
-    python_requires='>=2.7',
+    python_requires=">=2.7",
     include_package_data=True,  # to incluse manifest.in
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
@@ -68,13 +63,20 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['numpy', 'future; python_version <= "2.7"',
-                      'scipy', 'gdown', 'typing', 'enum; python_version <= "2.7"', 'requests', 'opencv-python<=4.3',
-                      'pretrainedmodels', "scikit-image", "timm==0.4.5"]#, "torch==1.8", "torchvision"],
-
-
+    install_requires=[
+        "numpy",
+        'future; python_version <= "2.7"',
+        "scipy",
+        "gdown",
+        "typing",
+        'enum; python_version <= "2.7"',
+        "requests",
+        "opencv-python<=4.3",
+        "pretrainedmodels",
+        "scikit-image",
+        "timm==0.4.5",
+    ]  # , "torch==1.8", "torchvision"],
     # Optional
-
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
     # syntax, for example:
@@ -87,20 +89,17 @@ setup(
     #     'dev': ['check-manifest'],
     #     'test': ['coverage'],
     # },
-
     # If there are data files included in your packages that need to be
     # installed, specify them here.
     # package_data={  # Optional
     #     'sample': ['package_data.dat'],
     # },
-
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:
     # http://docs.python.org/distutils/setupscript.html#installing-additional-files
     #
     # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
     # data_files=[('my_data', ['data/data_file'])],  # Optional
-
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # `pip` to create the appropriate form of executable for the target
@@ -113,7 +112,6 @@ setup(
     #         'sample=sample:main',
     #     ],
     # },
-
     # List additional is that are relevant to your project as a dict.
     #
     # This field corresponds to the "Project-URL" metadata fields:

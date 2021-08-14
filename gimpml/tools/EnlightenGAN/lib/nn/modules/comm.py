@@ -3,7 +3,7 @@
 # Author : Jiayuan Mao
 # Email  : maojiayuan@gmail.com
 # Date   : 27/01/2018
-# 
+#
 # This file is part of Synchronized-BatchNorm-PyTorch.
 # https://github.com/vacancy/Synchronized-BatchNorm-PyTorch
 # Distributed under MIT License.
@@ -12,7 +12,7 @@ import queue
 import collections
 import threading
 
-__all__ = ['FutureResult', 'SlavePipe', 'SyncMaster']
+__all__ = ["FutureResult", "SlavePipe", "SyncMaster"]
 
 
 class FutureResult(object):
@@ -25,7 +25,7 @@ class FutureResult(object):
 
     def put(self, result):
         with self._lock:
-            assert self._result is None, 'Previous result has\'t been fetched.'
+            assert self._result is None, "Previous result has't been fetched."
             self._result = result
             self._cond.notify()
 
@@ -39,8 +39,10 @@ class FutureResult(object):
             return res
 
 
-_MasterRegistry = collections.namedtuple('MasterRegistry', ['result'])
-_SlavePipeBase = collections.namedtuple('_SlavePipeBase', ['identifier', 'queue', 'result'])
+_MasterRegistry = collections.namedtuple("MasterRegistry", ["result"])
+_SlavePipeBase = collections.namedtuple(
+    "_SlavePipeBase", ["identifier", "queue", "result"]
+)
 
 
 class SlavePipe(_SlavePipeBase):
@@ -86,7 +88,7 @@ class SyncMaster(object):
 
         """
         if self._activated:
-            assert self._queue.empty(), 'Queue is not clean before next initialization.'
+            assert self._queue.empty(), "Queue is not clean before next initialization."
             self._activated = False
             self._registry.clear()
         future = FutureResult()
@@ -114,7 +116,7 @@ class SyncMaster(object):
             intermediates.append(self._queue.get())
 
         results = self._master_callback(intermediates)
-        assert results[0][0] == 0, 'The first result should belongs to the master.'
+        assert results[0][0] == 0, "The first result should belongs to the master."
 
         for i, res in results:
             if i == 0:

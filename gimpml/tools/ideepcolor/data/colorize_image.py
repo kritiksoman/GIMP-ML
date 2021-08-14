@@ -1,4 +1,5 @@
 import numpy as np
+
 # import matplotlib.pyplot as plt
 # from skimage import color
 # from sklearn.cluster import KMeans
@@ -6,40 +7,41 @@ import os
 import cv2
 from scipy.ndimage.interpolation import zoom
 
+
 def create_temp_directory(path_template, N=1e8):
     print(path_template)
     cur_path = path_template % np.random.randint(0, N)
-    while(os.path.exists(cur_path)):
+    while os.path.exists(cur_path):
         cur_path = path_template % np.random.randint(0, N)
-    print('Creating directory: %s' % cur_path)
+    print("Creating directory: %s" % cur_path)
     os.mkdir(cur_path)
     return cur_path
 
 
 def lab2rgb_transpose(img_l, img_ab):
-    ''' INPUTS
-            img_l     1xXxX     [0,100]
-            img_ab     2xXxX     [-100,100]
-        OUTPUTS
-            returned value is XxXx3 '''
+    """INPUTS
+        img_l     1xXxX     [0,100]
+        img_ab     2xXxX     [-100,100]
+    OUTPUTS
+        returned value is XxXx3"""
     pred_lab = np.concatenate((img_l, img_ab), axis=0).transpose((1, 2, 0))
     # im = color.lab2rgb(pred_lab)
-    im = cv2.cvtColor(pred_lab.astype('float32'), cv2.COLOR_LAB2RGB)
-    pred_rgb = (np.clip(im, 0, 1) * 255).astype('uint8')
+    im = cv2.cvtColor(pred_lab.astype("float32"), cv2.COLOR_LAB2RGB)
+    pred_rgb = (np.clip(im, 0, 1) * 255).astype("uint8")
     return pred_rgb
 
 
 def rgb2lab_transpose(img_rgb):
-    ''' INPUTS
-            img_rgb XxXx3
-        OUTPUTS
-            returned value is 3xXxX '''
+    """INPUTS
+        img_rgb XxXx3
+    OUTPUTS
+        returned value is 3xXxX"""
     # im=color.rgb2lab(img_rgb)
-    im = cv2.cvtColor(img_rgb.astype(np.float32)/255, cv2.COLOR_RGB2LAB)
+    im = cv2.cvtColor(img_rgb.astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
     return im.transpose((2, 0, 1))
 
 
-class ColorizeImageBase():
+class ColorizeImageBase:
     def __init__(self, Xd=256, Xfullres_max=10000):
         self.Xd = Xd
         self.img_l_set = False
@@ -84,11 +86,11 @@ class ColorizeImageBase():
         #     mask     1xXxX    input mask, indicating which points have been provided
         # assumes self.img_l_mc has been set
 
-        if(not self.img_l_set):
-            print('I need to have an image!')
+        if not self.img_l_set:
+            print("I need to have an image!")
             return -1
-        if(not self.net_set):
-            print('I need to have a net!')
+        if not self.net_set:
+            print("I need to have a net!")
             return -1
 
         self.input_ab = input_ab
@@ -102,11 +104,11 @@ class ColorizeImageBase():
             cur_result = self.get_img_forward()
         else:
             cur_result = result.copy()
-        SE_map = (1. * self.img_rgb - cur_result)**2
+        SE_map = (1.0 * self.img_rgb - cur_result) ** 2
         cur_MSE = np.mean(SE_map)
-        cur_PSNR = 20 * np.log10(255. / np.sqrt(cur_MSE))
+        cur_PSNR = 20 * np.log10(255.0 / np.sqrt(cur_MSE))
         if return_SE_map:
-            return(cur_PSNR, SE_map)
+            return (cur_PSNR, SE_map)
         else:
             return cur_PSNR
 
@@ -120,20 +122,31 @@ class ColorizeImageBase():
 
     def get_img_gray_fullres(self):
         # Get black and white image
-        return lab2rgb_transpose(self.img_l_fullres, np.zeros((2, self.img_l_fullres.shape[1], self.img_l_fullres.shape[2])))
+        return lab2rgb_transpose(
+            self.img_l_fullres,
+            np.zeros((2, self.img_l_fullres.shape[1], self.img_l_fullres.shape[2])),
+        )
 
     def get_img_fullres(self):
         # This assumes self.img_l_fullres, self.output_ab are set.
         # Typically, this means that set_image() and net_forward()
         # have been called.
         # bilinear upsample
-        zoom_factor = (1, 1. * self.img_l_fullres.shape[1] / self.output_ab.shape[1], 1. * self.img_l_fullres.shape[2] / self.output_ab.shape[2])
+        zoom_factor = (
+            1,
+            1.0 * self.img_l_fullres.shape[1] / self.output_ab.shape[1],
+            1.0 * self.img_l_fullres.shape[2] / self.output_ab.shape[2],
+        )
         output_ab_fullres = zoom(self.output_ab, zoom_factor, order=1)
 
         return lab2rgb_transpose(self.img_l_fullres, output_ab_fullres)
 
     def get_input_img_fullres(self):
-        zoom_factor = (1, 1. * self.img_l_fullres.shape[1] / self.input_ab.shape[1], 1. * self.img_l_fullres.shape[2] / self.input_ab.shape[2])
+        zoom_factor = (
+            1,
+            1.0 * self.img_l_fullres.shape[1] / self.input_ab.shape[1],
+            1.0 * self.img_l_fullres.shape[2] / self.input_ab.shape[2],
+        )
         input_ab_fullres = zoom(self.input_ab, zoom_factor, order=1)
         return lab2rgb_transpose(self.img_l_fullres, input_ab_fullres)
 
@@ -142,19 +155,32 @@ class ColorizeImageBase():
 
     def get_img_mask(self):
         # Get black and white image
-        return lab2rgb_transpose(100. * (1 - self.input_mask), np.zeros((2, self.Xd, self.Xd)))
+        return lab2rgb_transpose(
+            100.0 * (1 - self.input_mask), np.zeros((2, self.Xd, self.Xd))
+        )
 
     def get_img_mask_fullres(self):
         # Get black and white image
-        zoom_factor = (1, 1. * self.img_l_fullres.shape[1] / self.input_ab.shape[1], 1. * self.img_l_fullres.shape[2] / self.input_ab.shape[2])
+        zoom_factor = (
+            1,
+            1.0 * self.img_l_fullres.shape[1] / self.input_ab.shape[1],
+            1.0 * self.img_l_fullres.shape[2] / self.input_ab.shape[2],
+        )
         input_mask_fullres = zoom(self.input_mask, zoom_factor, order=0)
-        return lab2rgb_transpose(100. * (1 - input_mask_fullres), np.zeros((2, input_mask_fullres.shape[1], input_mask_fullres.shape[2])))
+        return lab2rgb_transpose(
+            100.0 * (1 - input_mask_fullres),
+            np.zeros((2, input_mask_fullres.shape[1], input_mask_fullres.shape[2])),
+        )
 
     def get_sup_img(self):
         return lab2rgb_transpose(50 * self.input_mask, self.input_ab)
 
     def get_sup_fullres(self):
-        zoom_factor = (1, 1. * self.img_l_fullres.shape[1] / self.output_ab.shape[1], 1. * self.img_l_fullres.shape[2] / self.output_ab.shape[2])
+        zoom_factor = (
+            1,
+            1.0 * self.img_l_fullres.shape[1] / self.output_ab.shape[1],
+            1.0 * self.img_l_fullres.shape[2] / self.output_ab.shape[2],
+        )
         input_mask_fullres = zoom(self.input_mask, zoom_factor, order=0)
         input_ab_fullres = zoom(self.input_ab, zoom_factor, order=0)
         return lab2rgb_transpose(50 * input_mask_fullres, input_ab_fullres)
@@ -166,19 +192,25 @@ class ColorizeImageBase():
         Yfullres = self.img_rgb_fullres.shape[1]
         if Xfullres > self.Xfullres_max or Yfullres > self.Xfullres_max:
             if Xfullres > Yfullres:
-                zoom_factor = 1. * self.Xfullres_max / Xfullres
+                zoom_factor = 1.0 * self.Xfullres_max / Xfullres
             else:
-                zoom_factor = 1. * self.Xfullres_max / Yfullres
-            self.img_rgb_fullres = zoom(self.img_rgb_fullres, (zoom_factor, zoom_factor, 1), order=1)
+                zoom_factor = 1.0 * self.Xfullres_max / Yfullres
+            self.img_rgb_fullres = zoom(
+                self.img_rgb_fullres, (zoom_factor, zoom_factor, 1), order=1
+            )
 
-        self.img_lab_fullres = cv2.cvtColor(self.img_rgb_fullres.astype(np.float32) / 255, cv2.COLOR_RGB2LAB).transpose((2, 0, 1))
+        self.img_lab_fullres = cv2.cvtColor(
+            self.img_rgb_fullres.astype(np.float32) / 255, cv2.COLOR_RGB2LAB
+        ).transpose((2, 0, 1))
         # self.img_lab_fullres = color.rgb2lab(self.img_rgb_fullres).transpose((2, 0, 1))
         self.img_l_fullres = self.img_lab_fullres[[0], :, :]
         self.img_ab_fullres = self.img_lab_fullres[1:, :, :]
 
     def _set_img_lab_(self):
         # set self.img_lab from self.im_rgb
-        self.img_lab = cv2.cvtColor(self.img_rgb.astype(np.float32) / 255, cv2.COLOR_RGB2LAB).transpose((2, 0, 1))
+        self.img_lab = cv2.cvtColor(
+            self.img_rgb.astype(np.float32) / 255, cv2.COLOR_RGB2LAB
+        ).transpose((2, 0, 1))
         # self.img_lab = color.rgb2lab(self.img_rgb).transpose((2, 0, 1))
         self.img_l = self.img_lab[[0], :, :]
         self.img_ab = self.img_lab[1:, :, :]
@@ -186,8 +218,19 @@ class ColorizeImageBase():
     def _set_img_lab_mc_(self):
         # set self.img_lab_mc from self.img_lab
         # lab image, mean centered [XxYxX]
-        self.img_lab_mc = self.img_lab / np.array((self.l_norm, self.ab_norm, self.ab_norm))[:, np.newaxis, np.newaxis] - np.array(
-            (self.l_mean / self.l_norm, self.ab_mean / self.ab_norm, self.ab_mean / self.ab_norm))[:, np.newaxis, np.newaxis]
+        self.img_lab_mc = (
+            self.img_lab
+            / np.array((self.l_norm, self.ab_norm, self.ab_norm))[
+                :, np.newaxis, np.newaxis
+            ]
+            - np.array(
+                (
+                    self.l_mean / self.l_norm,
+                    self.ab_mean / self.ab_norm,
+                    self.ab_mean / self.ab_norm,
+                )
+            )[:, np.newaxis, np.newaxis]
+        )
         self._set_img_l_()
 
     def _set_img_l_(self):
@@ -206,30 +249,37 @@ class ColorizeImageTorch(ColorizeImageBase):
     def __init__(self, Xd=256, maskcent=False):
         # print('ColorizeImageTorch instantiated')
         ColorizeImageBase.__init__(self, Xd)
-        self.l_norm = 1.
-        self.ab_norm = 1.
-        self.l_mean = 50.
-        self.ab_mean = 0.
-        self.mask_mult = 1.
-        self.mask_cent = .5 if maskcent else 0
+        self.l_norm = 1.0
+        self.ab_norm = 1.0
+        self.l_mean = 50.0
+        self.ab_mean = 0.0
+        self.mask_mult = 1.0
+        self.mask_cent = 0.5 if maskcent else 0
 
         # Load grid properties
-        self.pts_in_hull = np.array(np.meshgrid(np.arange(-110, 120, 10), np.arange(-110, 120, 10))).reshape((2, 529)).T
+        self.pts_in_hull = (
+            np.array(np.meshgrid(np.arange(-110, 120, 10), np.arange(-110, 120, 10)))
+            .reshape((2, 529))
+            .T
+        )
 
     # ***** Net preparation *****
-    def prep_net(self, gpu_id=None, path='', dist=False):
+    def prep_net(self, gpu_id=None, path="", dist=False):
         import torch
         import pytorch.model as model
+
         # print('path = %s' % path)
         # print('Model set! dist mode? ', dist)
         self.net = model.SIGGRAPHGenerator(dist=dist)
         state_dict = torch.load(path)
-        if hasattr(state_dict, '_metadata'):
+        if hasattr(state_dict, "_metadata"):
             del state_dict._metadata
 
         # patch InstanceNorm checkpoints prior to 0.4
-        for key in list(state_dict.keys()):  # need to copy keys here because we mutate in loop
-            self.__patch_instance_norm_state_dict(state_dict, self.net, key.split('.'))
+        for key in list(
+            state_dict.keys()
+        ):  # need to copy keys here because we mutate in loop
+            self.__patch_instance_norm_state_dict(state_dict, self.net, key.split("."))
         self.net.load_state_dict(state_dict)
         if gpu_id != None:
             self.net.cuda()
@@ -239,15 +289,19 @@ class ColorizeImageTorch(ColorizeImageBase):
     def __patch_instance_norm_state_dict(self, state_dict, module, keys, i=0):
         key = keys[i]
         if i + 1 == len(keys):  # at the end, pointing to a parameter/buffer
-            if module.__class__.__name__.startswith('InstanceNorm') and \
-                    (key == 'running_mean' or key == 'running_var'):
+            if module.__class__.__name__.startswith("InstanceNorm") and (
+                key == "running_mean" or key == "running_var"
+            ):
                 if getattr(module, key) is None:
-                    state_dict.pop('.'.join(keys))
-            if module.__class__.__name__.startswith('InstanceNorm') and \
-               (key == 'num_batches_tracked'):
-                state_dict.pop('.'.join(keys))
+                    state_dict.pop(".".join(keys))
+            if module.__class__.__name__.startswith("InstanceNorm") and (
+                key == "num_batches_tracked"
+            ):
+                state_dict.pop(".".join(keys))
         else:
-            self.__patch_instance_norm_state_dict(state_dict, getattr(module, key), keys, i + 1)
+            self.__patch_instance_norm_state_dict(
+                state_dict, getattr(module, key), keys, i + 1
+            )
 
     # ***** Call forward *****
     def net_forward(self, input_ab, input_mask, f):
@@ -264,7 +318,13 @@ class ColorizeImageTorch(ColorizeImageBase):
         # return prediction
         # self.net.blobs['data_l_ab_mask'].data[...] = net_input_prepped
         # embed()
-        output_ab = self.net.forward(self.img_l_mc, self.input_ab_mc, self.input_mask_mult, self.mask_cent,f)[0, :, :, :].cpu().data.numpy()
+        output_ab = (
+            self.net.forward(
+                self.img_l_mc, self.input_ab_mc, self.input_mask_mult, self.mask_cent, f
+            )[0, :, :, :]
+            .cpu()
+            .data.numpy()
+        )
         self.output_rgb = lab2rgb_transpose(self.img_l, output_ab)
         # self.output_rgb = lab2rgb_transpose(self.img_l, self.net.blobs[self.pred_ab_layer].data[0, :, :, :])
 
@@ -284,7 +344,11 @@ class ColorizeImageTorchDist(ColorizeImageTorch):
     def __init__(self, Xd=256, maskcent=False):
         ColorizeImageTorch.__init__(self, Xd)
         self.dist_ab_set = False
-        self.pts_grid = np.array(np.meshgrid(np.arange(-110, 120, 10), np.arange(-110, 120, 10))).reshape((2, 529)).T
+        self.pts_grid = (
+            np.array(np.meshgrid(np.arange(-110, 120, 10), np.arange(-110, 120, 10)))
+            .reshape((2, 529))
+            .T
+        )
         self.in_hull = np.ones(529, dtype=bool)
         self.AB = self.pts_grid.shape[0]  # 529
         self.A = int(np.sqrt(self.AB))  # 23
@@ -292,9 +356,9 @@ class ColorizeImageTorchDist(ColorizeImageTorch):
         self.dist_ab_full = np.zeros((self.AB, self.Xd, self.Xd))
         self.dist_ab_grid = np.zeros((self.A, self.B, self.Xd, self.Xd))
         self.dist_entropy = np.zeros((self.Xd, self.Xd))
-        self.mask_cent = .5 if maskcent else 0
+        self.mask_cent = 0.5 if maskcent else 0
 
-    def prep_net(self, gpu_id=None, path='', dist=True, S=.2):
+    def prep_net(self, gpu_id=None, path="", dist=True, S=0.2):
         ColorizeImageTorch.prep_net(self, gpu_id=gpu_id, path=path, dist=dist)
         # set S somehow
 
@@ -309,7 +373,9 @@ class ColorizeImageTorchDist(ColorizeImageTorch):
             return -1
 
         # set distribution
-        (function_return, self.dist_ab) = self.net.forward(self.img_l_mc, self.input_ab_mc, self.input_mask_mult, self.mask_cent)
+        (function_return, self.dist_ab) = self.net.forward(
+            self.img_l_mc, self.input_ab_mc, self.input_mask_mult, self.mask_cent
+        )
         function_return = function_return[0, :, :, :].cpu().data.numpy()
         self.dist_ab = self.dist_ab[0, :, :, :].cpu().data.numpy()
         self.dist_ab_set = True
@@ -318,7 +384,9 @@ class ColorizeImageTorchDist(ColorizeImageTorch):
         self.dist_ab_full[self.in_hull, :, :] = self.dist_ab
 
         # gridded, AxBxXxX, A = 23
-        self.dist_ab_grid = self.dist_ab_full.reshape((self.A, self.B, self.Xd, self.Xd))
+        self.dist_ab_grid = self.dist_ab_full.reshape(
+            (self.A, self.B, self.Xd, self.Xd)
+        )
 
         # return
         return function_return
@@ -378,24 +446,28 @@ class ColorizeImageTorchDist(ColorizeImageTorch):
 
 class ColorizeImageCaffe(ColorizeImageBase):
     def __init__(self, Xd=256):
-        print('ColorizeImageCaffe instantiated')
+        print("ColorizeImageCaffe instantiated")
         ColorizeImageBase.__init__(self, Xd)
-        self.l_norm = 1.
-        self.ab_norm = 1.
-        self.l_mean = 50.
-        self.ab_mean = 0.
-        self.mask_mult = 110.
+        self.l_norm = 1.0
+        self.ab_norm = 1.0
+        self.l_mean = 50.0
+        self.ab_mean = 0.0
+        self.mask_mult = 110.0
 
-        self.pred_ab_layer = 'pred_ab'  # predicted ab layer
+        self.pred_ab_layer = "pred_ab"  # predicted ab layer
 
         # Load grid properties
-        self.pts_in_hull_path = './data/color_bins/pts_in_hull.npy'
+        self.pts_in_hull_path = "./data/color_bins/pts_in_hull.npy"
         self.pts_in_hull = np.load(self.pts_in_hull_path)  # 313x2, in-gamut
 
     # ***** Net preparation *****
-    def prep_net(self, gpu_id, prototxt_path='', caffemodel_path=''):
+    def prep_net(self, gpu_id, prototxt_path="", caffemodel_path=""):
         import caffe
-        print('gpu_id = %d, net_path = %s, model_path = %s' % (gpu_id, prototxt_path, caffemodel_path))
+
+        print(
+            "gpu_id = %d, net_path = %s, model_path = %s"
+            % (gpu_id, prototxt_path, caffemodel_path)
+        )
         if gpu_id == -1:
             caffe.set_mode_cpu()
         else:
@@ -406,15 +478,25 @@ class ColorizeImageCaffe(ColorizeImageBase):
         self.net_set = True
 
         # automatically set cluster centers
-        if len(self.net.params[self.pred_ab_layer][0].data[...].shape) == 4 and self.net.params[self.pred_ab_layer][0].data[...].shape[1] == 313:
-            print('Setting ab cluster centers in layer: %s' % self.pred_ab_layer)
+        if (
+            len(self.net.params[self.pred_ab_layer][0].data[...].shape) == 4
+            and self.net.params[self.pred_ab_layer][0].data[...].shape[1] == 313
+        ):
+            print("Setting ab cluster centers in layer: %s" % self.pred_ab_layer)
             self.net.params[self.pred_ab_layer][0].data[:, :, 0, 0] = self.pts_in_hull.T
 
         # automatically set upsampling kernel
         for layer in self.net._layer_names:
-            if layer[-3:] == '_us':
-                print('Setting upsampling layer kernel: %s' % layer)
-                self.net.params[layer][0].data[:, 0, :, :] = np.array(((.25, .5, .25, 0), (.5, 1., .5, 0), (.25, .5, .25, 0), (0, 0, 0, 0)))[np.newaxis, :, :]
+            if layer[-3:] == "_us":
+                print("Setting upsampling layer kernel: %s" % layer)
+                self.net.params[layer][0].data[:, 0, :, :] = np.array(
+                    (
+                        (0.25, 0.5, 0.25, 0),
+                        (0.5, 1.0, 0.5, 0),
+                        (0.25, 0.5, 0.25, 0),
+                        (0, 0, 0, 0),
+                    )
+                )[np.newaxis, :, :]
 
     # ***** Call forward *****
     def net_forward(self, input_ab, input_mask):
@@ -426,13 +508,17 @@ class ColorizeImageCaffe(ColorizeImageBase):
         if ColorizeImageBase.net_forward(self, input_ab, input_mask) == -1:
             return -1
 
-        net_input_prepped = np.concatenate((self.img_l_mc, self.input_ab_mc, self.input_mask_mult), axis=0)
+        net_input_prepped = np.concatenate(
+            (self.img_l_mc, self.input_ab_mc, self.input_mask_mult), axis=0
+        )
 
-        self.net.blobs['data_l_ab_mask'].data[...] = net_input_prepped
+        self.net.blobs["data_l_ab_mask"].data[...] = net_input_prepped
         self.net.forward()
 
         # return prediction
-        self.output_rgb = lab2rgb_transpose(self.img_l, self.net.blobs[self.pred_ab_layer].data[0, :, :, :])
+        self.output_rgb = lab2rgb_transpose(
+            self.img_l, self.net.blobs[self.pred_ab_layer].data[0, :, :, :]
+        )
 
         self._set_out_ab_()
         return self.output_rgb
@@ -450,14 +536,14 @@ class ColorizeImageCaffeGlobDist(ColorizeImageCaffe):
     # Caffe colorization, with additional global histogram as input
     def __init__(self, Xd=256):
         ColorizeImageCaffe.__init__(self, Xd)
-        self.glob_mask_mult = 1.
-        self.glob_layer = 'glob_ab_313_mask'
+        self.glob_mask_mult = 1.0
+        self.glob_layer = "glob_ab_313_mask"
 
     def net_forward(self, input_ab, input_mask, glob_dist=-1):
         # glob_dist is 313 array, or -1
         if np.array(glob_dist).flatten()[0] == -1:  # run without this, zero it out
-            self.net.blobs[self.glob_layer].data[0, :-1, 0, 0] = 0.
-            self.net.blobs[self.glob_layer].data[0, -1, 0, 0] = 0.
+            self.net.blobs[self.glob_layer].data[0, :-1, 0, 0] = 0.0
+            self.net.blobs[self.glob_layer].data[0, -1, 0, 0] = 0.0
         else:  # run conditioned on global histogram
             self.net.blobs[self.glob_layer].data[0, :-1, 0, 0] = glob_dist
             self.net.blobs[self.glob_layer].data[0, -1, 0, 0] = self.glob_mask_mult
@@ -472,10 +558,10 @@ class ColorizeImageCaffeDist(ColorizeImageCaffe):
     def __init__(self, Xd=256):
         ColorizeImageCaffe.__init__(self, Xd)
         self.dist_ab_set = False
-        self.scale_S_layer = 'scale_S'
-        self.dist_ab_S_layer = 'dist_ab_S'  # softened distribution layer
-        self.pts_grid = np.load('./data/color_bins/pts_grid.npy')  # 529x2, all points
-        self.in_hull = np.load('./data/color_bins/in_hull.npy')  # 529 bool
+        self.scale_S_layer = "scale_S"
+        self.dist_ab_S_layer = "dist_ab_S"  # softened distribution layer
+        self.pts_grid = np.load("./data/color_bins/pts_grid.npy")  # 529x2, all points
+        self.in_hull = np.load("./data/color_bins/in_hull.npy")  # 529 bool
         self.AB = self.pts_grid.shape[0]  # 529
         self.A = int(np.sqrt(self.AB))  # 23
         self.B = int(np.sqrt(self.AB))  # 23
@@ -483,8 +569,10 @@ class ColorizeImageCaffeDist(ColorizeImageCaffe):
         self.dist_ab_grid = np.zeros((self.A, self.B, self.Xd, self.Xd))
         self.dist_entropy = np.zeros((self.Xd, self.Xd))
 
-    def prep_net(self, gpu_id, prototxt_path='', caffemodel_path='', S=.2):
-        ColorizeImageCaffe.prep_net(self, gpu_id, prototxt_path=prototxt_path, caffemodel_path=caffemodel_path)
+    def prep_net(self, gpu_id, prototxt_path="", caffemodel_path="", S=0.2):
+        ColorizeImageCaffe.prep_net(
+            self, gpu_id, prototxt_path=prototxt_path, caffemodel_path=caffemodel_path
+        )
         self.S = S
         self.net.params[self.scale_S_layer][0].data[...] = S
 
@@ -507,7 +595,9 @@ class ColorizeImageCaffeDist(ColorizeImageCaffe):
         self.dist_ab_full[self.in_hull, :, :] = self.dist_ab
 
         # gridded, AxBxXxX, A = 23
-        self.dist_ab_grid = self.dist_ab_full.reshape((self.A, self.B, self.Xd, self.Xd))
+        self.dist_ab_grid = self.dist_ab_full.reshape(
+            (self.A, self.B, self.Xd, self.Xd)
+        )
 
         # return
         return function_return
@@ -551,15 +641,15 @@ class ColorizeImageCaffeDist(ColorizeImageCaffe):
         self.dist_entropy = np.sum(self.dist_ab * np.log(self.dist_ab), axis=0)
 
     # def plot_dist_grid(self, h, w):
-        # Plots distribution at a given point
-        # plt.figure()
-        # plt.imshow(self.dist_ab_grid[:, :, h, w], extent=[-110, 110, 110, -110], interpolation='nearest')
-        # plt.colorbar()
-        # plt.ylabel('a')
-        # plt.xlabel('b')
+    # Plots distribution at a given point
+    # plt.figure()
+    # plt.imshow(self.dist_ab_grid[:, :, h, w], extent=[-110, 110, 110, -110], interpolation='nearest')
+    # plt.colorbar()
+    # plt.ylabel('a')
+    # plt.xlabel('b')
 
     # def plot_dist_entropy(self):
-        # Plots distribution at a given point
-        # plt.figure()
-        # plt.imshow(-self.dist_entropy, interpolation='nearest')
-        # plt.colorbar()
+    # Plots distribution at a given point
+    # plt.figure()
+    # plt.imshow(-self.dist_entropy, interpolation='nearest')
+    # plt.colorbar()

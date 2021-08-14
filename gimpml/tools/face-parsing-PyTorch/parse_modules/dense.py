@@ -7,7 +7,9 @@ from .bn import ABN
 
 
 class DenseModule(nn.Module):
-    def __init__(self, in_channels, growth, layers, bottleneck_factor=4, norm_act=ABN, dilation=1):
+    def __init__(
+        self, in_channels, growth, layers, bottleneck_factor=4, norm_act=ABN, dilation=1
+    ):
         super(DenseModule, self).__init__()
         self.in_channels = in_channels
         self.growth = growth
@@ -16,15 +18,44 @@ class DenseModule(nn.Module):
         self.convs1 = nn.ModuleList()
         self.convs3 = nn.ModuleList()
         for i in range(self.layers):
-            self.convs1.append(nn.Sequential(OrderedDict([
-                ("bn", norm_act(in_channels)),
-                ("conv", nn.Conv2d(in_channels, self.growth * bottleneck_factor, 1, bias=False))
-            ])))
-            self.convs3.append(nn.Sequential(OrderedDict([
-                ("bn", norm_act(self.growth * bottleneck_factor)),
-                ("conv", nn.Conv2d(self.growth * bottleneck_factor, self.growth, 3, padding=dilation, bias=False,
-                                   dilation=dilation))
-            ])))
+            self.convs1.append(
+                nn.Sequential(
+                    OrderedDict(
+                        [
+                            ("bn", norm_act(in_channels)),
+                            (
+                                "conv",
+                                nn.Conv2d(
+                                    in_channels,
+                                    self.growth * bottleneck_factor,
+                                    1,
+                                    bias=False,
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            )
+            self.convs3.append(
+                nn.Sequential(
+                    OrderedDict(
+                        [
+                            ("bn", norm_act(self.growth * bottleneck_factor)),
+                            (
+                                "conv",
+                                nn.Conv2d(
+                                    self.growth * bottleneck_factor,
+                                    self.growth,
+                                    3,
+                                    padding=dilation,
+                                    bias=False,
+                                    dilation=dilation,
+                                ),
+                            ),
+                        ]
+                    )
+                )
+            )
             in_channels += self.growth
 
     @property

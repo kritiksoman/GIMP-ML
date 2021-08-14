@@ -32,12 +32,10 @@ class ConvRelu(nn.Module):
 
 
 class UNetSEResNext(nn.Module):
-
-    def __init__(self, num_classes=3, num_filters=32,
-                 pretrained=True, is_deconv=True):
+    def __init__(self, num_classes=3, num_filters=32, pretrained=True, is_deconv=True):
         super().__init__()
         self.num_classes = num_classes
-        pretrain = 'imagenet' if pretrained is True else None
+        pretrain = "imagenet" if pretrained is True else None
         self.encoder = se_resnext50_32x4d(num_classes=1000, pretrained=pretrain)
         bottom_channel_nr = 2048
 
@@ -52,17 +50,41 @@ class UNetSEResNext(nn.Module):
         self.conv5 = self.encoder.layer4
         # self.se_e5 = SCSEBlock(512 * 4)
 
-        self.center = DecoderCenter(bottom_channel_nr, num_filters * 8 * 2, num_filters * 8, False)
+        self.center = DecoderCenter(
+            bottom_channel_nr, num_filters * 8 * 2, num_filters * 8, False
+        )
 
-        self.dec5 = DecoderBlockV(bottom_channel_nr + num_filters * 8, num_filters * 8 * 2, num_filters * 2, is_deconv)
+        self.dec5 = DecoderBlockV(
+            bottom_channel_nr + num_filters * 8,
+            num_filters * 8 * 2,
+            num_filters * 2,
+            is_deconv,
+        )
         # self.se_d5 = SCSEBlock(num_filters * 2)
-        self.dec4 = DecoderBlockV(bottom_channel_nr // 2 + num_filters * 2, num_filters * 8, num_filters * 2, is_deconv)
+        self.dec4 = DecoderBlockV(
+            bottom_channel_nr // 2 + num_filters * 2,
+            num_filters * 8,
+            num_filters * 2,
+            is_deconv,
+        )
         # self.se_d4 = SCSEBlock(num_filters * 2)
-        self.dec3 = DecoderBlockV(bottom_channel_nr // 4 + num_filters * 2, num_filters * 4, num_filters * 2, is_deconv)
+        self.dec3 = DecoderBlockV(
+            bottom_channel_nr // 4 + num_filters * 2,
+            num_filters * 4,
+            num_filters * 2,
+            is_deconv,
+        )
         # self.se_d3 = SCSEBlock(num_filters * 2)
-        self.dec2 = DecoderBlockV(bottom_channel_nr // 8 + num_filters * 2, num_filters * 2, num_filters * 2, is_deconv)
+        self.dec2 = DecoderBlockV(
+            bottom_channel_nr // 8 + num_filters * 2,
+            num_filters * 2,
+            num_filters * 2,
+            is_deconv,
+        )
         # self.se_d2 = SCSEBlock(num_filters * 2)
-        self.dec1 = DecoderBlockV(num_filters * 2, num_filters, num_filters * 2, is_deconv)
+        self.dec1 = DecoderBlockV(
+            num_filters * 2, num_filters, num_filters * 2, is_deconv
+        )
         # self.se_d1 = SCSEBlock(num_filters * 2)
         self.dec0 = ConvRelu(num_filters * 10, num_filters * 2)
         self.final = nn.Conv2d(num_filters * 2, num_classes, kernel_size=1)
@@ -91,13 +113,16 @@ class UNetSEResNext(nn.Module):
         dec1 = self.dec1(dec2)
         # dec1 = self.se_d1(dec1)
 
-        f = torch.cat((
-            dec1,
-            F.upsample(dec2, scale_factor=2, mode='bilinear', align_corners=False),
-            F.upsample(dec3, scale_factor=4, mode='bilinear', align_corners=False),
-            F.upsample(dec4, scale_factor=8, mode='bilinear', align_corners=False),
-            F.upsample(dec5, scale_factor=16, mode='bilinear', align_corners=False),
-        ), 1)
+        f = torch.cat(
+            (
+                dec1,
+                F.upsample(dec2, scale_factor=2, mode="bilinear", align_corners=False),
+                F.upsample(dec3, scale_factor=4, mode="bilinear", align_corners=False),
+                F.upsample(dec4, scale_factor=8, mode="bilinear", align_corners=False),
+                F.upsample(dec5, scale_factor=16, mode="bilinear", align_corners=False),
+            ),
+            1,
+        )
 
         dec0 = self.dec0(f)
 
@@ -112,15 +137,15 @@ class DecoderBlockV(nn.Module):
         if is_deconv:
             self.block = nn.Sequential(
                 ConvRelu(in_channels, middle_channels),
-                nn.ConvTranspose2d(middle_channels, out_channels, kernel_size=4, stride=2,
-                                   padding=1),
+                nn.ConvTranspose2d(
+                    middle_channels, out_channels, kernel_size=4, stride=2, padding=1
+                ),
                 nn.InstanceNorm2d(out_channels, affine=False),
-                nn.ReLU(inplace=True)
-
+                nn.ReLU(inplace=True),
             )
         else:
             self.block = nn.Sequential(
-                nn.Upsample(scale_factor=2, mode='bilinear'),
+                nn.Upsample(scale_factor=2, mode="bilinear"),
                 ConvRelu(in_channels, middle_channels),
                 ConvRelu(middle_channels, out_channels),
             )
@@ -136,22 +161,22 @@ class DecoderCenter(nn.Module):
 
         if is_deconv:
             """
-                Paramaters for Deconvolution were chosen to avoid artifacts, following
-                link https://distill.pub/2016/deconv-checkerboard/
+            Paramaters for Deconvolution were chosen to avoid artifacts, following
+            link https://distill.pub/2016/deconv-checkerboard/
             """
 
             self.block = nn.Sequential(
                 ConvRelu(in_channels, middle_channels),
-                nn.ConvTranspose2d(middle_channels, out_channels, kernel_size=4, stride=2,
-                                   padding=1),
+                nn.ConvTranspose2d(
+                    middle_channels, out_channels, kernel_size=4, stride=2, padding=1
+                ),
                 nn.InstanceNorm2d(out_channels, affine=False),
-                nn.ReLU(inplace=True)
+                nn.ReLU(inplace=True),
             )
         else:
             self.block = nn.Sequential(
                 ConvRelu(in_channels, middle_channels),
-                ConvRelu(middle_channels, out_channels)
-
+                ConvRelu(middle_channels, out_channels),
             )
 
     def forward(self, x):

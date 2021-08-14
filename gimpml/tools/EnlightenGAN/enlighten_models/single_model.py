@@ -18,7 +18,7 @@ import sys
 
 class SingleModel(BaseModel):
     def name(self):
-        return 'SingleGANModel'
+        return "SingleGANModel"
 
     def initialize(self, opt):
         BaseModel.initialize(self, opt)
@@ -53,28 +53,51 @@ class SingleModel(BaseModel):
         # Code (paper): G_A (G), G_B (F), D_A (D_Y), D_B (D_X)
 
         skip = True if opt.skip > 0 else False
-        self.netG_A = networks.define_G(opt.input_nc, opt.output_nc,
-                                        opt.ngf, opt.which_model_netG, opt.norm, not opt.no_dropout, self.gpu_ids, skip=skip, opt=opt)
+        self.netG_A = networks.define_G(
+            opt.input_nc,
+            opt.output_nc,
+            opt.ngf,
+            opt.which_model_netG,
+            opt.norm,
+            not opt.no_dropout,
+            self.gpu_ids,
+            skip=skip,
+            opt=opt,
+        )
         # self.netG_B = networks.define_G(opt.output_nc, opt.input_nc,
         #                                 opt.ngf, opt.which_model_netG, opt.norm, not opt.no_dropout, self.gpu_ids, skip=False, opt=opt)
 
         if self.isTrain:
             use_sigmoid = opt.no_lsgan
-            self.netD_A = networks.define_D(opt.output_nc, opt.ndf,
-                                            opt.which_model_netD,
-                                            opt.n_layers_D, opt.norm, use_sigmoid, self.gpu_ids, False)
+            self.netD_A = networks.define_D(
+                opt.output_nc,
+                opt.ndf,
+                opt.which_model_netD,
+                opt.n_layers_D,
+                opt.norm,
+                use_sigmoid,
+                self.gpu_ids,
+                False,
+            )
             if self.opt.patchD:
-                self.netD_P = networks.define_D(opt.input_nc, opt.ndf,
-                                            opt.which_model_netD,
-                                            opt.n_layers_patchD, opt.norm, use_sigmoid, self.gpu_ids, True)
+                self.netD_P = networks.define_D(
+                    opt.input_nc,
+                    opt.ndf,
+                    opt.which_model_netD,
+                    opt.n_layers_patchD,
+                    opt.norm,
+                    use_sigmoid,
+                    self.gpu_ids,
+                    True,
+                )
         if not self.isTrain or opt.continue_train:
             which_epoch = opt.which_epoch
-            self.load_network(self.netG_A, 'G_A', which_epoch)
+            self.load_network(self.netG_A, "G_A", which_epoch)
             # self.load_network(self.netG_B, 'G_B', which_epoch)
             if self.isTrain:
-                self.load_network(self.netD_A, 'D_A', which_epoch)
+                self.load_network(self.netD_A, "D_A", which_epoch)
                 if self.opt.patchD:
-                    self.load_network(self.netD_P, 'D_P', which_epoch)
+                    self.load_network(self.netD_P, "D_P", which_epoch)
 
         if self.isTrain:
             self.old_lr = opt.lr
@@ -84,7 +107,9 @@ class SingleModel(BaseModel):
             if opt.use_wgan:
                 self.criterionGAN = networks.DiscLossWGANGP()
             else:
-                self.criterionGAN = networks.GANLoss(use_lsgan=not opt.no_lsgan, tensor=self.Tensor)
+                self.criterionGAN = networks.GANLoss(
+                    use_lsgan=not opt.no_lsgan, tensor=self.Tensor
+                )
             if opt.use_mse:
                 self.criterionCycle = torch.nn.MSELoss()
             else:
@@ -92,11 +117,16 @@ class SingleModel(BaseModel):
             self.criterionL1 = torch.nn.L1Loss()
             self.criterionIdt = torch.nn.L1Loss()
             # initialize optimizers
-            self.optimizer_G = torch.optim.Adam(self.netG_A.parameters(),
-                                                lr=opt.lr, betas=(opt.beta1, 0.999))
-            self.optimizer_D_A = torch.optim.Adam(self.netD_A.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+            self.optimizer_G = torch.optim.Adam(
+                self.netG_A.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999)
+            )
+            self.optimizer_D_A = torch.optim.Adam(
+                self.netD_A.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999)
+            )
             if self.opt.patchD:
-                self.optimizer_D_P = torch.optim.Adam(self.netD_P.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+                self.optimizer_D_P = torch.optim.Adam(
+                    self.netD_P.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999)
+                )
 
         # print('---------- Networks initialized -------------')
         # networks.print_network(self.netG_A)
@@ -115,49 +145,61 @@ class SingleModel(BaseModel):
         # print('-----------------------------------------------')
 
     def set_input(self, input):
-        AtoB = self.opt.which_direction == 'AtoB'
-        input_A = input['A' if AtoB else 'B']
-        input_B = input['B' if AtoB else 'A']
-        input_img = input['input_img']
-        input_A_gray = input['A_gray']
+        AtoB = self.opt.which_direction == "AtoB"
+        input_A = input["A" if AtoB else "B"]
+        input_B = input["B" if AtoB else "A"]
+        input_img = input["input_img"]
+        input_A_gray = input["A_gray"]
         self.input_A.resize_(input_A.size()).copy_(input_A)
         self.input_A_gray.resize_(input_A_gray.size()).copy_(input_A_gray)
         self.input_B.resize_(input_B.size()).copy_(input_B)
         self.input_img.resize_(input_img.size()).copy_(input_img)
-        self.image_paths = input['A_paths' if AtoB else 'B_paths']
-
-    
-
+        self.image_paths = input["A_paths" if AtoB else "B_paths"]
 
     def test(self):
         self.real_A = Variable(self.input_A, volatile=True)
         self.real_A_gray = Variable(self.input_A_gray, volatile=True)
         if self.opt.noise > 0:
-            self.noise = Variable(torch.cuda.FloatTensor(self.real_A.size()).normal_(mean=0, std=self.opt.noise/255.))
+            self.noise = Variable(
+                torch.cuda.FloatTensor(self.real_A.size()).normal_(
+                    mean=0, std=self.opt.noise / 255.0
+                )
+            )
             self.real_A = self.real_A + self.noise
         if self.opt.input_linear:
-            self.real_A = (self.real_A - torch.min(self.real_A))/(torch.max(self.real_A) - torch.min(self.real_A))
+            self.real_A = (self.real_A - torch.min(self.real_A)) / (
+                torch.max(self.real_A) - torch.min(self.real_A)
+            )
         # print(np.transpose(self.real_A.data[0].cpu().float().numpy(),(1,2,0))[:2][:2][:])
         if self.opt.skip == 1:
-            self.fake_B, self.latent_real_A = self.netG_A.forward(self.real_A, self.real_A_gray)
+            self.fake_B, self.latent_real_A = self.netG_A.forward(
+                self.real_A, self.real_A_gray
+            )
         else:
             self.fake_B = self.netG_A.forward(self.real_A, self.real_A_gray)
         # self.rec_A = self.netG_B.forward(self.fake_B)
 
         self.real_B = Variable(self.input_B, volatile=True)
 
-
     def predict(self):
         self.real_A = Variable(self.input_A, volatile=True)
         self.real_A_gray = Variable(self.input_A_gray, volatile=True)
         if self.opt.noise > 0:
-            self.noise = Variable(torch.cuda.FloatTensor(self.real_A.size()).normal_(mean=0, std=self.opt.noise/255.))
+            self.noise = Variable(
+                torch.cuda.FloatTensor(self.real_A.size()).normal_(
+                    mean=0, std=self.opt.noise / 255.0
+                )
+            )
             self.real_A = self.real_A + self.noise
         if self.opt.input_linear:
-            self.real_A = (self.real_A - torch.min(self.real_A))/(torch.max(self.real_A) - torch.min(self.real_A))
+            self.real_A = (self.real_A - torch.min(self.real_A)) / (
+                torch.max(self.real_A) - torch.min(self.real_A)
+            )
         # print(np.transpose(self.real_A.data[0].cpu().float().numpy(),(1,2,0))[:2][:2][:])
         if self.opt.skip == 1:
-            self.fake_B, self.latent_real_A = self.netG_A.forward(self.real_A, self.real_A_gray)
+            self.fake_B, self.latent_real_A = self.netG_A.forward(
+                self.real_A, self.real_A_gray
+            )
         else:
             self.fake_B = self.netG_A.forward(self.real_A, self.real_A_gray)
         # self.rec_A = self.netG_B.forward(self.fake_B)
@@ -175,7 +217,7 @@ class SingleModel(BaseModel):
         # else:
         #     return OrderedDict([('real_A', real_A), ('fake_B', fake_B)])
         # return OrderedDict([('fake_B', fake_B)])
-        return OrderedDict([('real_A', real_A), ('fake_B', fake_B)])
+        return OrderedDict([("real_A", real_A), ("fake_B", fake_B)])
 
     # get image paths
     def get_image_paths(self):
@@ -188,11 +230,16 @@ class SingleModel(BaseModel):
         if self.opt.use_wgan:
             loss_D_real = pred_real.mean()
             loss_D_fake = pred_fake.mean()
-            loss_D = loss_D_fake - loss_D_real + self.criterionGAN.calc_gradient_penalty(netD, 
-                                                real.data, fake.data)
+            loss_D = (
+                loss_D_fake
+                - loss_D_real
+                + self.criterionGAN.calc_gradient_penalty(netD, real.data, fake.data)
+            )
         elif self.opt.use_ragan and use_ragan:
-            loss_D = (self.criterionGAN(pred_real - torch.mean(pred_fake), True) +
-                                      self.criterionGAN(pred_fake - torch.mean(pred_real), False)) / 2
+            loss_D = (
+                self.criterionGAN(pred_real - torch.mean(pred_fake), True)
+                + self.criterionGAN(pred_fake - torch.mean(pred_real), False)
+            ) / 2
         else:
             loss_D_real = self.criterionGAN(pred_real, True)
             loss_D_fake = self.criterionGAN(pred_fake, False)
@@ -205,26 +252,34 @@ class SingleModel(BaseModel):
         fake_B = self.fake_B
         self.loss_D_A = self.backward_D_basic(self.netD_A, self.real_B, fake_B, True)
         self.loss_D_A.backward()
-    
+
     def backward_D_P(self):
         if self.opt.hybrid_loss:
-            loss_D_P = self.backward_D_basic(self.netD_P, self.real_patch, self.fake_patch, False)
+            loss_D_P = self.backward_D_basic(
+                self.netD_P, self.real_patch, self.fake_patch, False
+            )
             if self.opt.patchD_3 > 0:
                 for i in range(self.opt.patchD_3):
-                    loss_D_P += self.backward_D_basic(self.netD_P, self.real_patch_1[i], self.fake_patch_1[i], False)
-                self.loss_D_P = loss_D_P/float(self.opt.patchD_3 + 1)
+                    loss_D_P += self.backward_D_basic(
+                        self.netD_P, self.real_patch_1[i], self.fake_patch_1[i], False
+                    )
+                self.loss_D_P = loss_D_P / float(self.opt.patchD_3 + 1)
             else:
                 self.loss_D_P = loss_D_P
         else:
-            loss_D_P = self.backward_D_basic(self.netD_P, self.real_patch, self.fake_patch, True)
+            loss_D_P = self.backward_D_basic(
+                self.netD_P, self.real_patch, self.fake_patch, True
+            )
             if self.opt.patchD_3 > 0:
                 for i in range(self.opt.patchD_3):
-                    loss_D_P += self.backward_D_basic(self.netD_P, self.real_patch_1[i], self.fake_patch_1[i], True)
-                self.loss_D_P = loss_D_P/float(self.opt.patchD_3 + 1)
+                    loss_D_P += self.backward_D_basic(
+                        self.netD_P, self.real_patch_1[i], self.fake_patch_1[i], True
+                    )
+                self.loss_D_P = loss_D_P / float(self.opt.patchD_3 + 1)
             else:
                 self.loss_D_P = loss_D_P
         if self.opt.D_P_times2:
-            self.loss_D_P = self.loss_D_P*2
+            self.loss_D_P = self.loss_D_P * 2
         self.loss_D_P.backward()
 
     # def backward_D_B(self):
@@ -236,12 +291,20 @@ class SingleModel(BaseModel):
         self.real_A_gray = Variable(self.input_A_gray)
         self.real_img = Variable(self.input_img)
         if self.opt.noise > 0:
-            self.noise = Variable(torch.cuda.FloatTensor(self.real_A.size()).normal_(mean=0, std=self.opt.noise/255.))
+            self.noise = Variable(
+                torch.cuda.FloatTensor(self.real_A.size()).normal_(
+                    mean=0, std=self.opt.noise / 255.0
+                )
+            )
             self.real_A = self.real_A + self.noise
         if self.opt.input_linear:
-            self.real_A = (self.real_A - torch.min(self.real_A))/(torch.max(self.real_A) - torch.min(self.real_A))
+            self.real_A = (self.real_A - torch.min(self.real_A)) / (
+                torch.max(self.real_A) - torch.min(self.real_A)
+            )
         if self.opt.skip == 1:
-            self.fake_B, self.latent_real_A = self.netG_A.forward(self.real_img, self.real_A_gray)
+            self.fake_B, self.latent_real_A = self.netG_A.forward(
+                self.real_img, self.real_A_gray
+            )
         else:
             self.fake_B = self.netG_A.forward(self.real_img, self.real_A_gray)
         if self.opt.patchD:
@@ -250,12 +313,24 @@ class SingleModel(BaseModel):
             w_offset = random.randint(0, max(0, w - self.opt.patchSize - 1))
             h_offset = random.randint(0, max(0, h - self.opt.patchSize - 1))
 
-            self.fake_patch = self.fake_B[:,:, h_offset:h_offset + self.opt.patchSize,
-                   w_offset:w_offset + self.opt.patchSize]
-            self.real_patch = self.real_B[:,:, h_offset:h_offset + self.opt.patchSize,
-                   w_offset:w_offset + self.opt.patchSize]
-            self.input_patch = self.real_A[:,:, h_offset:h_offset + self.opt.patchSize,
-                   w_offset:w_offset + self.opt.patchSize]
+            self.fake_patch = self.fake_B[
+                :,
+                :,
+                h_offset : h_offset + self.opt.patchSize,
+                w_offset : w_offset + self.opt.patchSize,
+            ]
+            self.real_patch = self.real_B[
+                :,
+                :,
+                h_offset : h_offset + self.opt.patchSize,
+                w_offset : w_offset + self.opt.patchSize,
+            ]
+            self.input_patch = self.real_A[
+                :,
+                :,
+                h_offset : h_offset + self.opt.patchSize,
+                w_offset : w_offset + self.opt.patchSize,
+            ]
         if self.opt.patchD_3 > 0:
             self.fake_patch_1 = []
             self.real_patch_1 = []
@@ -265,12 +340,30 @@ class SingleModel(BaseModel):
             for i in range(self.opt.patchD_3):
                 w_offset_1 = random.randint(0, max(0, w - self.opt.patchSize - 1))
                 h_offset_1 = random.randint(0, max(0, h - self.opt.patchSize - 1))
-                self.fake_patch_1.append(self.fake_B[:,:, h_offset_1:h_offset_1 + self.opt.patchSize,
-                    w_offset_1:w_offset_1 + self.opt.patchSize])
-                self.real_patch_1.append(self.real_B[:,:, h_offset_1:h_offset_1 + self.opt.patchSize,
-                    w_offset_1:w_offset_1 + self.opt.patchSize])
-                self.input_patch_1.append(self.real_A[:,:, h_offset_1:h_offset_1 + self.opt.patchSize,
-                    w_offset_1:w_offset_1 + self.opt.patchSize])
+                self.fake_patch_1.append(
+                    self.fake_B[
+                        :,
+                        :,
+                        h_offset_1 : h_offset_1 + self.opt.patchSize,
+                        w_offset_1 : w_offset_1 + self.opt.patchSize,
+                    ]
+                )
+                self.real_patch_1.append(
+                    self.real_B[
+                        :,
+                        :,
+                        h_offset_1 : h_offset_1 + self.opt.patchSize,
+                        w_offset_1 : w_offset_1 + self.opt.patchSize,
+                    ]
+                )
+                self.input_patch_1.append(
+                    self.real_A[
+                        :,
+                        :,
+                        h_offset_1 : h_offset_1 + self.opt.patchSize,
+                        w_offset_1 : w_offset_1 + self.opt.patchSize,
+                    ]
+                )
 
             # w_offset_2 = random.randint(0, max(0, w - self.opt.patchSize - 1))
             # h_offset_2 = random.randint(0, max(0, h - self.opt.patchSize - 1))
@@ -288,12 +381,14 @@ class SingleModel(BaseModel):
         elif self.opt.use_ragan:
             pred_real = self.netD_A.forward(self.real_B)
 
-            self.loss_G_A = (self.criterionGAN(pred_real - torch.mean(pred_fake), False) +
-                                      self.criterionGAN(pred_fake - torch.mean(pred_real), True)) / 2
-            
+            self.loss_G_A = (
+                self.criterionGAN(pred_real - torch.mean(pred_fake), False)
+                + self.criterionGAN(pred_fake - torch.mean(pred_real), True)
+            ) / 2
+
         else:
             self.loss_G_A = self.criterionGAN(pred_fake, True)
-        
+
         loss_G_A = 0
         if self.opt.patchD:
             pred_fake_patch = self.netD_P.forward(self.fake_patch)
@@ -301,73 +396,120 @@ class SingleModel(BaseModel):
                 loss_G_A += self.criterionGAN(pred_fake_patch, True)
             else:
                 pred_real_patch = self.netD_P.forward(self.real_patch)
-                
-                loss_G_A += (self.criterionGAN(pred_real_patch - torch.mean(pred_fake_patch), False) +
-                                      self.criterionGAN(pred_fake_patch - torch.mean(pred_real_patch), True)) / 2
-        if self.opt.patchD_3 > 0:   
+
+                loss_G_A += (
+                    self.criterionGAN(
+                        pred_real_patch - torch.mean(pred_fake_patch), False
+                    )
+                    + self.criterionGAN(
+                        pred_fake_patch - torch.mean(pred_real_patch), True
+                    )
+                ) / 2
+        if self.opt.patchD_3 > 0:
             for i in range(self.opt.patchD_3):
                 pred_fake_patch_1 = self.netD_P.forward(self.fake_patch_1[i])
                 if self.opt.hybrid_loss:
                     loss_G_A += self.criterionGAN(pred_fake_patch_1, True)
                 else:
                     pred_real_patch_1 = self.netD_P.forward(self.real_patch_1[i])
-                    
-                    loss_G_A += (self.criterionGAN(pred_real_patch_1 - torch.mean(pred_fake_patch_1), False) +
-                                        self.criterionGAN(pred_fake_patch_1 - torch.mean(pred_real_patch_1), True)) / 2
-                    
+
+                    loss_G_A += (
+                        self.criterionGAN(
+                            pred_real_patch_1 - torch.mean(pred_fake_patch_1), False
+                        )
+                        + self.criterionGAN(
+                            pred_fake_patch_1 - torch.mean(pred_real_patch_1), True
+                        )
+                    ) / 2
+
             if not self.opt.D_P_times2:
-                self.loss_G_A += loss_G_A/float(self.opt.patchD_3 + 1)
+                self.loss_G_A += loss_G_A / float(self.opt.patchD_3 + 1)
             else:
-                self.loss_G_A += loss_G_A/float(self.opt.patchD_3 + 1)*2
+                self.loss_G_A += loss_G_A / float(self.opt.patchD_3 + 1) * 2
         else:
             if not self.opt.D_P_times2:
                 self.loss_G_A += loss_G_A
             else:
-                self.loss_G_A += loss_G_A*2
-                
+                self.loss_G_A += loss_G_A * 2
+
         if epoch < 0:
             vgg_w = 0
         else:
             vgg_w = 1
         if self.opt.vgg > 0:
-            self.loss_vgg_b = self.vgg_loss.compute_vgg_loss(self.vgg, 
-                    self.fake_B, self.real_A) * self.opt.vgg if self.opt.vgg > 0 else 0
+            self.loss_vgg_b = (
+                self.vgg_loss.compute_vgg_loss(self.vgg, self.fake_B, self.real_A)
+                * self.opt.vgg
+                if self.opt.vgg > 0
+                else 0
+            )
             if self.opt.patch_vgg:
                 if not self.opt.IN_vgg:
-                    loss_vgg_patch = self.vgg_loss.compute_vgg_loss(self.vgg, 
-                    self.fake_patch, self.input_patch) * self.opt.vgg
+                    loss_vgg_patch = (
+                        self.vgg_loss.compute_vgg_loss(
+                            self.vgg, self.fake_patch, self.input_patch
+                        )
+                        * self.opt.vgg
+                    )
                 else:
-                    loss_vgg_patch = self.vgg_patch_loss.compute_vgg_loss(self.vgg, 
-                    self.fake_patch, self.input_patch) * self.opt.vgg
+                    loss_vgg_patch = (
+                        self.vgg_patch_loss.compute_vgg_loss(
+                            self.vgg, self.fake_patch, self.input_patch
+                        )
+                        * self.opt.vgg
+                    )
                 if self.opt.patchD_3 > 0:
                     for i in range(self.opt.patchD_3):
                         if not self.opt.IN_vgg:
-                            loss_vgg_patch += self.vgg_loss.compute_vgg_loss(self.vgg, 
-                                self.fake_patch_1[i], self.input_patch_1[i]) * self.opt.vgg
+                            loss_vgg_patch += (
+                                self.vgg_loss.compute_vgg_loss(
+                                    self.vgg,
+                                    self.fake_patch_1[i],
+                                    self.input_patch_1[i],
+                                )
+                                * self.opt.vgg
+                            )
                         else:
-                            loss_vgg_patch += self.vgg_patch_loss.compute_vgg_loss(self.vgg, 
-                                self.fake_patch_1[i], self.input_patch_1[i]) * self.opt.vgg
-                    self.loss_vgg_b += loss_vgg_patch/float(self.opt.patchD_3 + 1)
+                            loss_vgg_patch += (
+                                self.vgg_patch_loss.compute_vgg_loss(
+                                    self.vgg,
+                                    self.fake_patch_1[i],
+                                    self.input_patch_1[i],
+                                )
+                                * self.opt.vgg
+                            )
+                    self.loss_vgg_b += loss_vgg_patch / float(self.opt.patchD_3 + 1)
                 else:
                     self.loss_vgg_b += loss_vgg_patch
-            self.loss_G = self.loss_G_A + self.loss_vgg_b*vgg_w
+            self.loss_G = self.loss_G_A + self.loss_vgg_b * vgg_w
         elif self.opt.fcn > 0:
-            self.loss_fcn_b = self.fcn_loss.compute_fcn_loss(self.fcn, 
-                    self.fake_B, self.real_A) * self.opt.fcn if self.opt.fcn > 0 else 0
+            self.loss_fcn_b = (
+                self.fcn_loss.compute_fcn_loss(self.fcn, self.fake_B, self.real_A)
+                * self.opt.fcn
+                if self.opt.fcn > 0
+                else 0
+            )
             if self.opt.patchD:
-                loss_fcn_patch = self.fcn_loss.compute_vgg_loss(self.fcn, 
-                    self.fake_patch, self.input_patch) * self.opt.fcn
+                loss_fcn_patch = (
+                    self.fcn_loss.compute_vgg_loss(
+                        self.fcn, self.fake_patch, self.input_patch
+                    )
+                    * self.opt.fcn
+                )
                 if self.opt.patchD_3 > 0:
                     for i in range(self.opt.patchD_3):
-                        loss_fcn_patch += self.fcn_loss.compute_vgg_loss(self.fcn, 
-                            self.fake_patch_1[i], self.input_patch_1[i]) * self.opt.fcn
-                    self.loss_fcn_b += loss_fcn_patch/float(self.opt.patchD_3 + 1)
+                        loss_fcn_patch += (
+                            self.fcn_loss.compute_vgg_loss(
+                                self.fcn, self.fake_patch_1[i], self.input_patch_1[i]
+                            )
+                            * self.opt.fcn
+                        )
+                    self.loss_fcn_b += loss_fcn_patch / float(self.opt.patchD_3 + 1)
                 else:
                     self.loss_fcn_b += loss_fcn_patch
-            self.loss_G = self.loss_G_A + self.loss_fcn_b*vgg_w
+            self.loss_G = self.loss_G_A + self.loss_fcn_b * vgg_w
         # self.loss_G = self.L1_AB + self.L1_BA
         self.loss_G.backward()
-
 
     # def optimize_parameters(self, epoch):
     #     # forward
@@ -385,10 +527,10 @@ class SingleModel(BaseModel):
     #         self.optimizer_D_P.zero_grad()
     #         self.backward_D_P()
     #         self.optimizer_D_P.step()
-        # D_B
-        # self.optimizer_D_B.zero_grad()
-        # self.backward_D_B()
-        # self.optimizer_D_B.step()
+    # D_B
+    # self.optimizer_D_B.zero_grad()
+    # self.backward_D_B()
+    # self.optimizer_D_B.step()
     def optimize_parameters(self, epoch):
         # forward
         self.forward()
@@ -408,18 +550,16 @@ class SingleModel(BaseModel):
             self.optimizer_D_A.step()
             self.optimizer_D_P.step()
 
-
     def get_current_errors(self, epoch):
         D_A = self.loss_D_A.data[0]
         D_P = self.loss_D_P.data[0] if self.opt.patchD else 0
         G_A = self.loss_G_A.data[0]
         if self.opt.vgg > 0:
-            vgg = self.loss_vgg_b.data[0]/self.opt.vgg if self.opt.vgg > 0 else 0
-            return OrderedDict([('D_A', D_A), ('G_A', G_A), ("vgg", vgg), ("D_P", D_P)])
+            vgg = self.loss_vgg_b.data[0] / self.opt.vgg if self.opt.vgg > 0 else 0
+            return OrderedDict([("D_A", D_A), ("G_A", G_A), ("vgg", vgg), ("D_P", D_P)])
         elif self.opt.fcn > 0:
-            fcn = self.loss_fcn_b.data[0]/self.opt.fcn if self.opt.fcn > 0 else 0
-            return OrderedDict([('D_A', D_A), ('G_A', G_A), ("fcn", fcn), ("D_P", D_P)])
-        
+            fcn = self.loss_fcn_b.data[0] / self.opt.fcn if self.opt.fcn > 0 else 0
+            return OrderedDict([("D_A", D_A), ("G_A", G_A), ("fcn", fcn), ("D_P", D_P)])
 
     def get_current_visuals(self):
         real_A = util.tensor2im(self.real_A.data)
@@ -434,63 +574,121 @@ class SingleModel(BaseModel):
                 if self.opt.patch_vgg:
                     input_patch = util.tensor2im(self.input_patch.data)
                     if not self.opt.self_attention:
-                        return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('latent_real_A', latent_real_A),
-                                ('latent_show', latent_show), ('real_B', real_B), ('real_patch', real_patch),
-                                ('fake_patch', fake_patch), ('input_patch', input_patch)])
+                        return OrderedDict(
+                            [
+                                ("real_A", real_A),
+                                ("fake_B", fake_B),
+                                ("latent_real_A", latent_real_A),
+                                ("latent_show", latent_show),
+                                ("real_B", real_B),
+                                ("real_patch", real_patch),
+                                ("fake_patch", fake_patch),
+                                ("input_patch", input_patch),
+                            ]
+                        )
                     else:
                         self_attention = util.atten2im(self.real_A_gray.data)
-                        return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('latent_real_A', latent_real_A),
-                                ('latent_show', latent_show), ('real_B', real_B), ('real_patch', real_patch),
-                                ('fake_patch', fake_patch), ('input_patch', input_patch), ('self_attention', self_attention)])
+                        return OrderedDict(
+                            [
+                                ("real_A", real_A),
+                                ("fake_B", fake_B),
+                                ("latent_real_A", latent_real_A),
+                                ("latent_show", latent_show),
+                                ("real_B", real_B),
+                                ("real_patch", real_patch),
+                                ("fake_patch", fake_patch),
+                                ("input_patch", input_patch),
+                                ("self_attention", self_attention),
+                            ]
+                        )
                 else:
                     if not self.opt.self_attention:
-                        return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('latent_real_A', latent_real_A),
-                                ('latent_show', latent_show), ('real_B', real_B), ('real_patch', real_patch),
-                                ('fake_patch', fake_patch)])
+                        return OrderedDict(
+                            [
+                                ("real_A", real_A),
+                                ("fake_B", fake_B),
+                                ("latent_real_A", latent_real_A),
+                                ("latent_show", latent_show),
+                                ("real_B", real_B),
+                                ("real_patch", real_patch),
+                                ("fake_patch", fake_patch),
+                            ]
+                        )
                     else:
                         self_attention = util.atten2im(self.real_A_gray.data)
-                        return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('latent_real_A', latent_real_A),
-                                ('latent_show', latent_show), ('real_B', real_B), ('real_patch', real_patch),
-                                ('fake_patch', fake_patch), ('self_attention', self_attention)])
+                        return OrderedDict(
+                            [
+                                ("real_A", real_A),
+                                ("fake_B", fake_B),
+                                ("latent_real_A", latent_real_A),
+                                ("latent_show", latent_show),
+                                ("real_B", real_B),
+                                ("real_patch", real_patch),
+                                ("fake_patch", fake_patch),
+                                ("self_attention", self_attention),
+                            ]
+                        )
             else:
                 if not self.opt.self_attention:
-                    return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('latent_real_A', latent_real_A),
-                                ('latent_show', latent_show), ('real_B', real_B)])
+                    return OrderedDict(
+                        [
+                            ("real_A", real_A),
+                            ("fake_B", fake_B),
+                            ("latent_real_A", latent_real_A),
+                            ("latent_show", latent_show),
+                            ("real_B", real_B),
+                        ]
+                    )
                 else:
                     self_attention = util.atten2im(self.real_A_gray.data)
-                    return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('real_B', real_B),
-                                    ('latent_real_A', latent_real_A), ('latent_show', latent_show),
-                                    ('self_attention', self_attention)])
+                    return OrderedDict(
+                        [
+                            ("real_A", real_A),
+                            ("fake_B", fake_B),
+                            ("real_B", real_B),
+                            ("latent_real_A", latent_real_A),
+                            ("latent_show", latent_show),
+                            ("self_attention", self_attention),
+                        ]
+                    )
         else:
             if not self.opt.self_attention:
-                return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('real_B', real_B)])
+                return OrderedDict(
+                    [("real_A", real_A), ("fake_B", fake_B), ("real_B", real_B)]
+                )
             else:
                 self_attention = util.atten2im(self.real_A_gray.data)
-                return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('real_B', real_B),
-                                    ('self_attention', self_attention)])
+                return OrderedDict(
+                    [
+                        ("real_A", real_A),
+                        ("fake_B", fake_B),
+                        ("real_B", real_B),
+                        ("self_attention", self_attention),
+                    ]
+                )
 
     def save(self, label):
-        self.save_network(self.netG_A, 'G_A', label, self.gpu_ids)
-        self.save_network(self.netD_A, 'D_A', label, self.gpu_ids)
+        self.save_network(self.netG_A, "G_A", label, self.gpu_ids)
+        self.save_network(self.netD_A, "D_A", label, self.gpu_ids)
         if self.opt.patchD:
-            self.save_network(self.netD_P, 'D_P', label, self.gpu_ids)
+            self.save_network(self.netD_P, "D_P", label, self.gpu_ids)
         # self.save_network(self.netG_B, 'G_B', label, self.gpu_ids)
         # self.save_network(self.netD_B, 'D_B', label, self.gpu_ids)
 
     def update_learning_rate(self):
-        
+
         if self.opt.new_lr:
-            lr = self.old_lr/2
+            lr = self.old_lr / 2
         else:
             lrd = self.opt.lr / self.opt.niter_decay
             lr = self.old_lr - lrd
         for param_group in self.optimizer_D_A.param_groups:
-            param_group['lr'] = lr
+            param_group["lr"] = lr
         if self.opt.patchD:
             for param_group in self.optimizer_D_P.param_groups:
-                param_group['lr'] = lr
+                param_group["lr"] = lr
         for param_group in self.optimizer_G.param_groups:
-            param_group['lr'] = lr
+            param_group["lr"] = lr
 
-        print('update learning rate: %f -> %f' % (self.old_lr, lr))
+        print("update learning rate: %f -> %f" % (self.old_lr, lr))
         self.old_lr = lr

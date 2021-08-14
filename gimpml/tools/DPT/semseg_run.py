@@ -10,7 +10,9 @@ from dpt_util.pallete import get_mask_pallete
 
 def run(img, model_path, cpu_flag=False, model_type="dpt_hybrid", optimize=True):
     img = img / 255.0
-    device = torch.device("cuda" if torch.cuda.is_available() and not cpu_flag else "cpu")
+    device = torch.device(
+        "cuda" if torch.cuda.is_available() and not cpu_flag else "cpu"
+    )
     net_w = net_h = 480
 
     # load network
@@ -75,7 +77,6 @@ def run(img, model_path, cpu_flag=False, model_type="dpt_hybrid", optimize=True)
     mask = get_mask_pallete(prediction, "ade20k")
     mask = mask.convert("RGB")
     return np.array(mask)
-
 
 
 # img = cv2.imread(r'D:\win\Users\Kritik Soman\Pictures\image.jpg')[:, :, ::-1]

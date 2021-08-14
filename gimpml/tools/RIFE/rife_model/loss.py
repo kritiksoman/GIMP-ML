@@ -13,7 +13,7 @@ class EPE(nn.Module):
     def forward(self, flow, gt, loss_mask):
         loss_map = (flow - gt.detach()) ** 2
         loss_map = (loss_map.sum(1, True) + 1e-6) ** 0.5
-        return (loss_map * loss_mask)
+        return loss_map * loss_mask
 
 
 class Ternary(nn.Module):
@@ -21,16 +21,17 @@ class Ternary(nn.Module):
         super(Ternary, self).__init__()
         patch_size = 7
         out_channels = patch_size * patch_size
-        self.w = np.eye(out_channels).reshape(
-            (patch_size, patch_size, 1, out_channels))
+        self.w = np.eye(out_channels).reshape((patch_size, patch_size, 1, out_channels))
         self.w = np.transpose(self.w, (3, 2, 0, 1))
-        self.device = torch.device("cuda" if torch.cuda.is_available() and not cFlag else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() and not cFlag else "cpu"
+        )
         self.w = torch.tensor(self.w).float().to(self.device)
 
     def transform(self, img):
         patches = F.conv2d(img, self.w, padding=3, bias=None)
         transf = patches - img
-        transf_norm = transf / torch.sqrt(0.81 + transf**2)
+        transf_norm = transf / torch.sqrt(0.81 + transf ** 2)
         return transf_norm
 
     def rgb2gray(self, rgb):
@@ -58,33 +59,37 @@ class Ternary(nn.Module):
 class SOBEL(nn.Module):
     def __init__(self, cFlag):
         super(SOBEL, self).__init__()
-        self.kernelX = torch.tensor([
-            [1, 0, -1],
-            [2, 0, -2],
-            [1, 0, -1],
-        ]).float()
+        self.kernelX = torch.tensor(
+            [
+                [1, 0, -1],
+                [2, 0, -2],
+                [1, 0, -1],
+            ]
+        ).float()
         self.kernelY = self.kernelX.clone().T
-        self.device = torch.device("cuda" if torch.cuda.is_available() and not cFlag else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() and not cFlag else "cpu"
+        )
         self.kernelX = self.kernelX.unsqueeze(0).unsqueeze(0).to(self.device)
         self.kernelY = self.kernelY.unsqueeze(0).unsqueeze(0).to(self.device)
 
     def forward(self, pred, gt):
         N, C, H, W = pred.shape[0], pred.shape[1], pred.shape[2], pred.shape[3]
         img_stack = torch.cat(
-            [pred.reshape(N*C, 1, H, W), gt.reshape(N*C, 1, H, W)], 0)
+            [pred.reshape(N * C, 1, H, W), gt.reshape(N * C, 1, H, W)], 0
+        )
         sobel_stack_x = F.conv2d(img_stack, self.kernelX, padding=1)
         sobel_stack_y = F.conv2d(img_stack, self.kernelY, padding=1)
-        pred_X, gt_X = sobel_stack_x[:N*C], sobel_stack_x[N*C:]
-        pred_Y, gt_Y = sobel_stack_y[:N*C], sobel_stack_y[N*C:]
+        pred_X, gt_X = sobel_stack_x[: N * C], sobel_stack_x[N * C :]
+        pred_Y, gt_Y = sobel_stack_y[: N * C], sobel_stack_y[N * C :]
 
-        L1X, L1Y = torch.abs(pred_X-gt_X), torch.abs(pred_Y-gt_Y)
-        loss = (L1X+L1Y)
+        L1X, L1Y = torch.abs(pred_X - gt_X), torch.abs(pred_Y - gt_Y)
+        loss = L1X + L1Y
         return loss
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     img0 = torch.zeros(3, 3, 256, 256).float().to(device)
-    img1 = torch.tensor(np.random.normal(
-        0, 1, (3, 3, 256, 256))).float().to(device)
+    img1 = torch.tensor(np.random.normal(0, 1, (3, 3, 256, 256))).float().to(device)
     ternary_loss = Ternary()
     print(ternary_loss(img0, img1).shape)

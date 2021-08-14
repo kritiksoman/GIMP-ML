@@ -1,1 +1,5 @@
-from .data_parallel import UserScatteredDataParallel, user_scattered_collate, async_copy_to
+from .data_parallel import (
+    UserScatteredDataParallel,
+    user_scattered_collate,
+    async_copy_to,
+)

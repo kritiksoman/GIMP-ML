@@ -7,7 +7,7 @@ from pylab import *
 loss_file_name = "simple_loss"
 title = "{}_Loss".format(loss_file_name)
 f = open("../log/{}.log".format(loss_file_name))
-pattern = re.compile(r'Loss:[ ]*\d+\.\d+')
+pattern = re.compile(r"Loss:[ ]*\d+\.\d+")
 self_inter = 10
 smooth = 20
 
@@ -17,18 +17,18 @@ print("Line: {}".format(len(lines)))
 ys = []
 k = 0
 cnt = 0
-sum_y = 0.
+sum_y = 0.0
 
 # read one by one
 for line in lines:
     obj = re.search(pattern, line)
     if obj:
-        val = float(obj.group().split(':')[-1])
+        val = float(obj.group().split(":")[-1])
         sum_y += val
         k += 1
         if k >= smooth:
             ys.append(sum_y / k)
-            sum_y = 0.
+            sum_y = 0.0
             k = 0
             cnt += 1
             if cnt % 10 == 0:

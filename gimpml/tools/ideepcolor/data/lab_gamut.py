@@ -15,19 +15,18 @@ def rgb2lab_1d(in_rgb):
     return color.rgb2lab(in_rgb[np.newaxis, np.newaxis, :]).flatten()
 
 
-def lab2rgb_1d(in_lab, clip=True, dtype='uint8'):
+def lab2rgb_1d(in_lab, clip=True, dtype="uint8"):
     warnings.filterwarnings("ignore")
     tmp_rgb = color.lab2rgb(in_lab[np.newaxis, np.newaxis, :]).flatten()
     if clip:
         tmp_rgb = np.clip(tmp_rgb, 0, 1)
-    if dtype == 'uint8':
-        tmp_rgb = np.round(tmp_rgb * 255).astype('uint8')
+    if dtype == "uint8":
+        tmp_rgb = np.round(tmp_rgb * 255).astype("uint8")
     return tmp_rgb
 
 
-def snap_ab(input_l, input_rgb, return_type='rgb'):
-    ''' given an input lightness and rgb, snap the color into a region where l,a,b is in-gamut
-    '''
+def snap_ab(input_l, input_rgb, return_type="rgb"):
+    """given an input lightness and rgb, snap the color into a region where l,a,b is in-gamut"""
     T = 20
     warnings.filterwarnings("ignore")
     input_lab = rgb2lab_1d(np.array(input_rgb))  # convert input to lab
@@ -43,21 +42,25 @@ def snap_ab(input_l, input_rgb, return_type='rgb'):
             break
         # print(conv_lab)
 
-    conv_rgb_ingamut = lab2rgb_1d(conv_lab, clip=True, dtype='uint8')
-    if (return_type == 'rgb'):
+    conv_rgb_ingamut = lab2rgb_1d(conv_lab, clip=True, dtype="uint8")
+    if return_type == "rgb":
         return conv_rgb_ingamut
 
-    elif(return_type == 'lab'):
+    elif return_type == "lab":
         conv_lab_ingamut = rgb2lab_1d(conv_rgb_ingamut)
         return conv_lab_ingamut
 
 
-class abGrid():
+class abGrid:
     def __init__(self, gamut_size=110, D=1):
         self.D = D
-        self.vals_b, self.vals_a = np.meshgrid(np.arange(-gamut_size, gamut_size + D, D),
-                                               np.arange(-gamut_size, gamut_size + D, D))
-        self.pts_full_grid = np.concatenate((self.vals_a[:, :, np.newaxis], self.vals_b[:, :, np.newaxis]), axis=2)
+        self.vals_b, self.vals_a = np.meshgrid(
+            np.arange(-gamut_size, gamut_size + D, D),
+            np.arange(-gamut_size, gamut_size + D, D),
+        )
+        self.pts_full_grid = np.concatenate(
+            (self.vals_a[:, :, np.newaxis], self.vals_b[:, :, np.newaxis]), axis=2
+        )
         self.A = self.pts_full_grid.shape[0]
         self.B = self.pts_full_grid.shape[1]
         self.AB = self.A * self.B
@@ -66,8 +69,10 @@ class abGrid():
     def update_gamut(self, l_in):
         warnings.filterwarnings("ignore")
         thresh = 1.0
-        pts_lab = np.concatenate((l_in + np.zeros((self.A, self.B, 1)), self.pts_full_grid), axis=2)
-        self.pts_rgb = (255 * np.clip(color.lab2rgb(pts_lab), 0, 1)).astype('uint8')
+        pts_lab = np.concatenate(
+            (l_in + np.zeros((self.A, self.B, 1)), self.pts_full_grid), axis=2
+        )
+        self.pts_rgb = (255 * np.clip(color.lab2rgb(pts_lab), 0, 1)).astype("uint8")
         pts_lab_back = color.rgb2lab(self.pts_rgb)
         pts_lab_diff = np.linalg.norm(pts_lab - pts_lab_back, axis=2)
 

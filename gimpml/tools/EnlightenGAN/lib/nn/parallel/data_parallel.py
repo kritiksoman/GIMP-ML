@@ -7,7 +7,7 @@ import collections
 from torch.nn.parallel._functions import Gather
 
 
-__all__ = ['UserScatteredDataParallel', 'user_scattered_collate', 'async_copy_to']
+__all__ = ["UserScatteredDataParallel", "user_scattered_collate", "async_copy_to"]
 
 
 def async_copy_to(obj, dev, main_stream=None):
@@ -29,6 +29,7 @@ def dict_gather(outputs, target_device, dim=0):
     Gathers variables from different GPUs on a specified device
       (-1 means the CPU), with dictionary support.
     """
+
     def gather_map(outputs):
         out = outputs[0]
         if torch.is_tensor(out):
@@ -42,6 +43,7 @@ def dict_gather(outputs, target_device, dim=0):
             return {k: gather_map([o[k] for o in outputs]) for k in out}
         elif isinstance(out, collections.Sequence):
             return type(out)(map(gather_map, zip(*outputs)))
+
     return gather_map(outputs)
 
 
@@ -108,5 +110,6 @@ def _get_stream(device):
         return None
     if _streams is None:
         _streams = [None] * cuda.device_count()
-    if _streams[device] is None: _streams[device] = cuda.Stream(device)
+    if _streams[device] is None:
+        _streams[device] = cuda.Stream(device)
     return _streams[device]

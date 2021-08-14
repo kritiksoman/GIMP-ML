@@ -1,11 +1,11 @@
 import cv2
 import gimpml
 
-image = cv2.imread('sampleinput/img.png')
-alpha = cv2.imread('sampleinput/alpha.png')
+image = cv2.imread("sampleinput/img.png")
+alpha = cv2.imread("sampleinput/alpha.png")
 
 out = gimpml.kmeans(image)
-cv2.imwrite('output/tmp-kmeans.jpg', out)
+cv2.imwrite("output/tmp-kmeans.jpg", out)
 # #
 # out = gimpml.deblur(image)
 # cv2.imwrite('output/tmp-deblur.jpg', out)
@@ -39,9 +39,11 @@ cv2.imwrite('output/tmp-kmeans.jpg', out)
 # mask2 = cv2.imread('sampleinput/mask2.png')
 # out = gimpml.interpolateframe(mask1, mask2, 'output/interpolateframes')
 #
-img = cv2.imread('sampleinput/img.png')
+img = cv2.imread("sampleinput/img.png")
 out = gimpml.depth(img[:, :, ::-1])
-cv2.imwrite("output/tmp-depth.png", out.astype("uint16"), [cv2.IMWRITE_PNG_COMPRESSION, 0])
+cv2.imwrite(
+    "output/tmp-depth.png", out.astype("uint16"), [cv2.IMWRITE_PNG_COMPRESSION, 0]
+)
 #
 # image = cv2.imread('sampleinput/face.png')
 # out = gimpml.semseg(image[:, :, ::-1])

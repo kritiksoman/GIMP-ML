@@ -9,27 +9,27 @@ class AdversarialLoss(nn.Module):
     https://arxiv.org/abs/1711.10337
     """
 
-    def __init__(self, type='nsgan', target_real_label=1.0, target_fake_label=0.0):
+    def __init__(self, type="nsgan", target_real_label=1.0, target_fake_label=0.0):
         r"""
         type = nsgan | lsgan | hinge
         """
         super(AdversarialLoss, self).__init__()
 
         self.type = type
-        self.register_buffer('real_label', torch.tensor(target_real_label))
-        self.register_buffer('fake_label', torch.tensor(target_fake_label))
+        self.register_buffer("real_label", torch.tensor(target_real_label))
+        self.register_buffer("fake_label", torch.tensor(target_fake_label))
 
-        if type == 'nsgan':
+        if type == "nsgan":
             self.criterion = nn.BCELoss()
 
-        elif type == 'lsgan':
+        elif type == "lsgan":
             self.criterion = nn.MSELoss()
 
-        elif type == 'hinge':
+        elif type == "hinge":
             self.criterion = nn.ReLU()
 
     def __call__(self, outputs, is_real, is_disc=None):
-        if self.type == 'hinge':
+        if self.type == "hinge":
             if is_disc:
                 if is_real:
                     outputs = -outputs
@@ -38,7 +38,9 @@ class AdversarialLoss(nn.Module):
                 return (-outputs).mean()
 
         else:
-            labels = (self.real_label if is_real else self.fake_label).expand_as(outputs)
+            labels = (self.real_label if is_real else self.fake_label).expand_as(
+                outputs
+            )
             loss = self.criterion(outputs, labels)
             return loss
 
@@ -52,7 +54,7 @@ class StyleLoss(nn.Module):
 
     def __init__(self):
         super(StyleLoss, self).__init__()
-        self.add_module('vgg', VGG19())
+        self.add_module("vgg", VGG19())
         self.criterion = torch.nn.L1Loss()
 
     def compute_gram(self, x):
@@ -69,13 +71,20 @@ class StyleLoss(nn.Module):
 
         # Compute loss
         style_loss = 0.0
-        style_loss += self.criterion(self.compute_gram(x_vgg['relu2_2']), self.compute_gram(y_vgg['relu2_2']))
-        style_loss += self.criterion(self.compute_gram(x_vgg['relu3_4']), self.compute_gram(y_vgg['relu3_4']))
-        style_loss += self.criterion(self.compute_gram(x_vgg['relu4_4']), self.compute_gram(y_vgg['relu4_4']))
-        style_loss += self.criterion(self.compute_gram(x_vgg['relu5_2']), self.compute_gram(y_vgg['relu5_2']))
+        style_loss += self.criterion(
+            self.compute_gram(x_vgg["relu2_2"]), self.compute_gram(y_vgg["relu2_2"])
+        )
+        style_loss += self.criterion(
+            self.compute_gram(x_vgg["relu3_4"]), self.compute_gram(y_vgg["relu3_4"])
+        )
+        style_loss += self.criterion(
+            self.compute_gram(x_vgg["relu4_4"]), self.compute_gram(y_vgg["relu4_4"])
+        )
+        style_loss += self.criterion(
+            self.compute_gram(x_vgg["relu5_2"]), self.compute_gram(y_vgg["relu5_2"])
+        )
 
         return style_loss
-
 
 
 class PerceptualLoss(nn.Module):
@@ -87,7 +96,7 @@ class PerceptualLoss(nn.Module):
 
     def __init__(self, weights=[1.0, 1.0, 1.0, 1.0, 1.0]):
         super(PerceptualLoss, self).__init__()
-        self.add_module('vgg', VGG19())
+        self.add_module("vgg", VGG19())
         self.criterion = torch.nn.L1Loss()
         self.weights = weights
 
@@ -96,15 +105,23 @@ class PerceptualLoss(nn.Module):
         x_vgg, y_vgg = self.vgg(x), self.vgg(y)
 
         content_loss = 0.0
-        content_loss += self.weights[0] * self.criterion(x_vgg['relu1_1'], y_vgg['relu1_1'])
-        content_loss += self.weights[1] * self.criterion(x_vgg['relu2_1'], y_vgg['relu2_1'])
-        content_loss += self.weights[2] * self.criterion(x_vgg['relu3_1'], y_vgg['relu3_1'])
-        content_loss += self.weights[3] * self.criterion(x_vgg['relu4_1'], y_vgg['relu4_1'])
-        content_loss += self.weights[4] * self.criterion(x_vgg['relu5_1'], y_vgg['relu5_1'])
-
+        content_loss += self.weights[0] * self.criterion(
+            x_vgg["relu1_1"], y_vgg["relu1_1"]
+        )
+        content_loss += self.weights[1] * self.criterion(
+            x_vgg["relu2_1"], y_vgg["relu2_1"]
+        )
+        content_loss += self.weights[2] * self.criterion(
+            x_vgg["relu3_1"], y_vgg["relu3_1"]
+        )
+        content_loss += self.weights[3] * self.criterion(
+            x_vgg["relu4_1"], y_vgg["relu4_1"]
+        )
+        content_loss += self.weights[4] * self.criterion(
+            x_vgg["relu5_1"], y_vgg["relu5_1"]
+        )
 
         return content_loss
-
 
 
 class VGG19(torch.nn.Module):
@@ -207,25 +224,21 @@ class VGG19(torch.nn.Module):
         relu5_4 = self.relu5_4(relu5_3)
 
         out = {
-            'relu1_1': relu1_1,
-            'relu1_2': relu1_2,
-
-            'relu2_1': relu2_1,
-            'relu2_2': relu2_2,
-
-            'relu3_1': relu3_1,
-            'relu3_2': relu3_2,
-            'relu3_3': relu3_3,
-            'relu3_4': relu3_4,
-
-            'relu4_1': relu4_1,
-            'relu4_2': relu4_2,
-            'relu4_3': relu4_3,
-            'relu4_4': relu4_4,
-
-            'relu5_1': relu5_1,
-            'relu5_2': relu5_2,
-            'relu5_3': relu5_3,
-            'relu5_4': relu5_4,
+            "relu1_1": relu1_1,
+            "relu1_2": relu1_2,
+            "relu2_1": relu2_1,
+            "relu2_2": relu2_2,
+            "relu3_1": relu3_1,
+            "relu3_2": relu3_2,
+            "relu3_3": relu3_3,
+            "relu3_4": relu3_4,
+            "relu4_1": relu4_1,
+            "relu4_2": relu4_2,
+            "relu4_3": relu4_3,
+            "relu4_4": relu4_4,
+            "relu5_1": relu5_1,
+            "relu5_2": relu5_2,
+            "relu5_3": relu5_3,
+            "relu5_4": relu5_4,
         }
         return out

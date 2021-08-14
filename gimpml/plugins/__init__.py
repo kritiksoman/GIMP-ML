@@ -3,10 +3,10 @@ import os
 import sys
 import cv2
 
-plugin_loc = os.path.dirname(os.path.realpath(__file__)) + '/'
-base_loc = os.path.expanduser("~") + '/GIMP-ML/'
+plugin_loc = os.path.dirname(os.path.realpath(__file__)) + "/"
+base_loc = os.path.expanduser("~") + "/GIMP-ML/"
 # base_loc = "D:/PycharmProjects/"
-sys.path.extend([plugin_loc + 'MiDaS'])
+sys.path.extend([plugin_loc + "MiDaS"])
 # data_path = "D:/PycharmProjects/GIMP3-ML-pip/gimpml/"
 
 from mono_run import run_depth
@@ -17,9 +17,16 @@ import cv2
 import torch
 
 
-def get_mono_depth(input_image, cFlag = False):
+def get_mono_depth(input_image, cFlag=False):
     image = input_image / 255.0
-    out = run_depth(image, base_loc + 'weights/MiDaS/model.pt', MonoDepthNet, MiDaS_utils, target_w=640, f=cFlag)
+    out = run_depth(
+        image,
+        base_loc + "weights/MiDaS/model.pt",
+        MonoDepthNet,
+        MiDaS_utils,
+        target_w=640,
+        f=cFlag,
+    )
     out = np.repeat(out[:, :, np.newaxis], 3, axis=2)
     d1, d2 = input_image.shape[:2]
     out = cv2.resize(out, (d2, d1))
@@ -41,4 +48,4 @@ if __name__ == "__main__":
 
     image = cv2.imread(os.path.join(base_loc, "cache.png"))[:, :, ::-1]
     output = get_mono_depth(image)
-    cv2.imwrite(os.path.join(base_loc, 'cache.png'), output[:, :, ::-1])
+    cv2.imwrite(os.path.join(base_loc, "cache.png"), output[:, :, ::-1])

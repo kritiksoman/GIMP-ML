@@ -31,14 +31,17 @@ class WarmRestart(lr_scheduler.CosineAnnealingLR):
         if self.last_epoch == self.T_max:
             self.last_epoch = 0
             self.T_max *= self.T_mult
-        return [self.eta_min + (base_lr - self.eta_min) * (1 + math.cos(math.pi * self.last_epoch / self.T_max)) / 2 for
-                base_lr in self.base_lrs]
+        return [
+            self.eta_min
+            + (base_lr - self.eta_min)
+            * (1 + math.cos(math.pi * self.last_epoch / self.T_max))
+            / 2
+            for base_lr in self.base_lrs
+        ]
 
 
 class LinearDecay(lr_scheduler._LRScheduler):
-    """This class implements LinearDecay
-
-    """
+    """This class implements LinearDecay"""
 
     def __init__(self, optimizer, num_epochs, start_epoch=0, min_lr=0, last_epoch=-1):
         """implements LinearDecay
@@ -55,5 +58,9 @@ class LinearDecay(lr_scheduler._LRScheduler):
     def get_lr(self):
         if self.last_epoch < self.start_epoch:
             return self.base_lrs
-        return [base_lr - ((base_lr - self.min_lr) / self.num_epochs) * (self.last_epoch - self.start_epoch) for
-                base_lr in self.base_lrs]
+        return [
+            base_lr
+            - ((base_lr - self.min_lr) / self.num_epochs)
+            * (self.last_epoch - self.start_epoch)
+            for base_lr in self.base_lrs
+        ]

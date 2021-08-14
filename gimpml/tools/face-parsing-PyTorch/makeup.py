@@ -24,7 +24,7 @@ def sharpen(img):
 
 
 def hair(image, parsing, part=17, color=[230, 50, 20]):
-    b, g, r = color      #[10, 50, 250]       # [10, 250, 10]
+    b, g, r = color  # [10, 50, 250]       # [10, 250, 10]
     tar_color = np.zeros_like(image)
     tar_color[:, :, 0] = b
     tar_color[:, :, 1] = g
@@ -46,6 +46,7 @@ def hair(image, parsing, part=17, color=[230, 50, 20]):
     changed[parsing != part] = image[parsing != part]
     # changed = cv2.resize(changed, (512, 512))
     return changed
+
 
 #
 # def lip(image, parsing, part=17, color=[230, 50, 20]):
@@ -76,7 +77,7 @@ def hair(image, parsing, part=17, color=[230, 50, 20]):
 #     return changed
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # 1  face
     # 10 nose
     # 11 teeth
@@ -84,47 +85,28 @@ if __name__ == '__main__':
     # 13 lower lip
     # 17 hair
     num = 116
-    table = {
-        'hair': 17,
-        'upper_lip': 12,
-        'lower_lip': 13
-    }
-    image_path = '/home/zll/data/CelebAMask-HQ/test-img/{}.jpg'.format(num)
-    parsing_path = 'res/test_res/{}.png'.format(num)
+    table = {"hair": 17, "upper_lip": 12, "lower_lip": 13}
+    image_path = "/home/zll/data/CelebAMask-HQ/test-img/{}.jpg".format(num)
+    parsing_path = "res/test_res/{}.png".format(num)
 
     image = cv2.imread(image_path)
     ori = image.copy()
     parsing = np.array(cv2.imread(parsing_path, 0))
     parsing = cv2.resize(parsing, image.shape[0:2], interpolation=cv2.INTER_NEAREST)
 
-    parts = [table['hair'], table['upper_lip'], table['lower_lip']]
+    parts = [table["hair"], table["upper_lip"], table["lower_lip"]]
     # colors = [[20, 20, 200], [100, 100, 230], [100, 100, 230]]
     colors = [[100, 200, 100]]
     for part, color in zip(parts, colors):
         image = hair(image, parsing, part, color)
-    cv2.imwrite('res/makeup/116_ori.png', cv2.resize(ori, (512, 512)))
-    cv2.imwrite('res/makeup/116_2.png', cv2.resize(image, (512, 512)))
+    cv2.imwrite("res/makeup/116_ori.png", cv2.resize(ori, (512, 512)))
+    cv2.imwrite("res/makeup/116_2.png", cv2.resize(image, (512, 512)))
 
-    cv2.imshow('image', cv2.resize(ori, (512, 512)))
-    cv2.imshow('color', cv2.resize(image, (512, 512)))
+    cv2.imshow("image", cv2.resize(ori, (512, 512)))
+    cv2.imshow("color", cv2.resize(image, (512, 512)))
 
     # cv2.imshow('image', ori)
     # cv2.imshow('color', image)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

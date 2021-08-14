@@ -8,8 +8,7 @@ from torchvision import models
 
 
 class MonoDepthNet(nn.Module):
-    """Network for monocular depth estimation.
-    """
+    """Network for monocular depth estimation."""
 
     def __init__(self, path=None, features=256):
         """Init.
@@ -18,24 +17,33 @@ class MonoDepthNet(nn.Module):
             path (str, optional): Path to saved model. Defaults to None.
             features (int, optional): Number of features. Defaults to 256.
         """
-        super(MonoDepthNet,self).__init__()
+        super(MonoDepthNet, self).__init__()
 
         resnet = models.resnet50(pretrained=False)
 
         self.pretrained = nn.Module()
         self.scratch = nn.Module()
-        self.pretrained.layer1 = nn.Sequential(resnet.conv1, resnet.bn1, resnet.relu,
-                                               resnet.maxpool, resnet.layer1)
+        self.pretrained.layer1 = nn.Sequential(
+            resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool, resnet.layer1
+        )
 
         self.pretrained.layer2 = resnet.layer2
         self.pretrained.layer3 = resnet.layer3
         self.pretrained.layer4 = resnet.layer4
 
         # adjust channel number of feature maps
-        self.scratch.layer1_rn = nn.Conv2d(256, features, kernel_size=3, stride=1, padding=1, bias=False)
-        self.scratch.layer2_rn = nn.Conv2d(512, features, kernel_size=3, stride=1, padding=1, bias=False)
-        self.scratch.layer3_rn = nn.Conv2d(1024, features, kernel_size=3, stride=1, padding=1, bias=False)
-        self.scratch.layer4_rn = nn.Conv2d(2048, features, kernel_size=3, stride=1, padding=1, bias=False)
+        self.scratch.layer1_rn = nn.Conv2d(
+            256, features, kernel_size=3, stride=1, padding=1, bias=False
+        )
+        self.scratch.layer2_rn = nn.Conv2d(
+            512, features, kernel_size=3, stride=1, padding=1, bias=False
+        )
+        self.scratch.layer3_rn = nn.Conv2d(
+            1024, features, kernel_size=3, stride=1, padding=1, bias=False
+        )
+        self.scratch.layer4_rn = nn.Conv2d(
+            2048, features, kernel_size=3, stride=1, padding=1, bias=False
+        )
 
         self.scratch.refinenet4 = FeatureFusionBlock(features)
         self.scratch.refinenet3 = FeatureFusionBlock(features)
@@ -43,9 +51,11 @@ class MonoDepthNet(nn.Module):
         self.scratch.refinenet1 = FeatureFusionBlock(features)
 
         # adaptive output module: 2 convolutions and upsampling
-        self.scratch.output_conv = nn.Sequential(nn.Conv2d(features, 128, kernel_size=3, stride=1, padding=1),
-                                                 nn.Conv2d(128, 1, kernel_size=3, stride=1, padding=1),
-                                                 Interpolate(scale_factor=2, mode='bilinear'))
+        self.scratch.output_conv = nn.Sequential(
+            nn.Conv2d(features, 128, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(128, 1, kernel_size=3, stride=1, padding=1),
+            Interpolate(scale_factor=2, mode="bilinear"),
+        )
 
         # load model
         if path:
@@ -91,8 +101,7 @@ class MonoDepthNet(nn.Module):
 
 
 class Interpolate(nn.Module):
-    """Interpolation module.
-    """
+    """Interpolation module."""
 
     def __init__(self, scale_factor, mode):
         """Init.
@@ -116,14 +125,15 @@ class Interpolate(nn.Module):
         Returns:
             tensor: interpolated data
         """
-        x = self.interp(x, scale_factor=self.scale_factor, mode=self.mode, align_corners=False)
+        x = self.interp(
+            x, scale_factor=self.scale_factor, mode=self.mode, align_corners=False
+        )
 
         return x
 
 
 class ResidualConvUnit(nn.Module):
-    """Residual convolution module.
-    """
+    """Residual convolution module."""
 
     def __init__(self, features):
         """Init.
@@ -131,10 +141,14 @@ class ResidualConvUnit(nn.Module):
         Args:
             features (int): number of features
         """
-        super(ResidualConvUnit,self).__init__()
+        super(ResidualConvUnit, self).__init__()
 
-        self.conv1 = nn.Conv2d(features, features, kernel_size=3, stride=1, padding=1, bias=True)
-        self.conv2 = nn.Conv2d(features, features, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(
+            features, features, kernel_size=3, stride=1, padding=1, bias=True
+        )
+        self.conv2 = nn.Conv2d(
+            features, features, kernel_size=3, stride=1, padding=1, bias=False
+        )
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x):
@@ -155,8 +169,7 @@ class ResidualConvUnit(nn.Module):
 
 
 class FeatureFusionBlock(nn.Module):
-    """Feature fusion block.
-    """
+    """Feature fusion block."""
 
     def __init__(self, features):
         """Init.
@@ -164,7 +177,7 @@ class FeatureFusionBlock(nn.Module):
         Args:
             features (int): number of features
         """
-        super(FeatureFusionBlock,self).__init__()
+        super(FeatureFusionBlock, self).__init__()
 
         self.resConfUnit = ResidualConvUnit(features)
 
@@ -180,7 +193,8 @@ class FeatureFusionBlock(nn.Module):
             output += self.resConfUnit(xs[1])
 
         output = self.resConfUnit(output)
-        output = nn.functional.interpolate(output, scale_factor=2,
-                                           mode='bilinear', align_corners=True)
+        output = nn.functional.interpolate(
+            output, scale_factor=2, mode="bilinear", align_corners=True
+        )
 
         return output

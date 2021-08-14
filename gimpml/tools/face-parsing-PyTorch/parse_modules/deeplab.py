@@ -7,25 +7,52 @@ from .bn import ABN
 
 
 class DeeplabV3(nn.Module):
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 hidden_channels=256,
-                 dilations=(12, 24, 36),
-                 norm_act=ABN,
-                 pooling_size=None):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        hidden_channels=256,
+        dilations=(12, 24, 36),
+        norm_act=ABN,
+        pooling_size=None,
+    ):
         super(DeeplabV3, self).__init__()
         self.pooling_size = pooling_size
 
-        self.map_convs = nn.ModuleList([
-            nn.Conv2d(in_channels, hidden_channels, 1, bias=False),
-            nn.Conv2d(in_channels, hidden_channels, 3, bias=False, dilation=dilations[0], padding=dilations[0]),
-            nn.Conv2d(in_channels, hidden_channels, 3, bias=False, dilation=dilations[1], padding=dilations[1]),
-            nn.Conv2d(in_channels, hidden_channels, 3, bias=False, dilation=dilations[2], padding=dilations[2])
-        ])
+        self.map_convs = nn.ModuleList(
+            [
+                nn.Conv2d(in_channels, hidden_channels, 1, bias=False),
+                nn.Conv2d(
+                    in_channels,
+                    hidden_channels,
+                    3,
+                    bias=False,
+                    dilation=dilations[0],
+                    padding=dilations[0],
+                ),
+                nn.Conv2d(
+                    in_channels,
+                    hidden_channels,
+                    3,
+                    bias=False,
+                    dilation=dilations[1],
+                    padding=dilations[1],
+                ),
+                nn.Conv2d(
+                    in_channels,
+                    hidden_channels,
+                    3,
+                    bias=False,
+                    dilation=dilations[2],
+                    padding=dilations[2],
+                ),
+            ]
+        )
         self.map_bn = norm_act(hidden_channels * 4)
 
-        self.global_pooling_conv = nn.Conv2d(in_channels, hidden_channels, 1, bias=False)
+        self.global_pooling_conv = nn.Conv2d(
+            in_channels, hidden_channels, 1, bias=False
+        )
         self.global_pooling_bn = norm_act(hidden_channels)
 
         self.red_conv = nn.Conv2d(hidden_channels * 4, out_channels, 1, bias=False)
@@ -70,13 +97,19 @@ class DeeplabV3(nn.Module):
             pool = x.view(x.size(0), x.size(1), -1).mean(dim=-1)
             pool = pool.view(x.size(0), x.size(1), 1, 1)
         else:
-            pooling_size = (min(try_index(self.pooling_size, 0), x.shape[2]),
-                            min(try_index(self.pooling_size, 1), x.shape[3]))
+            pooling_size = (
+                min(try_index(self.pooling_size, 0), x.shape[2]),
+                min(try_index(self.pooling_size, 1), x.shape[3]),
+            )
             padding = (
                 (pooling_size[1] - 1) // 2,
-                (pooling_size[1] - 1) // 2 if pooling_size[1] % 2 == 1 else (pooling_size[1] - 1) // 2 + 1,
+                (pooling_size[1] - 1) // 2
+                if pooling_size[1] % 2 == 1
+                else (pooling_size[1] - 1) // 2 + 1,
                 (pooling_size[0] - 1) // 2,
-                (pooling_size[0] - 1) // 2 if pooling_size[0] % 2 == 1 else (pooling_size[0] - 1) // 2 + 1
+                (pooling_size[0] - 1) // 2
+                if pooling_size[0] % 2 == 1
+                else (pooling_size[0] - 1) // 2 + 1,
             )
 
             pool = functional.avg_pool2d(x, pooling_size, stride=1)

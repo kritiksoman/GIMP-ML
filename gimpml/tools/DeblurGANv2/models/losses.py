@@ -12,7 +12,8 @@ from util.image_pool import ImagePool
 # Functions
 ###############################################################################
 
-class ContentLoss():
+
+class ContentLoss:
     def initialize(self, loss):
         self.criterion = loss
 
@@ -23,8 +24,7 @@ class ContentLoss():
         return self.get_loss(fakeIm, realIm)
 
 
-class PerceptualLoss():
-
+class PerceptualLoss:
     def contentFunc(self):
         conv_3_3_layer = 14
         cnn = models.vgg19(pretrained=True).features
@@ -42,7 +42,9 @@ class PerceptualLoss():
         with torch.no_grad():
             self.criterion = loss
             self.contentFunc = self.contentFunc()
-            self.transform = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            self.transform = transforms.Normalize(
+                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+            )
 
     def get_loss(self, fakeIm, realIm):
         fakeIm = (fakeIm + 1) / 2.0
@@ -60,8 +62,13 @@ class PerceptualLoss():
 
 
 class GANLoss(nn.Module):
-    def __init__(self, use_l1=True, target_real_label=1.0, target_fake_label=0.0,
-                 tensor=torch.FloatTensor):
+    def __init__(
+        self,
+        use_l1=True,
+        target_real_label=1.0,
+        target_fake_label=0.0,
+        tensor=torch.FloatTensor,
+    ):
         super(GANLoss, self).__init__()
         self.real_label = target_real_label
         self.fake_label = target_fake_label
@@ -75,15 +82,17 @@ class GANLoss(nn.Module):
 
     def get_target_tensor(self, input, target_is_real):
         if target_is_real:
-            create_label = ((self.real_label_var is None) or
-                            (self.real_label_var.numel() != input.numel()))
+            create_label = (self.real_label_var is None) or (
+                self.real_label_var.numel() != input.numel()
+            )
             if create_label:
                 real_tensor = self.Tensor(input.size()).fill_(self.real_label)
                 self.real_label_var = Variable(real_tensor, requires_grad=False)
             target_tensor = self.real_label_var
         else:
-            create_label = ((self.fake_label_var is None) or
-                            (self.fake_label_var.numel() != input.numel()))
+            create_label = (self.fake_label_var is None) or (
+                self.fake_label_var.numel() != input.numel()
+            )
             if create_label:
                 fake_tensor = self.Tensor(input.size()).fill_(self.fake_label)
                 self.fake_label_var = Variable(fake_tensor, requires_grad=False)
@@ -97,7 +106,7 @@ class GANLoss(nn.Module):
 
 class DiscLoss(nn.Module):
     def name(self):
-        return 'DiscLoss'
+        return "DiscLoss"
 
     def __init__(self):
         super(DiscLoss, self).__init__()
@@ -131,13 +140,15 @@ class DiscLoss(nn.Module):
 
 class RelativisticDiscLoss(nn.Module):
     def name(self):
-        return 'RelativisticDiscLoss'
+        return "RelativisticDiscLoss"
 
     def __init__(self):
         super(RelativisticDiscLoss, self).__init__()
 
         self.criterionGAN = GANLoss(use_l1=False)
-        self.fake_pool = ImagePool(50)  # create image buffer to store previously generated images
+        self.fake_pool = ImagePool(
+            50
+        )  # create image buffer to store previously generated images
         self.real_pool = ImagePool(50)
 
     def get_g_loss(self, net, fakeB, realB):
@@ -146,8 +157,10 @@ class RelativisticDiscLoss(nn.Module):
 
         # Real
         self.pred_real = net.forward(realB)
-        errG = (self.criterionGAN(self.pred_real - torch.mean(self.fake_pool.query()), 0) +
-                self.criterionGAN(self.pred_fake - torch.mean(self.real_pool.query()), 1)) / 2
+        errG = (
+            self.criterionGAN(self.pred_real - torch.mean(self.fake_pool.query()), 0)
+            + self.criterionGAN(self.pred_fake - torch.mean(self.real_pool.query()), 1)
+        ) / 2
         return errG
 
     def get_loss(self, net, fakeB, realB):
@@ -164,8 +177,10 @@ class RelativisticDiscLoss(nn.Module):
         self.real_pool.add(self.pred_real)
 
         # Combined loss
-        self.loss_D = (self.criterionGAN(self.pred_real - torch.mean(self.fake_pool.query()), 1) +
-                       self.criterionGAN(self.pred_fake - torch.mean(self.real_pool.query()), 0)) / 2
+        self.loss_D = (
+            self.criterionGAN(self.pred_real - torch.mean(self.fake_pool.query()), 1)
+            + self.criterionGAN(self.pred_fake - torch.mean(self.real_pool.query()), 0)
+        ) / 2
         return self.loss_D
 
     def __call__(self, net, fakeB, realB):
@@ -174,13 +189,15 @@ class RelativisticDiscLoss(nn.Module):
 
 class RelativisticDiscLossLS(nn.Module):
     def name(self):
-        return 'RelativisticDiscLossLS'
+        return "RelativisticDiscLossLS"
 
     def __init__(self):
         super(RelativisticDiscLossLS, self).__init__()
 
         self.criterionGAN = GANLoss(use_l1=True)
-        self.fake_pool = ImagePool(50)  # create image buffer to store previously generated images
+        self.fake_pool = ImagePool(
+            50
+        )  # create image buffer to store previously generated images
         self.real_pool = ImagePool(50)
 
     def get_g_loss(self, net, fakeB, realB):
@@ -189,8 +206,10 @@ class RelativisticDiscLossLS(nn.Module):
 
         # Real
         self.pred_real = net.forward(realB)
-        errG = (torch.mean((self.pred_real - torch.mean(self.fake_pool.query()) + 1) ** 2) +
-                torch.mean((self.pred_fake - torch.mean(self.real_pool.query()) - 1) ** 2)) / 2
+        errG = (
+            torch.mean((self.pred_real - torch.mean(self.fake_pool.query()) + 1) ** 2)
+            + torch.mean((self.pred_fake - torch.mean(self.real_pool.query()) - 1) ** 2)
+        ) / 2
         return errG
 
     def get_loss(self, net, fakeB, realB):
@@ -207,8 +226,10 @@ class RelativisticDiscLossLS(nn.Module):
         self.real_pool.add(self.pred_real)
 
         # Combined loss
-        self.loss_D = (torch.mean((self.pred_real - torch.mean(self.fake_pool.query()) - 1) ** 2) +
-                       torch.mean((self.pred_fake - torch.mean(self.real_pool.query()) + 1) ** 2)) / 2
+        self.loss_D = (
+            torch.mean((self.pred_real - torch.mean(self.fake_pool.query()) - 1) ** 2)
+            + torch.mean((self.pred_fake - torch.mean(self.real_pool.query()) + 1) ** 2)
+        ) / 2
         return self.loss_D
 
     def __call__(self, net, fakeB, realB):
@@ -217,7 +238,7 @@ class RelativisticDiscLossLS(nn.Module):
 
 class DiscLossLS(DiscLoss):
     def name(self):
-        return 'DiscLossLS'
+        return "DiscLossLS"
 
     def __init__(self):
         super(DiscLossLS, self).__init__()
@@ -232,7 +253,7 @@ class DiscLossLS(DiscLoss):
 
 class DiscLossWGANGP(DiscLossLS):
     def name(self):
-        return 'DiscLossWGAN-GP'
+        return "DiscLossWGAN-GP"
 
     def __init__(self):
         super(DiscLossWGANGP, self).__init__()
@@ -255,9 +276,14 @@ class DiscLossWGANGP(DiscLossLS):
 
         disc_interpolates = netD.forward(interpolates)
 
-        gradients = autograd.grad(outputs=disc_interpolates, inputs=interpolates,
-                                  grad_outputs=torch.ones(disc_interpolates.size()).cuda(),
-                                  create_graph=True, retain_graph=True, only_inputs=True)[0]
+        gradients = autograd.grad(
+            outputs=disc_interpolates,
+            inputs=interpolates,
+            grad_outputs=torch.ones(disc_interpolates.size()).cuda(),
+            create_graph=True,
+            retain_graph=True,
+            only_inputs=True,
+        )[0]
 
         gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean() * self.LAMBDA
         return gradient_penalty
@@ -276,25 +302,25 @@ class DiscLossWGANGP(DiscLossLS):
 
 
 def get_loss(model):
-    if model['content_loss'] == 'perceptual':
+    if model["content_loss"] == "perceptual":
         content_loss = PerceptualLoss()
         content_loss.initialize(nn.MSELoss())
-    elif model['content_loss'] == 'l1':
+    elif model["content_loss"] == "l1":
         content_loss = ContentLoss()
         content_loss.initialize(nn.L1Loss())
     else:
-        raise ValueError("ContentLoss [%s] not recognized." % model['content_loss'])
+        raise ValueError("ContentLoss [%s] not recognized." % model["content_loss"])
 
-    if model['disc_loss'] == 'wgan-gp':
+    if model["disc_loss"] == "wgan-gp":
         disc_loss = DiscLossWGANGP()
-    elif model['disc_loss'] == 'lsgan':
+    elif model["disc_loss"] == "lsgan":
         disc_loss = DiscLossLS()
-    elif model['disc_loss'] == 'gan':
+    elif model["disc_loss"] == "gan":
         disc_loss = DiscLoss()
-    elif model['disc_loss'] == 'ragan':
+    elif model["disc_loss"] == "ragan":
         disc_loss = RelativisticDiscLoss()
-    elif model['disc_loss'] == 'ragan-ls':
+    elif model["disc_loss"] == "ragan-ls":
         disc_loss = RelativisticDiscLossLS()
     else:
-        raise ValueError("GAN Loss [%s] not recognized." % model['disc_loss'])
+        raise ValueError("GAN Loss [%s] not recognized." % model["disc_loss"])
     return content_loss, disc_loss

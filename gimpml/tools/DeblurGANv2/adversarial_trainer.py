@@ -17,8 +17,7 @@ class GANFactory:
 
     def create_model(gan_id, net_d=None, criterion=None):
         if gan_id not in GANFactory.factories:
-            GANFactory.factories[gan_id] = \
-                eval(gan_id + '.Factory()')
+            GANFactory.factories[gan_id] = eval(gan_id + ".Factory()")
         return GANFactory.factories[gan_id].create(net_d, criterion)
 
     create_model = staticmethod(create_model)
@@ -54,7 +53,8 @@ class NoGAN(GANTrainer):
 
     class Factory:
         @staticmethod
-        def create(net_d, criterion): return NoGAN(net_d, criterion)
+        def create(net_d, criterion):
+            return NoGAN(net_d, criterion)
 
 
 class SingleGAN(GANTrainer):
@@ -73,27 +73,33 @@ class SingleGAN(GANTrainer):
 
     class Factory:
         @staticmethod
-        def create(net_d, criterion): return SingleGAN(net_d, criterion)
+        def create(net_d, criterion):
+            return SingleGAN(net_d, criterion)
 
 
 class DoubleGAN(GANTrainer):
     def __init__(self, net_d, criterion):
         GANTrainer.__init__(self, net_d, criterion)
-        self.patch_d = net_d['patch'].cuda()
-        self.full_d = net_d['full'].cuda()
+        self.patch_d = net_d["patch"].cuda()
+        self.full_d = net_d["full"].cuda()
         self.full_criterion = copy.deepcopy(criterion)
 
     def loss_d(self, pred, gt):
-        return (self.criterion(self.patch_d, pred, gt) + self.full_criterion(self.full_d, pred, gt)) / 2
+        return (
+            self.criterion(self.patch_d, pred, gt)
+            + self.full_criterion(self.full_d, pred, gt)
+        ) / 2
 
     def loss_g(self, pred, gt):
-        return (self.criterion.get_g_loss(self.patch_d, pred, gt) + self.full_criterion.get_g_loss(self.full_d, pred,
-                                                                                                  gt)) / 2
+        return (
+            self.criterion.get_g_loss(self.patch_d, pred, gt)
+            + self.full_criterion.get_g_loss(self.full_d, pred, gt)
+        ) / 2
 
     def get_params(self):
         return list(self.patch_d.parameters()) + list(self.full_d.parameters())
 
     class Factory:
         @staticmethod
-        def create(net_d, criterion): return DoubleGAN(net_d, criterion)
-
+        def create(net_d, criterion):
+            return DoubleGAN(net_d, criterion)
