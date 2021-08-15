@@ -12,7 +12,8 @@ import gimpml
 
 def setup_python_weights(install_location=None):
     if not install_location:
-        install_location = os.path.join(os.path.expanduser("~"), "GIMP-ML")
+        # install_location = os.path.join(os.path.expanduser("~"), "GIMP-ML")
+        install_location = os.path.join(os.environ.get("HOMEDRIVE"), os.environ.get("HOMEPATH"), "GIMP-ML")
     if not os.path.isdir(install_location):
         os.mkdir(install_location)
     python_string = "python"

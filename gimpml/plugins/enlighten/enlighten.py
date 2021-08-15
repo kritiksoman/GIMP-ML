@@ -130,7 +130,7 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
         use_header_bar = Gtk.Settings.get_default().get_property(
             "gtk-dialogs-use-header"
         )
-        dialog = GimpUi.Dialog(use_header_bar=use_header_bar, title=_("Mono Depth..."))
+        dialog = GimpUi.Dialog(use_header_bar=use_header_bar, title=_("Enlighten..."))
         dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
         dialog.add_button("_Help", Gtk.ResponseType.APPLY)
         dialog.add_button("_Run Inference", Gtk.ResponseType.OK)
