@@ -35,7 +35,7 @@ def setup_python_weights(install_location=None):
         step += 1
         print(
             "{}>> Please downloads weights folder from: \n"
-            "https://drive.google.com/drive/folders/10IiBO4fuMiGQ-spBStnObbk9R-pGp6u8?usp=sharing".format(
+            "https://drive.google.com/drive/folders/1AtuIkGH7gqD9e5Tb-Y7wM9sLAZPyP_Mq?usp=sharing".format(
                 step
             )
         )

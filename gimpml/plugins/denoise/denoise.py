@@ -13,28 +13,19 @@ Y88b  d88P   888   888   "   888 888             888   "   888 888
 
 Denoises the current layer.
 """
-import sys
 import gi
-
 gi.require_version("Gimp", "3.0")
-from gi.repository import Gimp
-
 gi.require_version("GimpUi", "3.0")
-from gi.repository import GimpUi
-from gi.repository import GObject
-from gi.repository import GLib
-from gi.repository import Gio
-
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+from gi.repository import Gimp, GimpUi, GObject, GLib, Gio, Gtk
 import gettext
 import subprocess
 import pickle
 import os
-
-plugin_loc = os.path.dirname(os.path.realpath(__file__)) + "/../"
-sys.path.extend([plugin_loc])
+import sys
+sys.path.extend([os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")])
 from plugin_utils import *
+
 
 _ = gettext.gettext
 image_paths = {

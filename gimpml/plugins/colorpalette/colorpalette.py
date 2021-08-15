@@ -14,11 +14,8 @@ Y88b  d88P   888   888   "   888 888             888   "   888 888
 Opens the color palette as a new image file in GIMP.
 """
 import gi
-
 gi.require_version("Gimp", "3.0")
-from gi.repository import Gimp
-from gi.repository import GLib
-from gi.repository import Gio
+from gi.repository import Gimp, GLib, Gio
 import sys
 import os
 
