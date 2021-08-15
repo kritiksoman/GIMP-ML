@@ -43,7 +43,7 @@ On windows, run for CPU: <br>
 On windows, run for GPU: <br>
 ```GIMP-ML\install.bat gpu```<br>
 [4] Follow steps that are printed in terminal or cmd. <br>
-FYI: weights link --> [Link](https://drive.google.com/drive/folders/10IiBO4fuMiGQ-spBStnObbk9R-pGp6u8?usp=sharing)
+FYI: weights link --> [Link](https://drive.google.com/drive/folders/1AtuIkGH7gqD9e5Tb-Y7wM9sLAZPyP_Mq?usp=sharing)
 
 
 | Windows | Linux |
