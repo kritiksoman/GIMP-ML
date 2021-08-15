@@ -17,6 +17,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/gimpml/tools/complete_install.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/gimpml/tools/inpainting.py">
           <value>
             <Attribute>

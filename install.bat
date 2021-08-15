@@ -18,6 +18,7 @@ if python --version 2>&1 | grep -q '^Python 3\.'; then #
     python -m pip3 install torch torchvision -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html #
     python -m pip install GIMP-ML/.
     python -c "import gimpml; gimpml.setup_python_weights()" #
+    chmod -R 777 gimpenv3/lib/ #
     deactivate #
 elif python3 --version 2>&1 | grep -q '^Python 3\.'; then #
     echo 'Python 3 found.' #
@@ -27,6 +28,7 @@ elif python3 --version 2>&1 | grep -q '^Python 3\.'; then #
     python3 -m pip install torch==1.8.1+cu111 torchvision==0.9.1+cu111 torchaudio==0.8.1 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html #
     python3 -m pip install GIMP-ML/.
     python3 -c "import gimpml; gimpml.setup_python_weights()" #
+    chmod -R 777 gimpenv3/lib/ #
     deactivate #
 else #
     echo 'Python 3 NOT found' #
