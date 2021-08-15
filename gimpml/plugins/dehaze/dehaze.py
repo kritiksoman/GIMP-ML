@@ -44,10 +44,6 @@ image_paths = {
 }
 
 
-def N_(message):
-    return message
-
-
 def dehaze(procedure, image, drawable, force_cpu, progress_bar, config_path_output):
     # Save inference parameters and layers
     weight_path = config_path_output["weight_path"]
@@ -99,10 +95,7 @@ def dehaze(procedure, image, drawable, force_cpu, progress_bar, config_path_outp
 
 
 def run(procedure, run_mode, image, n_drawables, layer, args, data):
-    force_cpu = args.index(1)
-
-    progress_bar = None
-    config = None
+    force_cpu = args.index(0)
 
     if run_mode == Gimp.RunMode.INTERACTIVE:
         # Get all paths
@@ -185,7 +178,7 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
                     config.end_run(Gimp.PDBStatusType.SUCCESS)
                 return result
             elif response == Gtk.ResponseType.APPLY:
-                url = "https://github.com/kritiksoman/GIMP-ML/blob/GIMP3-ML/docs/MANUAL.md"
+                url = "https://kritiksoman.github.io/GIMP-ML-Docs/docs-page.html#item-7-4"
                 Gio.app_info_launch_default_for_uri(url, None)
                 continue
             else:

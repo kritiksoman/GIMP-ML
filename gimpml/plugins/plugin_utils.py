@@ -74,3 +74,7 @@ def save_image(image, drawable, file_path):
             GObject.Value(GObject.TYPE_BOOLEAN, True),
         ],
     )
+
+
+def N_(message):
+    return message

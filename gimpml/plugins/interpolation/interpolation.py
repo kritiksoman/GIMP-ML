@@ -42,45 +42,6 @@ image_paths = {
     ),
 }
 
-
-def N_(message):
-    return message
-
-
-def show_dialog(message, title, icon="logo"):
-    use_header_bar = Gtk.Settings.get_default().get_property("gtk-dialogs-use-header")
-    dialog = GimpUi.Dialog(use_header_bar=use_header_bar, title=_(title))
-    # Add buttons
-    dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
-    dialog.add_button("_OK", Gtk.ResponseType.APPLY)
-    vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, homogeneous=False, spacing=10)
-    dialog.get_content_area().add(vbox)
-    vbox.show()
-
-    # Create grid to set all the properties inside.
-    grid = Gtk.Grid()
-    grid.set_column_homogeneous(False)
-    grid.set_border_width(10)
-    grid.set_column_spacing(10)
-    grid.set_row_spacing(10)
-    vbox.add(grid)
-    grid.show()
-
-    # Show Logo
-    logo = Gtk.Image.new_from_file(image_paths[icon])
-    # vbox.pack_start(logo, False, False, 1)
-    grid.attach(logo, 0, 0, 1, 1)
-    logo.show()
-    # Show message
-    label = Gtk.Label(label=_(message))
-    # vbox.pack_start(label, False, False, 1)
-    grid.attach(label, 1, 0, 1, 1)
-    label.show()
-    dialog.show()
-    dialog.run()
-    return
-
-
 def interpolation(
     procedure,
     image,
@@ -150,6 +111,7 @@ def interpolation(
             "Inference not successful. See error_log.txt in GIMP-ML folder.",
             "Error !",
             "error",
+            image_paths
         )
         return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
 
@@ -283,7 +245,7 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
                     config.end_run(Gimp.PDBStatusType.SUCCESS)
                 return result
             elif response == Gtk.ResponseType.APPLY:
-                url = "https://github.com/kritiksoman/GIMP-ML/blob/GIMP3-ML/docs/MANUAL.md"
+                url = "https://kritiksoman.github.io/GIMP-ML-Docs/docs-page.html#item-7-2"
                 Gio.app_info_launch_default_for_uri(url, None)
                 continue
             else:
