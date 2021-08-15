@@ -8,7 +8,7 @@ sys.path.extend([plugin_loc])
 import numpy as np
 import torch
 import cv2
-from data import colorize_image as CI
+from color_data import colorize_image as CI
 from gimpml.tools.tools_utils import get_weight_path
 
 def get_deepcolor(layerimg, layerc=None, cpu_flag=False, weight_path=None):

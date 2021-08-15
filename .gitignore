@@ -3,3 +3,6 @@
 *$py.class
 *.so
 *.pyc
+dist/
+.idea/
+gimpml.egg-info/

@@ -21,7 +21,7 @@ def get_super(input_image, s=4, cpu_flag=False, fFlag=True, weight_path=None):
         weight_path = get_weight_path()
     opt = Namespace(
         cuda=torch.cuda.is_available() and not cpu_flag,
-        model=os.path.join(weight_path, "super_resolution", "model_srresnet.pth"),
+        model=os.path.join(weight_path, "superresolution", "model_srresnet.pth"),
         dataset="Set5",
         scale=s,
         gpus=0,

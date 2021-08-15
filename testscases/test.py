@@ -4,8 +4,8 @@ import gimpml
 image = cv2.imread("sampleinput/img.png")
 alpha = cv2.imread("sampleinput/alpha.png")
 
-out = gimpml.kmeans(image)
-cv2.imwrite("output/tmp-kmeans.jpg", out)
+# out = gimpml.kmeans(image)
+# cv2.imwrite("output/tmp-kmeans.jpg", out)
 # #
 # out = gimpml.deblur(image)
 # cv2.imwrite('output/tmp-deblur.jpg', out)
@@ -19,9 +19,9 @@ cv2.imwrite("output/tmp-kmeans.jpg", out)
 # out = gimpml.denoise(image)
 # cv2.imwrite('output/tmp-denoise.jpg', out)
 #
-# out = gimpml.matting(image, alpha)
-# cv2.imwrite('output/tmp-matting.png', out)  # save as png
-#
+out = gimpml.matting(image, alpha)
+cv2.imwrite('output/tmp-matting.png', out)  # save as png
+
 # out = gimpml.enlighten(image)
 # cv2.imwrite('output/tmp-enlighten.jpg', out)
 
