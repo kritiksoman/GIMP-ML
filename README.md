@@ -1,4 +1,4 @@
-This branch is under development. Dedicated for GIMP 3 and Python 3. :star: :star: :star: :star: are welcome. <br>
+This branch is under development. Dedicated for GIMP 3 and Python 3. :star: :star: :star: :star: are welcome.<br> Waiting for GIMP 3 to release officially.<br>
 <img src="https://github.com/kritiksoman/tmp/blob/master/cover.png" width="1280" height="180"> <br>
 
 [![Open Docs](https://img.shields.io/badge/VIEW-DOCS-green)](https://kritiksoman.github.io/GIMP-ML-Docs/) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kritiksoman/GIMP-ML/blob/GIMP3-ML/testscases/Demo%20Notebook.ipynb)
