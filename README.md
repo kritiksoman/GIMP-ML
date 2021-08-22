@@ -20,7 +20,7 @@ Old Updates: <br>
 ![image1](https://github.com/kritiksoman/tmp/blob/master/screenshot.png)
 
 # Installation Steps
-[1] Install [GIMP](https://www.gimp.org/downloads/) 2.10.10<br>
+[1] Install [GIMP](https://download.gimp.org/pub/gimp/v2.10/) 2.10.10<br>
 [2] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
 [3] Open terminal, go to GIMP-ML/gimp-plugins and run : <br>
     ```bash installGimpML.sh```<br>
