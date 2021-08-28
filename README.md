@@ -2,7 +2,7 @@
 # A.I. for GNU Image Manipulation Program
 ### [<img src="https://github.com/kritiksoman/tmp/blob/master/yt.png" width="70" height="50">](https://www.youtube.com/channel/UCzZn99R6Zh0ttGqvZieT4zw) [<img src="https://github.com/kritiksoman/tmp/blob/master/inst.png" width="50" height="50">](https://www.instagram.com/explore/tags/gimpml/) [<img src="https://github.com/kritiksoman/tmp/blob/master/arxiv.png" width="100" height="50">](https://arxiv.org/abs/2004.13060) [<img src="https://github.com/kritiksoman/tmp/blob/master/manual.png" width="100" height="50">](https://github.com/kritiksoman/GIMP-ML/blob/master/docs/MANUAL.md)[<img src="https://github.com/kritiksoman/tmp/blob/master/ref.png" width="100" height="50">](https://github.com/kritiksoman/GIMP-ML/blob/master/docs/REFERENCES.md) <br>
  
-:star: :star: :star: :star: are welcome. This branch will no longer be updated and would only work with GIMP 2.10. Only GIMP3-ML branch will be updated in future.<br>
+:star: :star: :star: :star: are welcome. This branch will no longer be updated and would only work with GIMP 2.10 and python 2.7 on mac and linux. Only GIMP3-ML branch will be updated in future which is targeted for python3 and GIMP3 (with windows and linux support) .<br>
 
 [June 2] [GIMP3-ML](https://github.com/kritiksoman/GIMP-ML/tree/GIMP3-ML) branch development started.<br>
 Old Updates: <br>
@@ -40,13 +40,8 @@ Old Updates: <br>
 [3] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and restart GIMP. <br>
 [4] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to yes and restart GIMP. (Weights ~ 1.5GB will be downloaded)<br>
 
-<br>
 Manual install description if above is not working: [Link](https://github.com/kritiksoman/GIMP-ML/blob/master/INSTALLATION.md) <br>
 
-
-# Update Steps
-[1] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to NO and restart GIMP. <br>
-[2] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to YES and restart GIMP. <br>
 
 # Citation
 Please cite using the following bibtex entry:
