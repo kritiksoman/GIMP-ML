@@ -20,13 +20,29 @@ Old Updates: <br>
 ![image1](https://github.com/kritiksoman/tmp/blob/master/screenshot.png)
 
 # Installation Steps
-[1] Install [GIMP](https://download.gimp.org/pub/gimp/v2.10/) 2.10.10<br>
-[2] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
-[3] Open terminal, go to GIMP-ML/gimp-plugins and run : <br>
+## Install GIMP 2.10 with Python
+### MacOS
+[1] ```python``` command in terminal should point to GCC Apple LLVM Python 2.7. <br>
+[2] Install [GIMP](https://download.gimp.org/pub/gimp/v2.10/) 2.10.22<br>
+[3] Open GIMP,```Python-Fu``` should appear in the ```Filters``` menu.<br>
+
+### Ubuntu
+[1] Install GIMP 2.10 ```sudo apt install gimp```<br>
+[2] Install Python 2.7 ```sudo apt install python2.7``` , followed by ```sudo apt install python python-cairo python-gobject-2```<br>
+[3] Download Files: [gimp-python-debs.zip](https://drive.google.com/file/d/1g6Nea1-breldsV5TXSyFQIg_FYx2T5BL/view?usp=sharing) <br>
+[4] Install the above downloaded files with ```sudo dpkg -i *.deb``` <br>
+[5] Open GIMP,```Python-Fu``` should appear in the ```Filters``` menu.<br>
+
+## Install GIMP-ML
+[1] Clone this repository: git clone https://github.com/kritiksoman/GIMP-ML.git <br>
+[2] Open terminal, go to GIMP-ML/gimp-plugins and run : <br>
     ```bash installGimpML.sh```<br>
-[4] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and restart GIMP. <br>
-[5] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to yes and restart GIMP. (Weights ~ 1.5GB will be downloaded)<br>
+[3] Open GIMP and go to Preferences -> Folders -> Plug-ins, add the folder gimp-plugins and restart GIMP. <br>
+[4] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to yes and restart GIMP. (Weights ~ 1.5GB will be downloaded)<br>
+
+<br>
 Manual install description if above is not working: [Link](https://github.com/kritiksoman/GIMP-ML/blob/master/INSTALLATION.md) <br>
+
 
 # Update Steps
 [1] Go to Layer->GIMP-ML->update, click on ok with "update weights" set to NO and restart GIMP. <br>
