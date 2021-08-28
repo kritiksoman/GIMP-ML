@@ -20,7 +20,7 @@ Old Updates: <br>
 ![image1](https://github.com/kritiksoman/tmp/blob/master/screenshot.png)
 
 # Installation Steps
-## Install GIMP 2.10 with Python
+## Install GIMP 2.10 with Python 2.7
 ### MacOS
 [1] ```python``` command in terminal should point to GCC Apple LLVM Python 2.7. <br>
 [2] Install [GIMP](https://download.gimp.org/pub/gimp/v2.10/) 2.10.22<br>
