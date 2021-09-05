@@ -4,6 +4,9 @@ import gimpml
 image = cv2.imread("sampleinput/img.png")
 alpha = cv2.imread("sampleinput/alpha.png")
 
+out = gimpml.edge(image)
+cv2.imwrite("output/tmp-edge.jpg", out)
+
 # out = gimpml.kmeans(image)
 # cv2.imwrite("output/tmp-kmeans.jpg", out)
 # #

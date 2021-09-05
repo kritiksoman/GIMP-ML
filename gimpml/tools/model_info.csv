@@ -26,3 +26,4 @@ edgeconnect/psv,11vIrpFaAHhgPN0yixFbN7ZNY78ooefiq,10.8,EdgeModel_dis.pth,ea6c734
 edgeconnect/psv,11taSeBwJXj3AC1qucNHFUgTOTDIbyOLz,42,EdgeModel_gen.pth,40c83e91ace061acd2bd95421750ffaf
 edgeconnect/psv,122BaS0KobaZqsU5mZcIR4pTsoQz__1k8,10.8,InpaintingModel_dis.pth,bf9bb863592605237e620b8d73db225e
 edgeconnect/psv,11wPatO4UAIuPc_9Se99QvlKwGRiw62PY,42,InpaintingModel_gen.pth,afc0ce9b90413298972a2ef1fc65a3c7
+yolo,1-1m-rpIsbolCUGZRdsrKXq-KsT4A-Iwl,246,yolov4.pth,fa40d42ad9f3eb35abdee056aef3f936

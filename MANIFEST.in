@@ -2,4 +2,5 @@ include gimpml/plugins/colorpalette/color_palette.png
 include gimpml/plugins/images/plugin_logo.png
 include gimpml/plugins/images/error_icon.png
 include gimpml/tools/model_info.csv
-
+include gimpml/tools/pytorch-YOLOv4/yolo_data/coco.names
+include gimpml/tools/pytorch-YOLOv4/yolo_data/voc.names
