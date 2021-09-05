@@ -68,6 +68,9 @@ FYI: weights link --> [Link](https://drive.google.com/drive/folders/1AtuIkGH7gqD
 | [enlighten](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#enlightening) | [BSD](https://github.com/VITA-Group/EnlightenGAN/blob/master/License) | [Custom](https://arxiv.org/pdf/1906.06972.pdf) |
 | [interpolate-frames](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#interpolate-frames) | [MIT](https://github.com/hzwer/arXiv2020-RIFE/blob/main/LICENSE) | [HD](https://arxiv.org/pdf/2011.06294.pdf) |
 | [inpainting](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#in-painting) | [CC BY-NC 4.0](https://github.com/knazeri/edge-connect/blob/master/LICENSE.md) | [CelebA, CelebHQ, Places2, Paris StreetView](https://openaccess.thecvf.com/content_ICCVW_2019/papers/AIM/Nazeri_EdgeConnect_Structure_Guided_Image_Inpainting_using_Edge_Prediction_ICCVW_2019_paper.pdf) |
+| [Detect Objects](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#in-painting) | [Apache-2.0](https://github.com/Tianxiaomo/pytorch-YOLOv4/blob/master/License.txt) | [COCO](https://arxiv.org/pdf/2004.10934.pdf) |
+| [Filter Folder](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#in-painting) | [Apache-2.0](https://github.com/Tianxiaomo/pytorch-YOLOv4/blob/master/License.txt) | [COCO](https://arxiv.org/pdf/2004.10934.pdf) |
+| [Canny Edge](https://github.com/kritiksoman/GIMP-ML/wiki/User-Manual#in-painting) | [Apache-2.0](https://opencv.org/license/) | - |
 
 
 # Citation
