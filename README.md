@@ -87,3 +87,6 @@ Please cite using the following bibtex entry:
   year={2020}
 }
 ```
+
+# License
+GIMP-ML is  [![MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/kritiksoman/GIMP-ML/blob/GIMP3-ML/LICENSE.md), but each of the individual plugins follow the same license as the original model's.
