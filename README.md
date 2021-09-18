@@ -75,3 +75,6 @@ Please cite using the following bibtex entry:
 
 # Contribution
 If anyone is interested in contribution, then please see our GIMP3-ML branch--> [Link](https://github.com/kritiksoman/GIMP-ML/tree/GIMP3-ML)
+
+# License
+GIMP-ML is  [![MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/kritiksoman/GIMP-ML/blob/master/LICENSE.md), but each of the individual plugins follow the same license as the original model's.
