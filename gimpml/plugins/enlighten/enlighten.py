@@ -171,7 +171,6 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
                 result = enlighten(
                     procedure, image, layer, force_cpu, progress_bar, config_path_output
                 )
-                # super_resolution(procedure, image, n_drawables, layer, force_cpu, progress_bar, config_path_output)
                 # If the execution was successful, save parameters so they will be restored next time we show dialog.
                 if result.index(0) == Gimp.PDBStatusType.SUCCESS and config is not None:
                     config.end_run(Gimp.PDBStatusType.SUCCESS)

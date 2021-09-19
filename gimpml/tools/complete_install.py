@@ -62,22 +62,13 @@ def setup_python_weights(install_location=None):
                     digest = md5_hash.hexdigest()
                     a_file.close()
                 if not os.path.isfile(destination) or (digest and digest != md5sum):
-                    try:
-                        gimp.progress_init(
-                            "Downloading "
-                            + model_path
-                            + "(~"
-                            + str(file_size)
-                            + "MB)..."
-                        )
-                    except:
-                        print(
-                            "\nDownloading "
-                            + model_path
-                            + "(~"
-                            + str(file_size)
-                            + "MB)..."
-                        )
+                    print(
+                        "\nDownloading "
+                        + model_path
+                        + "(~"
+                        + str(file_size)
+                        + "MB)..."
+                    )
                     url = "https://drive.google.com/uc?id={0}".format(file_id)
                     try:
                         gdown.cached_download(url, destination, md5=md5sum)

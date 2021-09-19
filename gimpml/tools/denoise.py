@@ -11,6 +11,7 @@ import torch
 import cv2
 import numpy as np
 from gimpml.tools.tools_utils import get_weight_path
+import traceback
 
 
 def get_denoise(Img, cpu_flag=False, weight_path=None):
@@ -114,11 +115,6 @@ def get_denoise(Img, cpu_flag=False, weight_path=None):
             merge_out[i:i_end, j:j_end, :] = patch_merge_out_numpy
             j = j_end
             idx = idx + 1
-            try:
-                gimp.progress_update(float(idx) / float(t))
-                gimp.displays_flush()
-            except:
-                pass
         i = i_end
 
     return merge_out[:, :, ::-1]
@@ -146,4 +142,5 @@ if __name__ == "__main__":
         with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "wb") as file:
             pickle.dump({"inference_status": "failed"}, file)
         with open(os.path.join(weight_path, "..", "error_log.txt"), "w") as file:
-            file.write(str(error))
+            e_type, e_val, e_tb = sys.exc_info()
+            traceback.print_exception(e_type, e_val, e_tb, file=file)

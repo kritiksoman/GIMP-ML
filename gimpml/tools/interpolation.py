@@ -11,6 +11,7 @@ from torch.nn import functional as F
 from rife_model import RIFE
 import numpy as np
 from gimpml.tools.tools_utils import get_weight_path
+import traceback
 
 
 def get_inter(img_s, img_e, string_path, cpu_flag=False, weight_path=None):
@@ -45,8 +46,6 @@ def get_inter(img_s, img_e, string_path, cpu_flag=False, weight_path=None):
     img1 = F.pad(img1, padding)
 
     img_list = [img0, img1]
-    idx = 0
-    t = exp * (len(img_list) - 1)
     for i in range(exp):
         tmp = []
         for j in range(len(img_list) - 1):
@@ -54,12 +53,6 @@ def get_inter(img_s, img_e, string_path, cpu_flag=False, weight_path=None):
                 mid = model.inference(img_list[j], img_list[j + 1])
             tmp.append(img_list[j])
             tmp.append(mid)
-        idx = idx + 1
-        try:
-            gimp.progress_update(float(idx) / float(t))
-            gimp.displays_flush()
-        except:
-            pass
         tmp.append(img1)
         img_list = tmp
 
@@ -98,4 +91,5 @@ if __name__ == "__main__":
         with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "wb") as file:
             pickle.dump({"inference_status": "failed"}, file)
         with open(os.path.join(weight_path, "..", "error_log.txt"), "w") as file:
-            file.write(str(error))
+            e_type, e_val, e_tb = sys.exc_info()
+            traceback.print_exception(e_type, e_val, e_tb, file=file)

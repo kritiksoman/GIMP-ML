@@ -26,6 +26,7 @@ import sys
 sys.path.extend([os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")])
 from plugin_utils import *
 
+
 _ = gettext.gettext
 image_paths = {
     "colorpalette": os.path.join(

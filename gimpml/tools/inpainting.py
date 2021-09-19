@@ -14,6 +14,7 @@ import os
 from src.config import Config
 from skimage.feature import canny
 from gimpml.tools.tools_utils import get_weight_path
+import traceback
 
 
 def get_inpaint(images, masks, cpu_flag=False, model_name="places2", weight_path=None):
@@ -75,21 +76,9 @@ def get_inpaint(images, masks, cpu_flag=False, model_name="places2", weight_path
     # build the model and initialize
     model = EdgeConnect(config)
     model.load()
-    # model.test()
-
     images_gray = cv2.cvtColor(images, cv2.COLOR_RGB2GRAY)
-
-    # masks = masks / 255
     sigma = config.SIGMA
-    # # TODO: fix canny edge
-    # if not sigma % 2:
-    #     sigma += 1
-    # max_val = np.max(images_gray)
-    # img = cv2.GaussianBlur(images_gray, (sigma * 3, sigma * 3), sigma)
-    # img = cv2.Canny(img, 0.1 * max_val, 0.2 * max_val)
-    # edge = img * (1 - masks.astype(float))
-    # images_gray = images_gray / 255
-    # images = images / 255
+
     if sigma == -1:
         sigma = random.randint(1, 4)
 
@@ -198,4 +187,5 @@ if __name__ == "__main__":
         with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "wb") as file:
             pickle.dump({"inference_status": "failed"}, file)
         with open(os.path.join(weight_path, "..", "error_log.txt"), "w") as file:
-            file.write(str(error))
+            e_type, e_val, e_tb = sys.exc_info()
+            traceback.print_exception(e_type, e_val, e_tb, file=file)

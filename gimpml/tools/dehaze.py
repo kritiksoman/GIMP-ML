@@ -10,6 +10,8 @@ import net
 import numpy as np
 import cv2
 from gimpml.tools.tools_utils import get_weight_path
+import traceback
+
 
 def get_dehaze(data_hazy, cpu_flag=False, weight_path=None):
     if weight_path is None:
@@ -33,8 +35,6 @@ def get_dehaze(data_hazy, cpu_flag=False, weight_path=None):
             )
         )
 
-    # gimp.progress_update(float(0.005))
-    # gimp.displays_flush()
     data_hazy = data_hazy.unsqueeze(0)
     with torch.no_grad():
         clean_image = dehaze_net(data_hazy)
@@ -64,4 +64,5 @@ if __name__ == "__main__":
         with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "wb") as file:
             pickle.dump({"inference_status": "failed"}, file)
         with open(os.path.join(weight_path, "..", "error_log.txt"), "w") as file:
-            file.write(str(error))
+            e_type, e_val, e_tb = sys.exc_info()
+            traceback.print_exception(e_type, e_val, e_tb, file=file)

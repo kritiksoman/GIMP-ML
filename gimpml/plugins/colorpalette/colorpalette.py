@@ -22,7 +22,7 @@ import os
 
 def colorpalette(procedure, run_mode, image, n_drawables, drawable, args, data):
     image_new = Gimp.Image.new(1200, 675, 0)  # 0 for RGB
-    display = Gimp.Display.new(image_new)
+    # display = Gimp.Display.new(image_new)
     result = Gimp.file_load(
         Gimp.RunMode.NONINTERACTIVE,
         Gio.file_new_for_path(

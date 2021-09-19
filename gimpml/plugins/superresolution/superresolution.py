@@ -26,6 +26,7 @@ import sys
 sys.path.extend([os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")])
 from plugin_utils import *
 
+
 _ = gettext.gettext
 image_paths = {
     "colorpalette": os.path.join(
@@ -179,14 +180,12 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
 
         # Show Logo
         logo = Gtk.Image.new_from_file(image_paths["logo"])
-        # grid.attach(logo, 0, 0, 1, 1)
         vbox.pack_start(logo, False, False, 1)
         logo.show()
 
         # Show License
         license_text = _("PLUGIN LICENSE : MIT")
         label = Gtk.Label(label=license_text)
-        # grid.attach(label, 1, 1, 1, 1)
         vbox.pack_start(label, False, False, 1)
         label.show()
 
@@ -244,7 +243,6 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
                     progress_bar,
                     config_path_output,
                 )
-                # super_resolution(procedure, image, n_drawables, layer, force_cpu, progress_bar, config_path_output)
                 # If the execution was successful, save parameters so they will be restored next time we show dialog.
                 if result.index(0) == Gimp.PDBStatusType.SUCCESS and config is not None:
                     config.end_run(Gimp.PDBStatusType.SUCCESS)

@@ -1,16 +1,8 @@
 import gi
-
 gi.require_version("Gimp", "3.0")
-from gi.repository import Gimp
-
 gi.require_version("GimpUi", "3.0")
-from gi.repository import GimpUi
-from gi.repository import GObject
-from gi.repository import GLib
-from gi.repository import Gio
-
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+from gi.repository import Gimp, GimpUi, GObject, GLib, Gio, Gtk
 import gettext
 
 _ = gettext.gettext
@@ -67,7 +59,7 @@ def save_image(image, drawable, file_path):
             ),
             GObject.Value(GObject.TYPE_BOOLEAN, interlace),
             GObject.Value(GObject.TYPE_INT, compression),
-            # write all PNG chunks except oFFs(ets)
+
             GObject.Value(GObject.TYPE_BOOLEAN, True),
             GObject.Value(GObject.TYPE_BOOLEAN, True),
             GObject.Value(GObject.TYPE_BOOLEAN, False),

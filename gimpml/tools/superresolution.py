@@ -9,11 +9,11 @@ from argparse import Namespace
 import torch
 from torch.autograd import Variable
 import numpy as np
-from PIL import Image
 import cv2
 import warnings
 from gimpml.tools.tools_utils import get_weight_path
 warnings.filterwarnings("ignore")
+import traceback
 
 
 def get_super(input_image, s=4, cpu_flag=False, fFlag=True, weight_path=None):
@@ -51,28 +51,20 @@ def get_super(input_image, s=4, cpu_flag=False, fFlag=True, weight_path=None):
         im_h = np.zeros([4 * w, 4 * h, 3])
         wbin = 300
         i = 0
-        idx = 0
-        t = float(w * h) / float(wbin * wbin)
         while i < w:
             i_end = min(i + wbin, w)
             j = 0
             while j < h:
                 j_end = min(j + wbin, h)
                 patch = im_input[:, :, i:i_end, j:j_end]
-                # patch_merge_out_numpy = denoiser(patch, c, pss, model, model_est, opt, cFlag)
                 with torch.no_grad():
                     HR_4x = model(patch)
                 HR_4x = HR_4x.cpu().data[0].numpy().astype(np.float32) * 255.0
                 HR_4x = np.clip(HR_4x, 0.0, 255.0).transpose(1, 2, 0).astype(np.uint8)
 
-                im_h[4 * i : 4 * i_end, 4 * j : 4 * j_end, :] = HR_4x
+                im_h[4 * i: 4 * i_end, 4 * j: 4 * j_end, :] = HR_4x
                 j = j_end
-                idx = idx + 1
-                try:
-                    gimp.progress_update(float(idx) / float(t))
-                    gimp.displays_flush()
-                except:
-                    pass
+
             i = i_end
     else:
         with torch.no_grad():
@@ -112,4 +104,5 @@ if __name__ == "__main__":
         with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "wb") as file:
             pickle.dump({"inference_status": "failed"}, file)
         with open(os.path.join(weight_path, "..", "error_log.txt"), "w") as file:
-            file.write(str(error))
+            e_type, e_val, e_tb = sys.exc_info()
+            traceback.print_exception(e_type, e_val, e_tb, file=file)

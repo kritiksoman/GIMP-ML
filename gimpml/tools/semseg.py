@@ -46,6 +46,6 @@ if __name__ == "__main__":
     except Exception as error:
         with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "wb") as file:
             pickle.dump({"inference_status": "failed"}, file)
-        with open(os.path.join(weight_path, "..", "error_log.txt"), "w") as f:
-            f.write(str(error))
-            f.write(traceback.format_exc())
+        with open(os.path.join(weight_path, "..", "error_log.txt"), "w") as file:
+            e_type, e_val, e_tb = sys.exc_info()
+            traceback.print_exception(e_type, e_val, e_tb, file=file)

@@ -13,6 +13,7 @@ import os
 import numpy as np
 from deploy import inference_img_whole
 from gimpml.tools.tools_utils import get_weight_path
+import traceback
 
 
 def get_matting(image, mask, cpu_flag=False, weight_path=None):
@@ -26,30 +27,26 @@ def get_matting(image, mask, cpu_flag=False, weight_path=None):
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     trimap = mask[:, :, 0]
 
-    cudaFlag = False
+    cuda_flag = False
     if torch.cuda.is_available() and not cpu_flag:
-        cudaFlag = True
+        cuda_flag = True
 
     args = Namespace(
         crop_or_resize="whole",
-        cuda=cudaFlag,
+        cuda=cuda_flag,
         max_size=1600,
         resume=os.path.join(weight_path, "deepmatting", "stage1_sad_57.1.pth"),
         stage=1,
     )
     model = deepmatting_net.VGG16(args)
 
-    if cudaFlag:
+    if cuda_flag:
         ckpt = torch.load(args.resume)
     else:
         ckpt = torch.load(args.resume, map_location=torch.device("cpu"))
     model.load_state_dict(ckpt["state_dict"], strict=True)
-    if cudaFlag:
+    if cuda_flag:
         model = model.cuda()
-
-    # ckpt = torch.load(args.resume)
-    # model.load_state_dict(ckpt['state_dict'], strict=True)
-    # model = model.cuda()
 
     torch.cuda.empty_cache()
     with torch.no_grad():
@@ -57,7 +54,6 @@ def get_matting(image, mask, cpu_flag=False, weight_path=None):
     pred_mattes = (pred_mattes * 255).astype(np.uint8)
     pred_mattes[trimap == 255] = 255
     pred_mattes[trimap == 0] = 0
-    # pred_mattes = np.repeat(pred_mattes[:, :, np.newaxis], 3, axis=2)
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     pred_mattes = np.dstack((image, pred_mattes))
@@ -99,4 +95,5 @@ if __name__ == "__main__":
         with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "wb") as file:
             pickle.dump({"inference_status": "failed"}, file)
         with open(os.path.join(weight_path, "..", "error_log.txt"), "w") as file:
-            file.write(str(error))
+            e_type, e_val, e_tb = sys.exc_info()
+            traceback.print_exception(e_type, e_val, e_tb, file=file)

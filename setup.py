@@ -7,7 +7,7 @@ with open(os.path.join(here, "README.md"), "r") as fh:
 
 setup(
     name="gimpml",  # Required
-    version="0.0.7",  # Required
+    version="0.0.8",  # Required
     description="A.I. for GIMP",  # Optional
     long_description=long_description,  # Optional
     long_description_content_type="text/markdown",  # Optional (see note above)
@@ -15,10 +15,6 @@ setup(
     author="Kritik Soman",  # Optional
     author_email="kritiksoman@ieee.org",  # Optional
     classifiers=[  # Optional
-        # How mature is this project? Common values are
-        #   3 - Alpha
-        #   4 - Beta
-        #   5 - Production/Stable
         "Development Status :: 3 - Alpha",
         # Indicate who your project is intended for
         "Intended Audience :: Developers",
@@ -29,7 +25,7 @@ setup(
     keywords="sample, setuptools, development",  # Optional
     packages=find_packages(),
     python_requires=">=2.7",
-    include_package_data=True,  # to incluse manifest.in
+    include_package_data=True,  # to include manifest.in
     install_requires=[
         "numpy",
         'future; python_version <= "2.7"',
@@ -42,5 +38,5 @@ setup(
         "pretrainedmodels",
         "scikit-image",
         "timm==0.4.5",
-    ]  # , "torch==1.8", "torchvision"],
+    ]
 )

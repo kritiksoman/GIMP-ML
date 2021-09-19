@@ -44,17 +44,11 @@ def filterfolder(procedure, args_dict, config_path_output):
     weight_path = config_path_output["weight_path"]
     python_path = config_path_output["python_path"]
     plugin_path = config_path_output["plugin_path"]
-    #
-    # Gimp.context_push()
-    # image.undo_group_start()
-    #
-    # save_image(image, drawable, os.path.join(weight_path, "..", "cache.png"))
     args_dict["inference_status"] = "started"
     args_dict["get_predict_image"] = False
     with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "wb") as file:
         pickle.dump(args_dict, file)
-    # image.undo_group_end()
-    # Gimp.context_pop()
+
     # Run inference and load as layer
     subprocess.call([python_path, plugin_path])
     with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "rb") as file:
@@ -73,21 +67,6 @@ def filterfolder(procedure, args_dict, config_path_output):
             "logo",
             image_paths
         )
-        # result = Gimp.file_load(
-        #     Gimp.RunMode.NONINTERACTIVE,
-        #     Gio.file_new_for_path(os.path.join(weight_path, "..", "cache.png")),
-        # )
-        # result_layer = result.get_active_layer()
-        # copy = Gimp.Layer.new_from_drawable(result_layer, image)
-        # copy.set_name("Objects detected.")
-        # copy.set_mode(Gimp.LayerMode.NORMAL_LEGACY)  # DIFFERENCE_LEGACY
-        # image.insert_layer(copy, None, -1)
-        #
-        # # Remove temporary layers that were saved
-        # my_dir = os.path.join(weight_path, "..")
-        # for f_name in os.listdir(my_dir):
-        #     if f_name.startswith("cache"):
-        #         os.remove(os.path.join(my_dir, f_name))
 
         return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
 
@@ -103,10 +82,7 @@ def filterfolder(procedure, args_dict, config_path_output):
 
 def run(procedure, run_mode, args):
     args_dict = {}
-    # force_cpu = args.index(0)
 
-    # if run_mode == Gimp.RunMode.INTERACTIVE:
-    # Get all paths
     config_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "..", "..", "tools"
     )
@@ -116,8 +92,6 @@ def run(procedure, run_mode, args):
     config_path_output["plugin_path"] = os.path.join(config_path, "detectobjects.py")
 
     config = procedure.create_config()
-    # config.set_property("force_cpu", force_cpu)
-    # config.begin_run(image, run_mode, args)
 
     GimpUi.init("filterfolder.py")
     use_header_bar = Gtk.Settings.get_default().get_property(
@@ -143,17 +117,6 @@ def run(procedure, run_mode, args):
     vbox.add(grid)
     grid.show()
 
-    # # Force CPU parameter
-    # spin = GimpUi.prop_check_button_new(config, "force_cpu", _("Force _CPU"))
-    # spin.set_tooltip_text(
-    #     _(
-    #         "If checked, CPU is used for model inference."
-    #         " Otherwise, GPU will be used if available."
-    #     )
-    # )
-    # grid.attach(spin, 1, 2, 1, 1)
-    # spin.show()
-
     # UI for the file parameter
     def choose_file(widget):
         if file_chooser_dialog.run() == Gtk.ResponseType.OK:
@@ -171,7 +134,6 @@ def run(procedure, run_mode, args):
     grid.attach(file_entry, 1, 0, 1, 1)
     file_entry.set_width_chars(40)
     file_entry.set_placeholder_text(_("Choose export folder..."))
-    # if gio_file is not None:
     file_entry.set_text(os.path.join(os.path.expanduser("~"), "Pictures"))
     file_entry.show()
 
@@ -187,8 +149,6 @@ def run(procedure, run_mode, args):
     filter_objects = Gtk.Entry.new()
     grid.attach(filter_objects, 1, 1, 1, 1)
     filter_objects.set_width_chars(40)
-    # file_entry.set_placeholder_text(_("..."))
-    # if gio_file is not None:
     filter_objects.set_text("Person|Cars")
     filter_objects.show()
 
@@ -200,21 +160,18 @@ def run(procedure, run_mode, args):
 
     # Show Logo
     logo = Gtk.Image.new_from_file(image_paths["logo"])
-    # grid.attach(logo, 0, 0, 1, 1)
     vbox.pack_start(logo, False, False, 1)
     logo.show()
 
     # Show Custom Text
     license_text = _("For complete list of objects see help.")
     label = Gtk.Label(label=license_text)
-    # grid.attach(label, 1, 2, 1, 1)
     vbox.pack_start(label, False, False, 1)
     label.show()
 
     # Show License
     license_text = _("PLUGIN LICENSE : Apache-2.0")
     label = Gtk.Label(label=license_text)
-    # grid.attach(label, 1, 1, 1, 1)
     vbox.pack_start(label, False, False, 1)
     label.show()
 
@@ -229,15 +186,9 @@ def run(procedure, run_mode, args):
         if response == Gtk.ResponseType.OK:
             args_dict["image_path"] = file_entry.get_text()
             args_dict["objects"] = filter_objects.get_text()
-            # force_cpu = config.get_property("force_cpu")
             result = filterfolder(
                 procedure, args_dict, config_path_output
             )
-            # super_resolution(procedure, image, n_drawables, layer, force_cpu, progress_bar, config_path_output)
-            # If the execution was successful, save parameters so they will be restored next time we show dialog.
-            # if result.index(0) == Gimp.PDBStatusType.SUCCESS and config is not None:
-            #     config.end_run(Gimp.PDBStatusType.SUCCESS)
-            # return result
             if result.index(0) == Gimp.PDBStatusType.SUCCESS and config is not None:
                 config.end_run(Gimp.PDBStatusType.SUCCESS)
             return result
@@ -253,18 +204,6 @@ def run(procedure, run_mode, args):
 
 
 class FilterFolder(Gimp.PlugIn):
-    ## Properties: parameters ##
-
-    # ## Parameters ##
-    # __gproperties__ = {
-    #     "force_cpu": (
-    #         bool,
-    #         _("Force _CPU"),
-    #         "Force CPU",
-    #         False,
-    #         GObject.ParamFlags.READWRITE,
-    #     ),
-    # }
 
     @GObject.Property(type=Gimp.RunMode,
                       default=Gimp.RunMode.NONINTERACTIVE,
@@ -302,7 +241,6 @@ class FilterFolder(Gimp.PlugIn):
             procedure.set_attribution("Kritik Soman", "GIMP-ML", "2021")
             procedure.add_menu_path("<Image>/Layer/GIMP-ML/")
             procedure.add_argument_from_property(self, "run-mode")
-            # procedure.add_argument_from_property(self, "force_cpu")
 
         return procedure
 

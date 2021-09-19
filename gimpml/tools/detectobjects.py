@@ -15,8 +15,10 @@ import traceback
 import shutil
 import numpy as np
 
+
 def scale_image(image):
     height, width = image.shape[:2]
+    m, n = 0, 0
     if height > 320 or width > 320:
         if height > 320:
             n = (height - 320) / 96
@@ -31,7 +33,7 @@ def scale_image(image):
 
 
 def get_detect_objects(image=None, image_path=None, cpu_flag=False, weight_path=None, get_predict_image=False,
-                   n_classes=80):
+                       n_classes=80):
     if image is not None and image_path is not None:
         raise Exception("Invalid input.")
 
@@ -87,7 +89,10 @@ if __name__ == "__main__":
     weight_path = get_weight_path()
     with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "rb") as file:
         data_output = pickle.load(file)
-    force_cpu = False #data_output["force_cpu"]
+    if "force_cpu" in data_output.keys():
+        force_cpu = data_output["force_cpu"]
+    else:
+        force_cpu = False if torch.cuda.is_available() else True
     get_predict_image = data_output["get_predict_image"]
     image1, image_path = None, None
     if get_predict_image:
@@ -99,8 +104,6 @@ if __name__ == "__main__":
         if get_predict_image:
             count = 0
             output = get_detect_objects(image=image1, cpu_flag=force_cpu, weight_path=weight_path, get_predict_image=True)[0]
-            # with open(os.path.join(weight_path, "..", "output.txt"), "w") as file:
-            #     file.write(str(output))
             cv2.imwrite(os.path.join(weight_path, "..", "cache.png"), output)
         else:
             count = 0
@@ -113,8 +116,6 @@ if __name__ == "__main__":
                     head, tail = os.path.split(res[-1])
                     shutil.move(res[-1], os.path.join(head, "filtered", tail))
                     count += 1
-            # with open(os.path.join(weight_path, "..", "tmp.txt"), "w") as file:
-            #     file.write(str(output))
 
         with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "wb") as file:
             pickle.dump({"inference_status": "success", "force_cpu": force_cpu, "count": count}, file)
@@ -129,6 +130,5 @@ if __name__ == "__main__":
         with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "wb") as file:
             pickle.dump({"inference_status": "failed"}, file)
         with open(os.path.join(weight_path, "..", "error_log.txt"), "w") as file:
-            # file.write(str(error))
             e_type, e_val, e_tb = sys.exc_info()
             traceback.print_exception(e_type, e_val, e_tb, file=file)

@@ -9,6 +9,7 @@ import cv2
 from predictorClass import Predictor
 import torch
 from gimpml.tools.tools_utils import get_weight_path
+import traceback
 
 
 def get_deblur(img, cpu_flag=False, weight_path=None):
@@ -46,4 +47,5 @@ if __name__ == "__main__":
         with open(os.path.join(weight_path, "..", "gimp_ml_run.pkl"), "wb") as file:
             pickle.dump({"inference_status": "failed"}, file)
         with open(os.path.join(weight_path, "..", "error_log.txt"), "w") as file:
-            file.write(str(error))
+            e_type, e_val, e_tb = sys.exc_info()
+            traceback.print_exception(e_type, e_val, e_tb, file=file)

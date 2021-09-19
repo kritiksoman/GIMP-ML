@@ -26,6 +26,7 @@ import sys
 sys.path.extend([os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")])
 from plugin_utils import *
 
+
 _ = gettext.gettext
 image_paths = {
     "colorpalette": os.path.join(
@@ -41,6 +42,7 @@ image_paths = {
         os.path.dirname(os.path.realpath(__file__)), "..", "images", "error_icon.png"
     ),
 }
+
 
 def interpolation(
     procedure,
@@ -239,7 +241,6 @@ def run(procedure, run_mode, image, n_drawables, layer, args, data):
                     gio_file,
                     config_path_output,
                 )
-                # super_resolution(procedure, image, n_drawables, layer, force_cpu, progress_bar, config_path_output)
                 # If the execution was successful, save parameters so they will be restored next time we show dialog.
                 if result.index(0) == Gimp.PDBStatusType.SUCCESS and config is not None:
                     config.end_run(Gimp.PDBStatusType.SUCCESS)
