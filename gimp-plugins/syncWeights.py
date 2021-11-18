@@ -1,6 +1,11 @@
-import requests
 import os
+baseLoc = os.path.dirname(os.path.realpath(__file__))+'/'
 from gimpfu import *
+activate_this = os.path.join(baseLoc, 'gimpenv', 'bin', 'activate_this.py')
+with open(activate_this) as f:
+    code = compile(f.read(), activate_this, 'exec')
+    exec(code, dict(__file__=activate_this))
+import requests
 
 def download_file_from_google_drive(id, destination,fileSize):
 	URL = "https://docs.google.com/uc?export=download"
