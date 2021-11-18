@@ -2,8 +2,10 @@ import os
 baseLoc = os.path.dirname(os.path.realpath(__file__)) + '/'
 from gimpfu import *
 import sys
-sys.path.extend([baseLoc + 'gimpenv/lib/python2.7', baseLoc + 'gimpenv/lib/python2.7/site-packages',
-                 baseLoc + 'gimpenv/lib/python2.7/site-packages/setuptools'])
+activate_this = os.path.join(baseLoc, 'gimpenv', 'bin', 'activate_this.py')
+with open(activate_this) as f:
+    code = compile(f.read(), activate_this, 'exec')
+    exec(code, dict(__file__=activate_this))
 
 import cv2
 import numpy as np

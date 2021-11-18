@@ -5,8 +5,11 @@ savePath = '/'.join(baseLoc.split('/')[:-2]) + '/output/interpolateframes'
 from gimpfu import *
 import sys
 
-sys.path.extend([baseLoc + 'gimpenv/lib/python2.7', baseLoc + 'gimpenv/lib/python2.7/site-packages',
-                 baseLoc + 'gimpenv/lib/python2.7/site-packages/setuptools', baseLoc + 'RIFE'])
+activate_this = os.path.join(baseLoc, 'gimpenv', 'bin', 'activate_this.py')
+with open(activate_this) as f:
+    code = compile(f.read(), activate_this, 'exec')
+    exec(code, dict(__file__=activate_this))
+sys.path.extend([baseLoc + 'RIFE'])
 
 import cv2
 import torch
