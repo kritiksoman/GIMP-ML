@@ -276,10 +276,10 @@ class Interpolation(Gimp.PlugIn):
 
     ## GimpPlugIn virtual methods ##
     def do_query_procedures(self):
-        self.set_translation_domain(
-            "gimp30-python", Gio.file_new_for_path(Gimp.locale_directory())
-        )
         return ["interpolation"]
+
+    def do_set_i18n(self, procname):
+        return True, "gimp30-python", None
 
     def do_create_procedure(self, name):
         procedure = None
