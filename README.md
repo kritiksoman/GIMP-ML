@@ -4,7 +4,7 @@
  
 :star: :star: :star: :star: are welcome. This branch is in development.<br>
 
-[June 2] [GIMP-ML](https://github.com/kritiksoman/GIMP-ML/tree/dev) branch development started.<br>
+Dalle 3 and 2 added. <br>
 
 
 # Screenshot of Menu
