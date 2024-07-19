@@ -25,24 +25,25 @@ import json
 
 url = 'http://127.0.0.1:8000'
 post_json = {
-    "pipeline": "text_to_image",
-    "model": "text_to_image",
+    "pipeline": "text_outpaint_image",
+    "model": "text_outpaint_image",
     "text": "TEXT",
     "source": "gimp2"
 }
 
 gettext.install("gimp20-python", gimp.locale_directory, unicode=True)
 
-models = ["standard", "hd"]
+ext_side = ["Right", "Bottom", "Left", "Top"]
 
-def text_to_image(img, layer, text, dropdown_index):
+
+def text_extend_image(img, layer, text, dropdown_index):
     # Mark undo
     gimp.context_push()
     img.undo_group_start()
 
     # Load/set model
-    post_json["model"] = models[dropdown_index]
-    post_json["pipeline"] = "text_to_image"
+    # post_json["model"] = ext_side[dropdown_index]
+    post_json["pipeline"] = "text_extend_image"
     post_request_string = json.dumps(post_json).encode('utf-8')
     req =  urllib2.Request(url + "/download_load_model", data=post_request_string) 
     output_json = urllib2.urlopen(req)#, timeout=1000*30)
@@ -54,7 +55,8 @@ def text_to_image(img, layer, text, dropdown_index):
 
     # Post request to API 
     post_json["text"] = text
-    post_json["model"] = models[dropdown_index]
+    post_json["image"] = base64.b64encode(layer.get_pixel_rgn(0, 0, layer.width, layer.height)[:, :])
+    post_json["ext_side"] = ext_side[dropdown_index]
     post_json["image_shape"] = (layer.height, layer.width, layer.bpp)
     post_request_string = json.dumps(post_json).encode('utf-8')
     req =  urllib2.Request(url + "/run_inference", data=post_request_string) # this will make the method "POST"
@@ -70,8 +72,17 @@ def text_to_image(img, layer, text, dropdown_index):
     rl = gimp.Layer(img, text, output_shape[1], output_shape[0], 0, 100, NORMAL_MODE)
     region = rl.get_pixel_rgn(0, 0, rl.width,rl.height,True)
     region[:,:] = base64.b64decode(output)
-    img.add_layer(rl,0)
+    
+    
+    # Add a new layer to the new image
+    new_image = gimp.Image(output_shape[1], output_shape[0], RGB)
+    new_layer = pdb.gimp_layer_new_from_drawable(rl, new_image)
+    new_image.add_layer(new_layer, 0)
+    
+    # Display the new image in GIMP
+    gimp.Display(new_image)
     gimp.displays_flush()
+
 
     # Unmark undo
     img.undo_group_end()
@@ -79,23 +90,24 @@ def text_to_image(img, layer, text, dropdown_index):
     return False
 
 
+
 register(
-    "python-fu-text-to-image",
-    N_("Convert text to image"),
+    "python-fu-extend-image",
+    N_("Extend image using text"),
     "https://kritiksoman.github.io/GIMP-ML-Docs/docs-page.html#item-7-16",
     "Kritik Soman",
-    "Dalle 3",
+    "Apache 2",
     "2024",
-    N_("Text to image..."),
+    N_("Extend image..."),
     "RGB*, GRAY*",
     [
         (PF_IMAGE, "image",       "Input image", None),
         (PF_DRAWABLE, "drawable", "Input drawable", None),
 	    (PF_STRING, "string", "Text", "photo of a cat"),
-        (PF_OPTION, 'model', 'Model', 0, models)
+        (PF_OPTION, 'extend', 'Extension Side', 0, ext_side)
     ],
     [],
-    text_to_image,
+    text_extend_image,
     menu="<Image>/Layer/GIML-ML",
     domain=("gimp20-python", gimp.locale_directory)
     )

@@ -39,9 +39,9 @@ class TextEditImage:
         else:
             mask = np.dstack([mask, m])
         client = openai.OpenAI()
-        image_output = io.BytesIO()
-        image = Image.fromarray(image)
-        image.save(image_output, format='PNG')
+        # image_output = io.BytesIO()
+        # image = Image.fromarray(image)
+        # image.save(image_output, format='PNG')
         mask_output = io.BytesIO()        
         mask = Image.fromarray(mask)
         mask.save(mask_output, format='PNG')        

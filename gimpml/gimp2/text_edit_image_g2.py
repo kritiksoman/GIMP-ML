@@ -26,7 +26,7 @@ import json
 url = 'http://127.0.0.1:8000'
 post_json = {
     "pipeline": "text_to_image",
-    "model": "model",
+    "model": "text_to_image",
     "text": "TEXT",
     "source": "gimp2"
 }

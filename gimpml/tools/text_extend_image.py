@@ -15,7 +15,7 @@ if platform.system() == 'Darwin':
 from matplotlib import pyplot as plt
 
 
-class TextOutpaintImage:
+class TextExtendImage:
     def __init__(self, *args, **kwargs) -> None:
         self.folder = os.path.join(os.path.dirname(__file__), "..", "__cache__")
         os.environ['OPENAI_API_KEY'] = json.load(open(os.path.join(os.path.dirname(__file__), "..", "service", "config.json")))['openai']['key']
@@ -27,38 +27,37 @@ class TextOutpaintImage:
             return base64.b64encode(image_file.read()).decode('utf-8')
 
 
-    def edit_image(self, image, text, output_size=None):
-        # print(side)
-        # gen_image = np.zeros((image.shape[0], image.shape[1], 4))
-        gen_image = np.copy(image)
-        gen_image[gen_image[:, :, 3]==0] = [0, 0, 0, 0]
+    def edit_image(self, image, text, side=None, output_size=None):
+        print(side)
+        gen_image = np.zeros((image.shape[0], image.shape[1], 4))
+        
         s = [1024, 1024]
         
 
-        # if side == 'Right':
-        #     gen_image[:, :256, :3] = image[:, 768:, :3]
-        #     gen_image[:, :256, 3] = 255
-        #     image_new = Image.new('RGBA', (1024+768, 1024), (0, 0, 0, 0))
-        #     image = Image.fromarray(image).convert('RGBA')
-        #     image_new.paste(image, (0, 0), image)
-        # elif side == 'Left':
-        #     gen_image[:, 768:, :3] = image[:, :256, :3]
-        #     gen_image[:, 768:, 3] = 255
-        #     image_new = Image.new('RGBA', (1024+768, 1024), (0, 0, 0, 0))
-        #     image = Image.fromarray(image).convert('RGBA')
-        #     image_new.paste(image, (768, 0), image)
-        # elif side == 'Top':
-        #     gen_image[768:, :, :3] = image[:256, :, :3]
-        #     gen_image[768:, :, 3] = 255
-        #     image_new = Image.new('RGBA', (1024, 1024+768), (0, 0, 0, 0))
-        #     image = Image.fromarray(image).convert('RGBA')
-        #     image_new.paste(image, (0, 768), image)
-        # elif side == 'Bottom':
-        #     gen_image[:256, :, :3] = image[768:, :, :3]
-        #     gen_image[:256, :, 3] = 255
-        #     image_new = Image.new('RGBA', (1024, 1024+768), (0, 0, 0, 0))     
-        #     image = Image.fromarray(image).convert('RGBA') 
-        #     image_new.paste(image, (0, 0), image)  
+        if side == 'Right':
+            gen_image[:, :256, :3] = image[:, 768:, :3]
+            gen_image[:, :256, 3] = 255
+            image_new = Image.new('RGBA', (1024+768, 1024), (0, 0, 0, 0))
+            image = Image.fromarray(image).convert('RGBA')
+            image_new.paste(image, (0, 0), image)
+        elif side == 'Left':
+            gen_image[:, 768:, :3] = image[:, :256, :3]
+            gen_image[:, 768:, 3] = 255
+            image_new = Image.new('RGBA', (1024+768, 1024), (0, 0, 0, 0))
+            image = Image.fromarray(image).convert('RGBA')
+            image_new.paste(image, (768, 0), image)
+        elif side == 'Top':
+            gen_image[768:, :, :3] = image[:256, :, :3]
+            gen_image[768:, :, 3] = 255
+            image_new = Image.new('RGBA', (1024, 1024+768), (0, 0, 0, 0))
+            image = Image.fromarray(image).convert('RGBA')
+            image_new.paste(image, (0, 768), image)
+        elif side == 'Bottom':
+            gen_image[:256, :, :3] = image[768:, :, :3]
+            gen_image[:256, :, 3] = 255
+            image_new = Image.new('RGBA', (1024, 1024+768), (0, 0, 0, 0))     
+            image = Image.fromarray(image).convert('RGBA') 
+            image_new.paste(image, (0, 0), image)  
         
         client = openai.OpenAI()
         image_output = io.BytesIO()
@@ -76,19 +75,19 @@ class TextOutpaintImage:
             response = requests.get(url, stream=True)
             response.raise_for_status()
             extended_image = Image.open(response.raw)
-            # extended_image.putalpha(Image.new('L', extended_image.size, 255))
+            extended_image.putalpha(Image.new('L', extended_image.size, 255))
             # extended_image = Image.open("tmp.png")
-            # if side == 'Right':
-            #     image_new.paste(extended_image, (768, 0), extended_image)
-            # elif side == 'Left':       
-            #     image_new.paste(extended_image, (0, 0), extended_image)     
-            # elif side == 'Top':
-            #     image_new.paste(extended_image, (0, 0), extended_image) 
-            # elif side == 'Bottom':
-            #     image_new.paste(extended_image, (0, 768), extended_image) 
+            if side == 'Right':
+                image_new.paste(extended_image, (768, 0), extended_image)
+            elif side == 'Left':       
+                image_new.paste(extended_image, (0, 0), extended_image)     
+            elif side == 'Top':
+                image_new.paste(extended_image, (0, 0), extended_image) 
+            elif side == 'Bottom':
+                image_new.paste(extended_image, (0, 768), extended_image) 
             # image_new.save("tmp.png")
             # image_new = Image.open("tmp.png")
-            self.image = np.array(extended_image).astype(np.uint8)[:, :, :3]
+            self.image = np.array(image_new).astype(np.uint8)[:, :, :3]
             if output_size:
                 self.image = cv2.resize(self.image, (output_size[1], output_size[0]))
         except Exception as e:
@@ -112,7 +111,7 @@ class TextOutpaintImage:
 
 if __name__ == "__main__":
     try:
-        image_gen = TextOutpaintImage("dall-e-2")
+        image_gen = TextExtendImage("dall-e-2")
     except:
         pass
     # image_gen.edit_image(r"/Users/kritiksoman/gimp-test copy/Untitled.png", 
