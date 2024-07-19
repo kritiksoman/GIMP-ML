@@ -26,7 +26,7 @@ import json
 url = 'http://127.0.0.1:8000'
 post_json = {
     "pipeline": "text_to_image",
-    "model": "model",
+    "model": "text_to_image",
     "text": "TEXT",
     "source": "gimp2"
 }
@@ -84,7 +84,7 @@ register(
     N_("Convert text to image"),
     "https://kritiksoman.github.io/GIMP-ML-Docs/docs-page.html#item-7-16",
     "Kritik Soman",
-    "Apache 2",
+    "Dalle 3",
     "2024",
     N_("Text to image..."),
     "RGB*, GRAY*",

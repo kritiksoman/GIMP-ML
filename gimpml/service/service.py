@@ -2,6 +2,7 @@ import sys, os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 from gimpml.tools.text_to_image import TextToImage
 from gimpml.tools.text_edit_image import TextEditImage
+from gimpml.tools.text_extend_image import TextExtendImage
 from gimpml.tools.text_outpaint_image import TextOutpaintImage
 from fastapi import FastAPI, Request, APIRouter
 # import gradio as gr
@@ -81,6 +82,8 @@ class GimpMlService:
                     self.model = TextToImage(input_data["model"])
                 elif input_data["pipeline"] == "text_edit_image":
                     self.model = TextEditImage(input_data["model"])
+                elif input_data["pipeline"] == "text_extend_image":
+                    self.model = TextExtendImage(input_data["model"])
                 elif input_data["pipeline"] == "text_outpaint_image":
                     self.model = TextOutpaintImage(input_data["model"])
                 self.model_name = model_name
@@ -114,11 +117,15 @@ class GimpMlService:
                                      input_data["text"], 
                                      mask = self.get_numpy_img(input_data, "mask"), 
                                      output_size=input_data["image_shape"])
-            if input_data["pipeline"] == "text_outpaint_image":
+            elif input_data["pipeline"] == "text_extend_image":
                 self.model.edit_image(self.get_numpy_img(input_data, "image"), 
                                      input_data["text"], 
                                      side = input_data["ext_side"], 
-                                     )                
+                                     )        
+            elif input_data["pipeline"] == "text_outpaint_image":
+                self.model.edit_image(self.get_numpy_img(input_data, "image"), 
+                                     input_data["text"]
+                                     )           
             if input_data["source"] == "gimp2":
                 im_b64, im_shape = self.model.get_gimp2_output()
             else:
@@ -168,3 +175,4 @@ http://127.0.0.1:8000
 }
 
 """
+

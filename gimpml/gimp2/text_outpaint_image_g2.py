@@ -26,7 +26,7 @@ import json
 url = 'http://127.0.0.1:8000'
 post_json = {
     "pipeline": "text_outpaint_image",
-    "model": "model",
+    "model": "text_outpaint_image",
     "text": "TEXT",
     "source": "gimp2"
 }
@@ -36,7 +36,7 @@ gettext.install("gimp20-python", gimp.locale_directory, unicode=True)
 ext_side = ["Right", "Bottom", "Left", "Top"]
 
 
-def text_outpaint_image(img, layer, text, dropdown_index):
+def text_outpaint_image(img, layer, text):
     # Mark undo
     gimp.context_push()
     img.undo_group_start()
@@ -56,7 +56,7 @@ def text_outpaint_image(img, layer, text, dropdown_index):
     # Post request to API 
     post_json["text"] = text
     post_json["image"] = base64.b64encode(layer.get_pixel_rgn(0, 0, layer.width, layer.height)[:, :])
-    post_json["ext_side"] = ext_side[dropdown_index]
+    # post_json["ext_side"] = ext_side[dropdown_index]
     post_json["image_shape"] = (layer.height, layer.width, layer.bpp)
     post_request_string = json.dumps(post_json).encode('utf-8')
     req =  urllib2.Request(url + "/run_inference", data=post_request_string) # this will make the method "POST"
@@ -74,13 +74,11 @@ def text_outpaint_image(img, layer, text, dropdown_index):
     region[:,:] = base64.b64decode(output)
     
     
-    # Add a new layer to the new image
-    new_image = gimp.Image(output_shape[1], output_shape[0], RGB)
-    new_layer = pdb.gimp_layer_new_from_drawable(rl, new_image)
-    new_image.add_layer(new_layer, 0)
-    
-    # Display the new image in GIMP
-    gimp.Display(new_image)
+    # Load output image as layer
+    rl = gimp.Layer(img, text, output_shape[1], output_shape[0], 0, 100, NORMAL_MODE)
+    region = rl.get_pixel_rgn(0, 0, rl.width,rl.height,True)
+    region[:,:] = base64.b64decode(output)
+    img.add_layer(rl,0)
     gimp.displays_flush()
 
 
@@ -104,7 +102,7 @@ register(
         (PF_IMAGE, "image",       "Input image", None),
         (PF_DRAWABLE, "drawable", "Input drawable", None),
 	    (PF_STRING, "string", "Text", "photo of a cat"),
-        (PF_OPTION, 'extend', 'Extension Side', 0, ext_side)
+        # (PF_OPTION, 'extend', 'Extension Side', 0, ext_side)
     ],
     [],
     text_outpaint_image,

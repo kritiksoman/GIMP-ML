@@ -3,6 +3,7 @@
 *$py.class
 *.so
 *.pyc
-gimpenv/
-weights/
+.venv/
+docs/
 output/
+gimpml/service/config.json
