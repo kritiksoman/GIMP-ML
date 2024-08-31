@@ -1,5 +1,6 @@
-torch
-transformers
+requests
+# torch
+# transformers
 fastapi
 matplotlib
 # gradio
@@ -9,3 +10,5 @@ opencv-python
 PyQt6
 psutil
 openai
+pillow
+uvicorn

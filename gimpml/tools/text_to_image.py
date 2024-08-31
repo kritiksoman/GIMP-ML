@@ -11,7 +11,7 @@ from PIL import Image
 class TextToImage:
     def __init__(self, *args, **kwargs) -> None:
         self.gen_url = "https://api.openai.com/v1/images/generations"
-        self.OPENAI_API_KEY = json.load(open(os.path.join(os.path.dirname(__file__), "..", "service", "config.json")))['openai']['key']
+        self.OPENAI_API_KEY = json.load(open(os.path.join(os.path.dirname(__file__), "..", "config.json")))['openai']['key']
         self.headers = {
             "Content-Type": "application/json",
             "Authorization": "Bearer " + self.OPENAI_API_KEY

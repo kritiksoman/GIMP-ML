@@ -6,4 +6,6 @@
 .venv/
 docs/
 output/
-gimpml/service/config.json
+gimpml/config.json
+gimpml/config_bkp.json
+gimpml/genv

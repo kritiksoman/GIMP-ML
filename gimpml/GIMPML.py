@@ -1,11 +1,11 @@
 import json
+from PyQt6 import sip
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QPixmap
 import sys, os
-
 import requests
-sys.path.append(os.path.curdir)
-from gimpml.tools.text_to_image import TextToImage
+
+# from tools.text_to_image import TextToImage
 from PyQt6.QtCore import QProcess
 from PyQt6 import QtCore
 import subprocess
@@ -18,8 +18,7 @@ class Window(QMainWindow):
         super().__init__()
 
         self.p = None
-        # self.
-        
+       
         # set the title of main window
         self.setWindowTitle('GIMP-ML')
 
@@ -30,16 +29,16 @@ class Window(QMainWindow):
 
         # add all widgets
         self.openai_button = QPushButton('OpenAI', self)
-        self.monodepth = QPushButton('Segment Anything', self)
-        self.btn_3 = QPushButton('Super resolution', self)
-        self.btn_4 = QPushButton('Monodepth', self)
+        # self.monodepth = QPushButton('Segment Anything', self)
+        # self.btn_3 = QPushButton('Super resolution', self)
+        # self.btn_4 = QPushButton('Monodepth', self)
         self.status = QLabel("Service Status: Starting.", self)
         
 
         self.openai_button.clicked.connect(self.text_to_image_action)
-        self.monodepth.clicked.connect(self.monodepth_action)
-        self.btn_3.clicked.connect(self.button3)
-        self.btn_4.clicked.connect(self.button4)
+        # self.monodepth.clicked.connect(self.monodepth_action)
+        # self.btn_3.clicked.connect(self.button3)
+        # self.btn_4.clicked.connect(self.button4)
 
         # self.check
         self.check = list()
@@ -59,9 +58,9 @@ class Window(QMainWindow):
         
     def fun(self):
         # def run():
-        service_process = subprocess.Popen(["/Users/kritiksoman/dev/GIMP-ML/.venv/bin/python", 
-                        "/Users/kritiksoman/dev/GIMP-ML/gimpml/service/service.py"], 
-                        stdout=subprocess.PIPE, universal_newlines=True)
+        service_process = subprocess.Popen([os.path.join(os.path.dirname(__file__), ".venv", "Scripts", "python.exe"),#TODO: add .. when running in  VSCODE
+                        os.path.join(os.path.dirname(__file__), "service.py")], 
+                        stdout=subprocess.PIPE, universal_newlines=True, shell=True)
         # data = {
         #     "quality": model_version
         # }
@@ -76,34 +75,15 @@ class Window(QMainWindow):
                 pass
 
 
-    # def update_service_status(self, text):       
-    #     # def fun():
-    #     #     # process = subprocess.Popen(["nohup", "/Users/kritiksoman/dev/GIMP-ML/.venv/bin/python", 
-    #     #     #                 "/Users/kritiksoman/dev/GIMP-ML/gimpml/service/service.py", "&"], 
-    #     #     #                 stdout=subprocess.PIPE) # run in bg
-    #     process = subprocess.run(["/Users/kritiksoman/dev/GIMP-ML/.venv/bin/python", 
-    #                     "/Users/kritiksoman/dev/GIMP-ML/gimpml/service/service.py"], 
-    #                     capture_output=True, text=True)
-    #     self.service_process = process 
-    #     #     if not len(self.service_process.stderr):
-    #     #         self.status.setText("Service Status: Running.")
-    #     #     else:
-    #     #         self.status.setText("Service Status: Unable to start.")
-
-    #     # t = threading.Thread(target=fun)
-    #     # t.start()
-    #     # QtCore.QMetaObject.invokeMethod(self.status, "setText", QtCore.Qt.QueuedConnection, QtCore.Q_ARG(str, text))
-    #     self.status.setText(text)
-
     def initUI(self):
         left_layout = QVBoxLayout()
         left_layout.addWidget(self.openai_button)
-        left_layout.addWidget(self.monodepth)
-        left_layout.addWidget(self.btn_3)
-        left_layout.addWidget(self.btn_4)
+        # left_layout.addWidget(self.monodepth)
+        # left_layout.addWidget(self.btn_3)
+        # left_layout.addWidget(self.btn_4)
 
         self.logo = QLabel()
-        self.logo.setPixmap(QPixmap(os.path.join(os.path.split(os.path.abspath(__file__))[0], "..", "images", "plugin_logo.png")))
+        self.logo.setPixmap(QPixmap(os.path.join(os.path.dirname(__file__), "images", "plugin_logo.png")))
         left_layout.addWidget(self.logo)
 
         left_layout.addWidget(self.status)
@@ -150,25 +130,47 @@ class Window(QMainWindow):
         self.right_widget.setCurrentIndex(3)
 
     # ----------------- 
-    # pages
-    def download_models(self):
-        for m, c in zip(self.models, self.check):
-            if c.isChecked():
-                print(c.text())
-                # self.model = TextToImage(c.text())
-                if self.p is None:  # No process running.
-                    self.message("Executing process")
-                    self.p = QProcess()  # Keep a reference to the QProcess (e.g. on self) while it's running.
-                    self.p.readyReadStandardOutput.connect(self.handle_stdout)
-                    self.p.readyReadStandardError.connect(self.handle_stderr)
-                    self.p.stateChanged.connect(self.handle_state)
-                    self.p.finished.connect(self.process_finished)  # Clean up once complete.
-                    self.p.start("/Users/kritiksoman/gimp-test/.venv/bin/python3", ['/Users/kritiksoman/gimp-test/gimpml/tools/text_to_image.py', "CompVis/stable-diffusion-v1-4"])
+    # # pages
+    # def download_models(self):
+    #     for m, c in zip(self.models, self.check):
+    #         if c.isChecked():
+    #             print(c.text())
+    #             # self.model = TextToImage(c.text())
+    #             if self.p is None:  # No process running.
+    #                 self.message("Executing process")
+    #                 self.p = QProcess()  # Keep a reference to the QProcess (e.g. on self) while it's running.
+    #                 self.p.readyReadStandardOutput.connect(self.handle_stdout)
+    #                 self.p.readyReadStandardError.connect(self.handle_stderr)
+    #                 self.p.stateChanged.connect(self.handle_state)
+    #                 self.p.finished.connect(self.process_finished)  # Clean up once complete.
+    #                 self.p.start("/Users/kritiksoman/gimp-test/.venv/bin/python3", ['/Users/kritiksoman/gimp-test/gimpml/tools/text_to_image.py', "CompVis/stable-diffusion-v1-4"])
 
-                print("loaded")
-        # pass
+    #             print("loaded")
+    #     # pass
 
+    # def handle_stderr(self):
+    #     data = self.p.readAllStandardError()
+    #     stderr = bytes(data).decode("utf8")
+    #     self.message(stderr)
 
+    # def handle_stdout(self):
+    #     data = self.p.readAllStandardOutput()
+    #     stdout = bytes(data).decode("utf8")
+    #     self.message(stdout)
+
+    # def handle_state(self, state):
+    #     states = {
+    #         QProcess.ProcessState.NotRunning: 'Not running',
+    #         QProcess.ProcessState.Starting: 'Starting',
+    #         QProcess.ProcessState.Running: 'Running',
+    #     }
+    #     state_name = states[state]
+    #     self.message(f"State changed: {state_name}")
+
+    # def process_finished(self):
+    #     self.message("Process finished.")
+    #     self.p = None
+    
     def update_key(self):
         val = self.text.toPlainText()
         v = json.load(open(os.path.join(os.path.dirname(__file__), "..", "service", "config.json")))
@@ -179,29 +181,6 @@ class Window(QMainWindow):
 
     def message(self, s):
         self.text.appendPlainText(s)
-
-    def handle_stderr(self):
-        data = self.p.readAllStandardError()
-        stderr = bytes(data).decode("utf8")
-        self.message(stderr)
-
-    def handle_stdout(self):
-        data = self.p.readAllStandardOutput()
-        stdout = bytes(data).decode("utf8")
-        self.message(stdout)
-
-    def handle_state(self, state):
-        states = {
-            QProcess.ProcessState.NotRunning: 'Not running',
-            QProcess.ProcessState.Starting: 'Starting',
-            QProcess.ProcessState.Running: 'Running',
-        }
-        state_name = states[state]
-        self.message(f"State changed: {state_name}")
-
-    def process_finished(self):
-        self.message("Process finished.")
-        self.p = None
 
     def tab_1(self):
         main_layout = QVBoxLayout()
@@ -220,7 +199,7 @@ class Window(QMainWindow):
         self.text = QPlainTextEdit()
         
         try:
-            with open(os.path.join(os.path.dirname(__file__), "..", "service", "config.json"), "r") as json_file:
+            with open(os.path.join(os.path.dirname(__file__), "config.json"), "r") as json_file:
                 key = json.load(json_file)['openai']['key']
         except:
             key = ""
