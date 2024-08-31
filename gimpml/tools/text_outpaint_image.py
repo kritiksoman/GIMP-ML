@@ -18,7 +18,7 @@ from matplotlib import pyplot as plt
 class TextOutpaintImage:
     def __init__(self, *args, **kwargs) -> None:
         self.folder = os.path.join(os.path.dirname(__file__), "..", "__cache__")
-        os.environ['OPENAI_API_KEY'] = json.load(open(os.path.join(os.path.dirname(__file__), "..", "service", "config.json")))['openai']['key']
+        os.environ['OPENAI_API_KEY'] = json.load(open(os.path.join(os.path.dirname(__file__), "..", "config.json")))['openai']['key']
     
     @staticmethod
     # Function to encode the image

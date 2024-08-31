@@ -1,12 +1,12 @@
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-from gimpml.tools.text_to_image import TextToImage
-from gimpml.tools.text_edit_image import TextEditImage
-from gimpml.tools.text_extend_image import TextExtendImage
-from gimpml.tools.text_outpaint_image import TextOutpaintImage
+import  os
+# sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+from tools.text_to_image import TextToImage
+from tools.text_edit_image import TextEditImage
+from tools.text_extend_image import TextExtendImage
+from tools.text_outpaint_image import TextOutpaintImage
 from fastapi import FastAPI, Request, APIRouter
 # import gradio as gr
-import torch
+# import torch
 import uvicorn
 import numpy as np
 import base64
@@ -50,12 +50,13 @@ class GimpMlService:
         # Function to get info about the system running the service
         cuda_total, cuda_used, cuda_free = 0, 0, 0
         ram_total, ram_used, ram_free = psutil.virtual_memory().total/(1024.**3), psutil.virtual_memory().used/(1024.**3), psutil.virtual_memory().free/(1024.**3)
-        cuda  = torch.cuda.is_available()
-        if cuda:
-            cuda_stats = torch.cuda.mem_get_info()
-            cuda_total = cuda_stats[1]/(1024.**3)
-            cuda_free = cuda_stats[0]/(1024.**3)
-            cuda_used = cuda_total-cuda_free  # free inside reserved
+        # cuda  = torch.cuda.is_available()
+        cuda = False # TODO: change
+        # if cuda:
+        #     cuda_stats = torch.cuda.mem_get_info()
+        #     cuda_total = cuda_stats[1]/(1024.**3)
+        #     cuda_free = cuda_stats[0]/(1024.**3)
+        #     cuda_used = cuda_total-cuda_free  # free inside reserved
         return {"service": "running",
                 "cuda_available": cuda,
                 "cuda_total": round(cuda_total, 2),
@@ -144,7 +145,7 @@ class GimpMlService:
             # return
             ret_im = base64.b64encode(img_np.flatten().tobytes())
             output = {"image": ret_im}
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
         return output
 
 # io = gr.Interface(lambda x: "Hello, " + x + "!", "textbox", "textbox")
