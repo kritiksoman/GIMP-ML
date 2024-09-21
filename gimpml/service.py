@@ -88,7 +88,7 @@ class GimpMlService:
                 elif input_data["pipeline"] == "text_outpaint_image":
                     self.model = TextOutpaintImage(input_data["model"])
                 self.model_name = model_name
-            except:
+            except Exception as e:
                 output_json["status"] = "Error!"
         return output_json
     

@@ -1,0 +1,12 @@
+{
+    "openai": {
+        "key": "",
+        "downloaded": false
+    },
+
+    "monodepth": {
+        "model": "Intel/dpt-hybrid-midas",
+        "downloaded": false
+    }
+
+}
