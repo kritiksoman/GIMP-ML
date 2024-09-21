@@ -8,6 +8,7 @@ Dalle 3 and 2 added. <br>
 
 
 # Screenshot of Menu
+The code base and models available is being widely updated to support newer and more stable functionality.
 ![image1](https://github.com/kritiksoman/tmp/blob/master/screenshot8jun.png)
 
 
