@@ -25,6 +25,17 @@ Please cite using the following bibtex entry:
 }
 ```
 
+# Setup/Contribution
+[GIMP-ML Presentation](https://github.com/kritiksoman/tmp/blob/master/GIMP-ML%20Presentation.pdf)
+
+
+# Related work inspired by GIMP-ML
+| Repository | Link | 
+| ------------- |:-------------:| 
+| [Intel](https://github.com/intel/openvino-ai-plugins-gimp) | [Open Vino](https://github.com/intel/openvino-ai-plugins-gimp) | 
+| [GIMP-ML-Hub](https://github.com/valgur/GIMP-ML-Hub) | [GIMP-ML-Hub](https://github.com/valgur/GIMP-ML-Hub) |
+
+
 # Model Zoo
 | Name | Model | 
 | ------------- |:-------------:| 
