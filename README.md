@@ -6,6 +6,8 @@
 | ------------- |:-------------:| 
 |<img src="https://github.com/kritiksoman/tmp/blob/master/gimpml.gif" width="320" height="485">|  This branch is under development. <br>Dedicated for GIMP 3 and Python 3.<br> :star: :star: :star: :star: are welcome.<br> Waiting for GIMP 3 to release officially.<br>|
 
+# Documentation
+https://kritiksoman.github.io/GIMP-ML-Docs/index.html
 
 # Objectives
 [1] Model Ensembling. <br>
