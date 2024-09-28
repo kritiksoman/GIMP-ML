@@ -78,6 +78,12 @@ import gimpcolor
 from gimpenums import *
 import os
 import threading
+import glib
+import gio
+import gobject
+# import gtk
+# gtk.gdk.threads_init()
+gobject.threads_init()
 pdb = gimp.pdb
 
 import gettext
@@ -388,15 +394,12 @@ def _interact(proc_name, start_params):
 
     import pygtk
     pygtk.require('2.0')
-    import glib
+
     
     import gimpui
     import gtk
-    import gio
-    import gobject
-    gtk.gdk.threads_init()
-    gobject.threads_init()
-    gimpui.gimp_ui_init ()
+
+    gimpui.gimp_ui_init()
 
     defaults = _get_defaults(proc_name)
     defaults = defaults[len(start_params):]
@@ -743,8 +746,8 @@ def _interact(proc_name, start_params):
         box.show()
 
     table = gtk.Table(len(params), 2, False)
-    table.set_row_spacings(6)
-    table.set_col_spacings(6)
+    table.set_row_spacings(8)
+    table.set_col_spacings(8)
     vbox.pack_start(table, expand=False)
     table.show()
 
@@ -797,6 +800,11 @@ def _interact(proc_name, start_params):
                 browser.launch_uris([url])
         elif id == gtk.RESPONSE_CANCEL:
             gtk.main_quit()
+            
+        elif id == gtk.RESPONSE_DELETE_EVENT:
+            gtk.main_quit()
+        return True
+            # dialog.destroy()
 
     dialog.connect("response", response)
 
@@ -827,7 +835,7 @@ def _interact(proc_name, start_params):
 
         label.set_mnemonic_widget(wid)
 
-        table.attach(wid, 2,3, i,i+1, yoptions=0)
+        table.attach(wid, 2, 3, i,i+1, yoptions=0)
 
         if pf_type != PF_TEXT:
             wid.set_tooltip_text(tooltip_text)
@@ -839,22 +847,36 @@ def _interact(proc_name, start_params):
         wid.desc = desc
         edit_wids.append(wid)
 
-    progress_vbox = gtk.VBox(False, 6)
-    vbox.pack_end(progress_vbox, expand=False)
-    progress_vbox.show()
+    custom_vbox = gtk.VBox(False, 6)
+    vbox.pack_end(custom_vbox, expand=False)
+    custom_vbox.show()
 
     progress = gimpui.ProgressBar()
-    progress_vbox.pack_start(progress)
+    custom_vbox.pack_start(progress)
     progress.show()
 
     image = gtk.Image()
     image.set_from_file(image_paths["logo"])
-    progress_vbox.pack_start(image)
+    custom_vbox.pack_start(image)
     image.show()
 
     license_label = gtk.Label("PLUGIN LICENSE : " + copyright)
-    progress_vbox.pack_start(license_label)
+    custom_vbox.pack_start(license_label)
     license_label.show()
+    
+    
+    def donate(button):
+        browsers = gio.app_info_get_all_for_type(".html")
+        if len(browsers):
+            browser = browsers[0]
+            browser.launch_uris(["https://www.google.com"])
+            
+    # Create a button
+    button = gtk.Button("Donate")
+    button.connect("clicked", donate)
+    custom_vbox.pack_start(button)# Add the button to the custom_vbox
+    button.show()# Show the button and the window
+
 #    progress_label.set_alignment(0.0, 0.5)
 #    progress_label.set_ellipsize(pango.ELLIPSIZE_MIDDLE)
 
