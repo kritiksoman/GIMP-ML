@@ -8,6 +8,7 @@ opencv-python
 # xformers
 # https://github.com/apple/ml-stable-diffusion/archive/refs/heads/main.zip
 PyQt6
+PyQt6-WebEngine
 psutil
 openai
 pillow

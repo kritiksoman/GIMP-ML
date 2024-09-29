@@ -4,14 +4,21 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QPixmap
 import sys, os
 import requests
-
+import ctypes
 # from tools.text_to_image import TextToImage
 from PyQt6.QtCore import QProcess
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtGui import QIcon
+from PyQt6.QtCore import QUrl
 from PyQt6 import QtCore
 import subprocess
 import threading
 
-
+# # ctypes.windll.shcore.SetProcessDpiAwareness(1)
+# myappid = u'mycompany.myproduct.subproduct.version' # arbitrary string
+# # ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+# ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('company.app.1')
+    
 class Window(QMainWindow):
     progressSignal = QtCore.pyqtSignal(str)
     def __init__(self):
@@ -21,6 +28,7 @@ class Window(QMainWindow):
        
         # set the title of main window
         self.setWindowTitle('GIMP-ML')
+        self.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), "images", "icon.png")))
 
         # set the size of window
         self.Width = 800
@@ -173,9 +181,9 @@ class Window(QMainWindow):
     
     def update_key(self):
         val = self.text.toPlainText()
-        v = json.load(open(os.path.join(os.path.dirname(__file__), "..", "service", "config.json")))
+        v = json.load(open(os.path.join(os.path.dirname(__file__), "config.json")))
         v['openai']['key'] = val
-        with open(os.path.join(os.path.dirname(__file__), "..", "service", "config.json"), "w") as json_file:
+        with open(os.path.join(os.path.dirname(__file__), "config.json"), "w") as json_file:
             json.dump(v, json_file, indent=3)
 
 
@@ -213,6 +221,13 @@ class Window(QMainWindow):
         main_layout.addWidget(update_key_button)
         # name = self.text.toPlainText()
         update_key_button.clicked.connect(self.update_key)
+        
+        
+        self.browser = QWebEngineView()
+        main_layout.addWidget(self.browser)
+
+        # Load a YouTube video
+        self.browser.setUrl(QUrl("https://www.youtube.com/embed/OB99E7Y1cMA"))
 
         main_layout.addStretch(5)
         main = QWidget()
@@ -245,7 +260,9 @@ class Window(QMainWindow):
 
 
 if __name__ == '__main__':
+
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), "images", "icon.png")))  # Set the application icon
     ex = Window()
     ex.show()
     sys.exit(app.exec())
