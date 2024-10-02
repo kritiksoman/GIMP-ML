@@ -4,10 +4,9 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QPixmap
 import sys, os
 import requests
-import ctypes
 import webbrowser
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtGui import QPalette, QColor
+from PyQt6.QtGui import QPalette, QColor, QCursor
 from PyQt6.QtGui import QAction
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import QUrl
@@ -17,13 +16,15 @@ from PyQt6 import QtCore
 import subprocess
 import threading
 import os
-from Foundation import NSBundle
+
+# import ctypes
+# from Foundation import NSBundle
 
 
-# Hide the application from the macOS dock
-bundle = NSBundle.mainBundle()
-info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
-info['LSUIElement'] = '1'
+# # Hide the application from the macOS dock
+# bundle = NSBundle.mainBundle()
+# info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
+# info['LSUIElement'] = '1'
 
 # # ctypes.windll.shcore.SetProcessDpiAwareness(1)
 # myappid = u'mycompany.myproduct.subproduct.version' # arbitrary string
@@ -39,7 +40,8 @@ class TrayWindow(QMainWindow):
         # set the title of main window
         self.setWindowTitle('GIMP-ML')
         # Disable minimize button
-        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.WindowTitleHint | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowCloseButtonHint | Qt.WindowType.WindowMaximizeButtonHint)
+        # self.setWindowFlags(Qt.WindowType.Tool)
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.WindowTitleHint | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowCloseButtonHint | Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.Tool)
         self.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), "images", "icon.png")))
         self.service_process = None
 
@@ -71,23 +73,28 @@ class TrayWindow(QMainWindow):
         # System Tray Minimize
         self.tray_icon = QSystemTrayIcon(self)
         self.tray_icon.setIcon(QIcon(os.path.join(os.path.dirname(__file__), "images", "icon.png")))
-        tray_menu = QMenu() # Create the tray menu
+        self.tray_menu = QMenu() # Create the tray menu
         restore_action = QAction("Show window", self)
         restore_action.triggered.connect(self.show_raise_app)
-        tray_menu.addAction(restore_action)
+        self.tray_menu.addAction(restore_action)
 
         quit_action = QAction("Quit", self)
         quit_action.triggered.connect(self.quit_app)#QApplication.instance().quit)
-        tray_menu.addAction(quit_action)
+        self.tray_menu.addAction(quit_action)
 
-        self.tray_icon.setContextMenu(tray_menu)
+        self.tray_icon.setContextMenu(self.tray_menu)
         self.tray_icon.setVisible(True)
+        self.tray_icon.activated.connect(self.on_tray_icon_activated) # Connect the tray icon click event
 
         # GIMP-ML fast api service
         service_thread = threading.Thread(target=self.test_start_service)
         self.progressSignal.connect(self.status.setText)
         service_thread.start()
-        
+
+    def on_tray_icon_activated(self, reason):
+        if reason == QSystemTrayIcon.ActivationReason.Trigger:
+            self.tray_menu.exec(QCursor.pos())
+            
     def closeEvent(self, event):
         # Runs when window is closed
         event.ignore()
