@@ -81,6 +81,8 @@ import threading
 import glib
 import gio
 import gobject
+import webbrowser
+import sys
 # import gtk
 # gtk.gdk.threads_init()
 gobject.threads_init()
@@ -724,9 +726,11 @@ def _interact(proc_name, start_params):
                             gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
                             gtk.STOCK_OK, gtk.RESPONSE_OK))
 
+    # dialog.set_icon_from_file(os.path.join(os.path.dirname(__file__), "..", "images", "icon.png"))
     dialog.set_alternative_button_order((gtk.RESPONSE_OK, gtk.RESPONSE_CANCEL))
 
     dialog.set_transient()
+    
 
     vbox = gtk.VBox(False, 12)
     vbox.set_border_width(12)
@@ -793,11 +797,8 @@ def _interact(proc_name, start_params):
                     raise
         elif id == gtk.RESPONSE_HELP:
             url = help
-                # def x():
-            browsers = gio.app_info_get_all_for_type(".html")
-            if len(browsers):
-                browser = browsers[0]
-                browser.launch_uris([url])
+            open_browser(None, url)
+
         elif id == gtk.RESPONSE_CANCEL:
             gtk.main_quit()
             
@@ -864,16 +865,20 @@ def _interact(proc_name, start_params):
     custom_vbox.pack_start(license_label)
     license_label.show()
     
-    
-    def donate(button):
-        browsers = gio.app_info_get_all_for_type(".html")
-        if len(browsers):
-            browser = browsers[0]
-            browser.launch_uris(["https://www.google.com"])
+
+    def open_browser(button, url):
+        # Linux and mac os
+        if sys.platform in ["linux", "linux2", "darwin"]:
+            webbrowser.open(url)
+        else: # Windows
+            browsers = gio.app_info_get_all_for_type(".html")
+            if len(browsers):
+                browser = browsers[0]
+                browser.launch_uris([url])
             
     # Create a button
     button = gtk.Button("Donate")
-    button.connect("clicked", donate)
+    button.connect("clicked", open_browser, "https://www.google.com")
     custom_vbox.pack_start(button)# Add the button to the custom_vbox
     button.show()# Show the button and the window
 
