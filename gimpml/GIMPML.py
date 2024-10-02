@@ -17,14 +17,7 @@ import subprocess
 import threading
 import os
 
-# import ctypes
-# from Foundation import NSBundle
 
-
-# # Hide the application from the macOS dock
-# bundle = NSBundle.mainBundle()
-# info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
-# info['LSUIElement'] = '1'
 
 # # ctypes.windll.shcore.SetProcessDpiAwareness(1)
 # myappid = u'mycompany.myproduct.subproduct.version' # arbitrary string
@@ -84,7 +77,8 @@ class TrayWindow(QMainWindow):
 
         self.tray_icon.setContextMenu(self.tray_menu)
         self.tray_icon.setVisible(True)
-        self.tray_icon.activated.connect(self.on_tray_icon_activated) # Connect the tray icon click event
+        if sys.platform == "win32": # Connect the tray icon click event for left click on windows
+            self.tray_icon.activated.connect(self.on_tray_icon_activated) 
 
         # GIMP-ML fast api service
         service_thread = threading.Thread(target=self.test_start_service)
@@ -306,6 +300,13 @@ class TrayWindow(QMainWindow):
         return main
 
 if __name__ == '__main__':
+    if sys.platform == "darwin":
+        import ctypes
+        from Foundation import NSBundle
+        # Hide the application from the macOS dock
+        bundle = NSBundle.mainBundle()
+        info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
+        info['LSUIElement'] = '1'
 
     app = QApplication(sys.argv)
     # app.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), "images", "icon.png")))  # Set the application icon
