@@ -67,7 +67,7 @@ def semseg(procedure, image, drawable, force_cpu, progress_bar, config_path_outp
             Gimp.RunMode.NONINTERACTIVE,
             Gio.file_new_for_path(os.path.join(weight_path, "..", "cache.png")),
         )
-        result_layer = result.get_active_layer()
+        result_layer = result.list_layers()[0]
         copy = Gimp.Layer.new_from_drawable(result_layer, image)
         copy.set_name("Semantic Segmentation")
         copy.set_mode(Gimp.LayerMode.NORMAL_LEGACY)  # DIFFERENCE_LEGACY
@@ -200,10 +200,10 @@ class SemSeg(Gimp.PlugIn):
 
     ## GimpPlugIn virtual methods ##
     def do_query_procedures(self):
-        self.set_translation_domain(
-            "gimp30-python", Gio.file_new_for_path(Gimp.locale_directory())
-        )
         return ["semseg"]
+
+    def do_set_i18n(self, procname):
+        return True, "gimp30-python", None
 
     def do_create_procedure(self, name):
         procedure = None
