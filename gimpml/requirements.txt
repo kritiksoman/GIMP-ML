@@ -13,3 +13,4 @@ psutil
 openai
 pillow
 uvicorn
+pywin32

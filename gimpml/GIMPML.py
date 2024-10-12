@@ -12,11 +12,14 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import QUrl
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QCloseEvent
+from PyQt6.QtGui import QClipboard
 from PyQt6 import QtCore
 import subprocess
 import threading
 import os
 import socket
+import win32com.client as win32
+
 
 
 
@@ -46,17 +49,18 @@ class TrayWindow(QMainWindow):
 
         # add all widgets for the left and the right panel
         self.openai_button = QPushButton('OpenAI', self)
+        self.settings_button = QPushButton('Settings', self)
         self.status = QLabel("Service Status: Starting.", self)
         
 
         self.openai_button.clicked.connect(self.activate_openai_panel)
-        # self.monodepth.clicked.connect(self.monodepth_action)
+        self.settings_button.clicked.connect(self.activate_settings_panel)
 
         self.models = list()
 
         # add tabs
-        self.openai_tab = self.tab_1()
-        self.tab2 = self.ui2()
+        self.openai_tab = self.tab_openai()
+        self.tab2 = self.tab_settings()
 
         self.initUI()
 
@@ -162,7 +166,7 @@ class TrayWindow(QMainWindow):
     def initUI(self):
         left_layout = QVBoxLayout()
         left_layout.addWidget(self.openai_button)
-        # left_layout.addWidget(self.monodepth)
+        left_layout.addWidget(self.settings_button)
         # left_layout.addWidget(self.btn_3)
         # left_layout.addWidget(self.btn_4)
 
@@ -202,7 +206,7 @@ class TrayWindow(QMainWindow):
     def activate_openai_panel(self):
         self.right_widget.setCurrentIndex(0)
 
-    def monodepth_action(self):
+    def activate_settings_panel(self):
         self.right_widget.setCurrentIndex(1)
 
     def button3(self):
@@ -214,7 +218,7 @@ class TrayWindow(QMainWindow):
     def message(self, s):
         self.openai_key.appendPlainText(s)
 
-    def tab_1(self):
+    def tab_openai(self):
         main = QWidget()
         main_layout = QVBoxLayout()
 
@@ -228,7 +232,7 @@ class TrayWindow(QMainWindow):
 
         # Buttons layout
         button_layout = QHBoxLayout()
-        login_button = QPushButton('Create account', self)
+        login_button = QPushButton('Genarate API Key', self)
         login_button.clicked.connect(self.login_openai)
         see_usage_button = QPushButton('See credit usage', self)
         see_usage_button.clicked.connect(self.get_openai_usage)
@@ -238,15 +242,18 @@ class TrayWindow(QMainWindow):
         
         # Set key layout
         key_layout = QHBoxLayout()
-        key_layout.addWidget(QLabel("Key : "))
+        label = QLabel("Key : ")
+        label.setFixedWidth(100)
+        key_layout.addWidget(label)
         self.openai_key = QPlainTextEdit()
-        self.openai_key.setFixedWidth(450)
+        self.openai_key.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Plain)
+        self.openai_key.setFixedWidth(550)
         self.openai_key.setFixedHeight(24)
         try:
             with open(os.path.join(os.path.dirname(__file__), "config.json"), "r") as json_file:
                 key = json.load(json_file)['openai']['key']
         except:
-            key = ""
+            key = " "*51
         self.openai_key.appendPlainText(key)
         # self.text.resize(400, 5)
         self.openai_key = self.disable_plain_text(self.openai_key)        
@@ -259,10 +266,17 @@ class TrayWindow(QMainWindow):
         self.update_key_button.clicked.connect(self.enable_plain_text)
         
         # Widget for video guide layout
-        self.browser = QWebEngineView()
-        main_layout.addWidget(self.browser)
-        self.browser.setUrl(QUrl("https://www.youtube.com/embed/OB99E7Y1cMA"))        
+        browser = QWebEngineView()
+        main_layout.addWidget(browser)
+        browser.setUrl(QUrl("https://www.youtube.com/embed/5LVX7MyI2Kg"))        
 
+        # label = QLabel()
+        # pixmap = QPixmap(r"D:\win\Users\Kritik Soman\Documents\GIMP-ML Assets\key gen.png")
+        # label.setPixmap(pixmap)
+        # label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # label.resize(600, 400)
+        # main_layout.addWidget(label)
+                     
         main_layout.addStretch(5)
         main.setLayout(main_layout)
         return main
@@ -299,18 +313,119 @@ class TrayWindow(QMainWindow):
 
 
     def login_openai(self):
-        webbrowser.open("https://platform.openai.com/signup")
+        webbrowser.open("https://platform.openai.com/api-keys")
 
     def get_openai_usage(self):
         webbrowser.open("https://platform.openai.com/settings/organization/billing/overview")
 
-    def ui2(self):
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(QLabel('page 2'))
-        main_layout.addStretch(5)
+    def tab_settings(self):
         main = QWidget()
+        main_layout = QVBoxLayout()
+
+        # Label for the plugins layout
+        # main_layout.addWidget(QLabel('Plugin Path: '))
+        # self.models = ["* Text to image", "* Extend image", "* Edit image with text"]
+        # for i in range(len(self.models)):
+        #     main_layout.addWidget(QLabel(self.models[i]))
+        # verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        # main_layout.addItem(verticalSpacer)
+        
+        # self.plugin_path = QPlainTextEdit()
+        # self.plugin_path.setFixedWidth(450)
+        # self.plugin_path.setFixedHeight(24)
+        # self.plugin_path.appendPlainText(os.path.join(os.path.dirname(__file__), "gimp2"))
+        # main_layout.addWidget(self.plugin_path)
+        
+        # # Buttons layout
+        # button_layout = QHBoxLayout()
+        # login_button = QPushButton('Create account', self)
+        # login_button.clicked.connect(self.login_openai)
+        # see_usage_button = QPushButton('See credit usage', self)
+        # see_usage_button.clicked.connect(self.get_openai_usage)
+        # button_layout.addWidget(login_button)
+        # button_layout.addWidget(see_usage_button)
+        # main_layout.addItem(button_layout)
+        
+        # Plugin path layout
+        path_layout = QHBoxLayout()
+        path_layout.addWidget(QLabel("Plugin Path : "))
+        self.plugin_path = QPlainTextEdit()
+        self.plugin_path.setFixedWidth(450)
+        self.plugin_path.setFixedHeight(24)
+        self.plugin_path.appendPlainText(os.path.join(os.path.dirname(__file__), "gimp2"))  
+        self.plugin_path.setReadOnly(True)
+        path_layout.addWidget(self.plugin_path)
+        main_layout.addItem(path_layout)
+
+        # Update key layout
+        self.copy_button = QPushButton('Copy', self)
+        main_layout.addWidget(self.copy_button)
+        self.copy_button.clicked.connect(self.copy_path)
+
+        # Widget for video guide layout
+        main_layout.addWidget(QLabel("Plugin not visible in GIMP? Follow this tutorial : "))
+        browser = QWebEngineView()
+        main_layout.addWidget(browser)
+        browser.setUrl(QUrl("https://www.youtube.com/embed/cr0Fu0SY9eg"))     
+        # label = QLabel()
+        # pixmap = QPixmap(r"D:\win\Users\Kritik Soman\Documents\GIMP-ML Assets\add path.png")
+        # label.setPixmap(pixmap)
+        # label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # # label.resize(600, 400)
+        # main_layout.addWidget(label)
+        
+        # Launch at startup layout
+        startup_layout = QHBoxLayout()
+        # startup_layout.addWidget(QLabel("Launch GIMP-ML at login : "))
+        self.startup_checkbox = QCheckBox("Launch GIMP-ML at login", )
+        startup_layout.addWidget(self.startup_checkbox)
+        self.startup_checkbox.setChecked(self.is_present_at_startup())
+        self.startup_checkbox.stateChanged.connect(self.update_startup)
+        main_layout.addItem(startup_layout)   
+
+        main_layout.addStretch(5)
         main.setLayout(main_layout)
         return main
+
+    def update_startup(self):
+        if self.startup_checkbox.isChecked():
+            self.add_to_startup()
+        else:
+            self.remove_from_startup()
+        
+    @staticmethod
+    def add_to_startup(program_name="GIMPML"):
+        startup_path = os.path.join(os.getenv('APPDATA'), r'Microsoft\Windows\Start Menu\Programs\Startup')
+        destination_path = os.path.join(startup_path, f"{program_name}.lnk")
+
+        # Create a shortcut
+        shell = win32.Dispatch("WScript.Shell")
+        shortcut = shell.CreateShortCut(destination_path)
+        shortcut.TargetPath = os.path.join(os.path.dirname(__file__), "GIMPML.exe")
+        shortcut.save()
+        
+    @staticmethod
+    def remove_from_startup(program_name="GIMPML"):
+        startup_path = os.path.join(os.getenv('APPDATA'), r'Microsoft\Windows\Start Menu\Programs\Startup')
+        destination_path = os.path.join(startup_path, f"{program_name}.lnk")
+        if os.path.exists(destination_path):
+            os.remove(destination_path)
+            # print(f"Shortcut removed from {destination_path}")
+        # else:
+        #     print(f"No shortcut found at {destination_path}")
+        
+    @staticmethod
+    def is_present_at_startup(program_name="GIMPML"):
+        startup_path = os.path.join(os.getenv('APPDATA'), r'Microsoft\Windows\Start Menu\Programs\Startup')
+        destination_path = os.path.join(startup_path, f"{program_name}.lnk")
+        if os.path.exists(destination_path):
+            return True
+        return False
+            
+    def copy_path(self):
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.plugin_path.toPlainText())
+        
 
 if __name__ == '__main__':
     if sys.platform == "darwin":
