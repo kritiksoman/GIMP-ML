@@ -23,7 +23,8 @@ import base64
 import json
 
 
-url = 'http://127.0.0.1:8000'
+v = json.load(open(os.path.join(os.path.dirname(__file__), "..", "config.json")))
+url = r"http://localhost:"+ str(v['gimpml']['port']) 
 post_json = {
     "pipeline": "text_outpaint_image",
     "model": "text_outpaint_image",

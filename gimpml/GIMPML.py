@@ -16,6 +16,7 @@ from PyQt6 import QtCore
 import subprocess
 import threading
 import os
+import socket
 
 
 
@@ -81,6 +82,7 @@ class TrayWindow(QMainWindow):
             self.tray_icon.activated.connect(self.on_tray_icon_activated) 
 
         # GIMP-ML fast api service
+        self.identify_empty_port()
         service_thread = threading.Thread(target=self.test_start_service)
         self.progressSignal.connect(self.status.setText)
         service_thread.start()
@@ -116,36 +118,47 @@ class TrayWindow(QMainWindow):
         self.service_process.wait()
         QApplication.instance().quit()
 
+    def identify_empty_port(self):
+        sock = socket.socket()
+        sock.bind(('', 0))
+        self.port = sock.getsockname()[1]
+        v = json.load(open(os.path.join(os.path.dirname(__file__), "config.json")))
+        v['gimpml']['port'] = self.port
+        with open(os.path.join(os.path.dirname(__file__), "config.json"), "w") as json_file:
+            json.dump(v, json_file, indent=3)
+
+
     def test_start_service(self):
         try:
-            response = requests.get(r"http://127.0.0.1:8000/status")
+            response = requests.get(r"http://localhost:"+ str(self.port) +"/status")
             response_data = response.json()
             if response_data['service'] == 'running':
                 self.progressSignal.emit("Service Status: Running.")
         except:
             if sys.platform == "linux" or sys.platform == "linux2":
-                self.service_process = subprocess.Popen([os.path.join(os.path.dirname(__file__), "..", "..", ".venv", "bin", "python"), #TODO: add .. when running in  VSCODE
+                self.service_process = subprocess.Popen([os.path.join(os.path.dirname(__file__),  "gimp_env", "bin", "python"), #TODO: add .. when running in  VSCODE
                 os.path.join(os.path.dirname(__file__), "service.py")], 
                 stdout=subprocess.PIPE, universal_newlines=True, shell=True)
             elif sys.platform == "darwin":
-                self.service_process = subprocess.Popen([os.path.join(os.path.dirname(__file__), "..", "..", ".venv", "bin", "python"), #TODO: add .. when running in  VSCODE
+                # with open(r"/Users/kritiksoman/dev/tmp.txt", "w") as f:
+                #     f.write(os.path.join(os.path.dirname(__file__)))
+                self.service_process = subprocess.Popen([os.path.join(os.path.dirname(__file__), "gimp_env", "bin", "python"), #TODO: add .. when running in  VSCODE
                 os.path.join(os.path.dirname(__file__), "service.py")], 
                 stdout=subprocess.PIPE, universal_newlines=True, shell=False)
             elif sys.platform == "win32":
-                self.service_process = subprocess.Popen([os.path.join(os.path.dirname(__file__), "..", "..", ".venv", "Scripts", "python.exe"),#TODO: add .. when running in  VSCODE
+                self.service_process = subprocess.Popen([os.path.join(os.path.dirname(__file__),  "gimp_env", "Scripts", "python.exe"),#TODO: add .. when running in  VSCODE
                             os.path.join(os.path.dirname(__file__), "service.py")], 
                             stdout=subprocess.PIPE, universal_newlines=True, shell=True)
         while True:
             try:
-                response = requests.get(r"http://127.0.0.1:8000/status")
+                response = requests.get(r"http://localhost:"+ str(self.port) +"/status")
                 response_data = response.json()
                 if response_data['service'] == 'running':
                     self.progressSignal.emit("Service Status: Running.")
                     break
             except:
                 pass
-
-
+            
     def initUI(self):
         left_layout = QVBoxLayout()
         left_layout.addWidget(self.openai_button)

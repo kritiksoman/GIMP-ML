@@ -21,12 +21,12 @@ class TextToImage:
                   model_version='standard',
                   output_size=None):
  
-        if 1.25<=output_size[0]/output_size[1]<=2:
-            s = [1792, 1024]
-        elif 1.25<=output_size[1]/output_size[0]<=2:
+        if 0.9<=output_size[0]/output_size[1]<=1.1:
+            s = [1024, 1024]
+        elif output_size[0]>1.1*output_size[1]:
             s = [1024, 1792]
         else:
-            s = [1024, 1024]
+            s = [1792, 1024]
 
         data = {
             "prompt": text,
@@ -44,8 +44,8 @@ class TextToImage:
             response = requests.get(url, stream=True)
             response.raise_for_status()
             self.image = np.array(Image.open(response.raw))
-            if output_size:
-                self.image = cv2.resize(self.image, (output_size[1], output_size[0]))
+            # if output_size:
+            #     self.image = cv2.resize(self.image, (output_size[1], output_size[0]))
         except Exception as e:
             print(e)
             return {"status": "failed"}
