@@ -23,7 +23,7 @@ class TextToImage:
  
         if 0.9<=output_size[0]/output_size[1]<=1.1:
             s = [1024, 1024]
-        elif output_size[0]>1.1*output_size[1]:
+        elif output_size[1]>1.1*output_size[0]:
             s = [1024, 1792]
         else:
             s = [1792, 1024]
