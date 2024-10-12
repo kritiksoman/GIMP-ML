@@ -13,6 +13,7 @@ import base64
 from matplotlib import pyplot as plt
 import psutil
 import os, platform, subprocess, re
+import json
 
 # CUSTOM_PATH = "/gradio"
 
@@ -155,7 +156,10 @@ ml_service = GimpMlService()
 app.include_router(ml_service.router)
 
 if __name__ == "__main__":
-    uvicorn.run("service:app", host="127.0.0.1", port=8000, log_level="info")
+    port = 8000
+    with open(os.path.join(os.path.dirname(__file__), "config.json"), "r") as json_file:
+        port = json.load(json_file)['gimpml']['port']
+    uvicorn.run("service:app", host="localhost", port=port, log_level="info")
 
 # uvicorn service:app
 

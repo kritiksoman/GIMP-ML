@@ -8,4 +8,4 @@ docs/
 output/
 gimpml/config.json
 gimpml/config_bkp.json
-gimpml/genv
+gimpml/gimp_env/

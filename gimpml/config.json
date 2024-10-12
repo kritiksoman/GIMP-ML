@@ -1,12 +1,13 @@
 {
-    "openai": {
-        "key": "",
-        "downloaded": false
-    },
-
-    "monodepth": {
-        "model": "Intel/dpt-hybrid-midas",
-        "downloaded": false
-    }
-
+   "openai": {
+      "key": "",
+      "downloaded": false
+   },
+   "monodepth": {
+      "model": "Intel/dpt-hybrid-midas",
+      "downloaded": false
+   },
+   "gimpml": {
+      "port": 61482
+   }
 }
