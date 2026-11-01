@@ -62,12 +62,18 @@ def preferences(root: Path = ROOT) -> dict:
 
 def api_key(provider: str, root: Path = ROOT) -> str:
     from dotenv import dotenv_values
+    from gimpml.credentials import read_key
 
     name = "OPENROUTER_API_KEY" if provider == "openrouter" else "GEMINI_API_KEY"
     values = dotenv_values(root / ".env")
-    key = os.environ.get(name) or values.get(name)
+    key = os.environ.get(name)
     if provider == "google" and not key:
-        key = os.environ.get("GOOGLE_API_KEY") or values.get("GOOGLE_API_KEY")
+        key = os.environ.get("GOOGLE_API_KEY")
+    if not key:
+        key = read_key(provider) or values.get(name)
+    if provider == "google" and not key:
+        key = values.get("GOOGLE_API_KEY")
     if not key or not key.strip():
-        raise GenerationError(f"Set {name} in the repository .env file or worker environment.")
+        raise GenerationError(f"Set an API key in Filters > GIMP-ML > Settings on macOS, "
+                              f"or set {name} in the repository .env file or worker environment.")
     return key.strip()

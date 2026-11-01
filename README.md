@@ -1,13 +1,23 @@
 # GIMP-ML: image generation and editing
 
-Three native **GIMP 3** commands for generating and editing images using
-natural-language prompts: **Generate Image**, **Edit Selected Layer**, and
-**Edit Visible Canvas**. Choose **OpenRouter** or **Google** as the API provider.
-Results are added as a **new layer** by default; editing can optionally replace
-the selected layer's pixels with undo support.
+**GIMP-ML brings text-driven image creation and editing directly into GIMP 3.**
+Create an image from a description, transform a selected layer, or rework the
+visible canvas without leaving your editor. Native dialogs under
+**Filters > GIMP-ML** connect to **OpenRouter** or **Google**; no local models,
+GPU, or separate UI application are required.
 
-The legacy GIMP 2/Python 2 plugins, local neural-network models, OpenAI-only
-pipelines, and Qt tray application have been removed.
+- **Generate Image**: turn a text prompt into a new image or document layer.
+- **Edit Selected Layer**: describe changes to one layer's pixels.
+- **Edit Visible Canvas**: use the visible composition as the editing input.
+- **Settings** (macOS): manage provider API keys in OS-protected Keychain storage.
+
+Results are added as a **new layer by default**, preserving your originals.
+Editing can optionally replace selected-layer pixels with **undo support**.
+Text-only generation sends only your prompt; editing requires explicit consent
+to upload the chosen image. Both use external APIs and may incur charges.
+
+This implementation replaces the legacy GIMP 2/Python 2 plugins, local
+computer-vision models, OpenAI-only pipelines, and Qt tray application.
 
 ## Plugin UI and generated output
 
@@ -18,7 +28,8 @@ The prompt "coffee mug in ice" uses `gemini-2.5-flash-image` via OpenRouter
 with a 1:1 aspect ratio and 1K resolution. The generated image appears as a
 new layer above the existing Background layer, alongside the plugin controls.
 This screenshot shows an earlier text-only generation dialog. The current version
-has three separate menu entries and dialogs with provider-neutral titles.
+has three separate image commands with provider-neutral titles, plus a
+**Settings...** command on macOS. The screenshot does not show the Settings dialog.
 
 ## Install
 
@@ -31,7 +42,7 @@ From this repository:
 python3 scripts/install.py
 ```
 
-This creates `.venv`, installs the three backend dependencies, and copies the
+This creates `.venv`, installs the backend dependencies, and copies the
 plugin into your user's GIMP plugin directory, discovered from GIMP itself.
 For GIMP 3.2 on macOS, this is
 `~/Library/Application Support/GIMP/3.2/plug-ins`. It does not modify
@@ -49,9 +60,38 @@ absolute path. Run the installer again after moving it or updating plugin code.
 Fully quit GIMP and reopen it after installation to refresh its menus and dialogs.
 The installer only replaces its own `gimpml-gemini` plugin; it does not delete
 other user-installed plugins. That installed entry point registers all three
-commands; no separate installation is needed for each command.
+image commands and, on macOS, Settings; no separate installation is needed
+for each command.
+
+### Quick start on macOS
+
+1. Run the installer above.
+2. Fully quit GIMP with **Cmd+Q**, then reopen it.
+3. Open **Filters > GIMP-ML > Settings...**, enter a provider's API key, and click
+   **Save**. A repository `.env` file is not required when using saved keys.
+4. Choose **Generate Image...**, **Edit Selected Layer...**, or **Edit Visible
+   Canvas...** from the same menu and select the matching provider.
 
 ## Credentials
+
+### Set keys inside GIMP on macOS
+
+1. Choose **Filters > GIMP-ML > Settings...**. No open document is needed.
+2. Enter an **OpenRouter API key**, a **Google API key**, or both in the masked fields.
+3. Click **Save**. Keys are stored in **macOS Keychain**, not in the project or
+   GIMP's procedure settings. macOS may ask you to unlock Keychain or allow access.
+
+Saved keys are never displayed; the dialog only shows whether each provider has
+a saved key. Leave a field blank to keep its existing key. To delete one, check
+**Remove saved** and leave its field blank. Changes apply to the next API request
+without restarting GIMP. Saving does not verify account access or credits.
+
+Credential precedence is: **worker environment variables > macOS Keychain > .env**.
+Removing a Keychain entry does not remove credentials from the environment or
+`.env`. Settings is macOS-only; other platforms continue to use the options below.
+Keychain access errors are shown explicitly, not bypassed using a different key.
+
+### Environment variables or a credentials file
 
 Create `.env` in the repository root, or keep your existing one:
 
@@ -61,7 +101,7 @@ GEMINI_API_KEY=your-google-api-key
 ```
 
 Only the key for the selected provider is needed. Google also accepts
-`GOOGLE_API_KEY`. Worker environment variables take precedence over `.env`.
+`GOOGLE_API_KEY`. Worker environment variables take precedence over saved keys and `.env`.
 The worker explicitly locates `.env`, so GIMP launched from Finder does not
 need your terminal's environment.
 
@@ -70,11 +110,14 @@ Keys stay in the external API worker and are not written to layer names or logs.
 
 ## Use
 
-Three separate commands are available under **Filters > GIMP-ML**:
+The following commands are available under **Filters > GIMP-ML**:
 
-- **Generate Image...**: text-only generation without image upload.
-- **Edit Selected Layer...**: edit one layer using a text prompt.
-- **Edit Visible Canvas...**: edit the visible canvas composite.
+| Command | Purpose | Requires an open image |
+| --- | --- | --- |
+| **Generate Image...** | Text-only generation without image upload | No |
+| **Edit Selected Layer...** | Edit one layer using a text prompt | Yes |
+| **Edit Visible Canvas...** | Edit the visible canvas composite | Yes |
+| **Settings...** (macOS only) | Save or remove provider API keys in Keychain | No |
 
 Each command has its own dialog with a fixed image input. Generation is available
 without an open document; the editing commands require an open RGB or grayscale image.
@@ -162,7 +205,10 @@ GIMP 3 / three menu commands with dedicated GTK dialogs
 ```
 
 The native plugin uses GIMP's Python/GI runtime and standard library only.
-The separate worker uses `requests`, `Pillow`, and `python-dotenv`. A persistent
+The separate worker uses `requests`, `Pillow`, and `python-dotenv`, plus `keyring`
+on macOS for OS-protected credential storage. Settings passes new keys to a
+short-lived worker over stdin, never as command-line arguments, and receives
+only saved-key status in response. A persistent
 HTTP server, localhost port, separate UI application, and GPU are unnecessary.
 API errors are sanitized, response sizes are bounded, and temporary files are
 removed on success, cancellation, or failure.

@@ -1,3 +1,4 @@
 requests>=2.32,<3
 Pillow>=11,<13
 python-dotenv>=1,<2
+keyring>=25,<26; sys_platform == "darwin"
