@@ -7,18 +7,14 @@ and adds it to your document as a **new layer**. Choose Gemini through
 The legacy GIMP 2/Python 2 plugins, local neural-network models, OpenAI-only
 pipelines, and Qt tray application have been removed.
 
-## Plugin UI
+## Plugin UI and generated output
 
-![GIMP-ML dialog with a natural-language prompt, provider and Gemini model selectors, image sizing controls, and Generate button](assets/plugin-ui.png)
+![GIMP-ML dialog beside GIMP's canvas showing a generated iced-coffee mug and its new layer, with prompt, provider, Gemini model, image sizing controls, and Generate button visible](assets/plugin-ui.png)
 
-Native plugin dialog captured in GIMP 3.2.4 on macOS.
-
-### Generated output in GIMP
-
-![GIMP interface showing the generated blue ceramic mug on the canvas and its Gemini-generated layer in the Layers panel](assets/gimp-generated-output.png)
-
-Actual 1024 × 1024 output generated through the installed plugin using Gemini
-via OpenRouter. The canvas, GIMP tools, and generated layer are visible.
+Native plugin dialog and generated output captured in GIMP 3.2.4 on macOS.
+The prompt "coffee mug in ice" uses `gemini-2.5-flash-image` via OpenRouter
+with a 1:1 aspect ratio and 1K resolution. The generated image appears as a
+new layer above the existing Background layer, alongside the plugin controls.
 
 ## Install
 
@@ -70,7 +66,7 @@ Keys stay in the external API worker and are not written to layer names or logs.
 
 1. Restart GIMP after installation.
 2. Open a document, or generate without an open document to create one.
-3. Choose **Filters > AI > Generate Image with Gemini...**.
+3. Choose **Filters > GIMP-ML > Generate Image with Gemini...**.
 4. Enter a prompt, such as "A cinematic mountain landscape at sunset."
 5. Choose the provider, image model, aspect ratio, and resolution.
 6. Click **Generate**. The generated image appears as a new top layer.
