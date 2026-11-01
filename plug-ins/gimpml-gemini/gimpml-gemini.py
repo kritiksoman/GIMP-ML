@@ -310,7 +310,7 @@ class GeminiPlugin(Gimp.PlugIn):
         procedure.set_image_types("RGB*, GRAY*")
         procedure.set_sensitivity_mask(Gimp.ProcedureSensitivityMask.ALWAYS)
         procedure.set_menu_label("Generate Image with _Gemini...")
-        procedure.add_menu_path("<Image>/Filters/AI")
+        procedure.add_menu_path("<Image>/Filters/GIMP-ML")
         procedure.set_documentation(
             "Generate an image with Gemini and add it as a new layer.",
             "Sends a text prompt to OpenRouter or Google. Existing layers remain unchanged.",
