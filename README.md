@@ -7,6 +7,19 @@ and adds it to your document as a **new layer**. Choose Gemini through
 The legacy GIMP 2/Python 2 plugins, local neural-network models, OpenAI-only
 pipelines, and Qt tray application have been removed.
 
+## Plugin UI
+
+![GIMP-ML dialog with a natural-language prompt, provider and Gemini model selectors, image sizing controls, and Generate button](assets/plugin-ui.png)
+
+Native plugin dialog captured in GIMP 3.2.4 on macOS.
+
+### Generated output in GIMP
+
+![GIMP interface showing the generated blue ceramic mug on the canvas and its Gemini-generated layer in the Layers panel](assets/gimp-generated-output.png)
+
+Actual 1024 × 1024 output generated through the installed plugin using Gemini
+via OpenRouter. The canvas, GIMP tools, and generated layer are visible.
+
 ## Install
 
 Requirements: GIMP 3.0 or newer, a separate Python 3.10+ installation with
