@@ -18,6 +18,38 @@ generation/editing commands and macOS Settings.
 Requirements: GIMP 3.0 or newer, a separate Python 3.10+ installation with
 `venv`/`pip`, internet access, and a funded API account.
 
+### macOS disk image
+
+Open `GIMP-ML-macOS.dmg`, fully quit GIMP (**Cmd+Q**), and double-click
+**Install GIMP-ML**. If GIMP is not in `/Applications/GIMP.app`, the installer
+asks you to select it. Python from Homebrew or python.org must already be installed;
+setup downloads dependencies and does not install Python itself.
+
+The installer:
+
+- Copies the backend to `~/Library/Application Support/GIMP-ML` and creates its
+  isolated `.venv`, so the disk image can be ejected after installation.
+- Queries GIMP 3 for its actual user plugin directory (including version-specific
+  directories such as `3.0` or `3.2`) and installs the plugin there.
+- Adds that directory to GIMP's **Preferences > Folders > Plug-ins** search path
+  only if it is missing, preserving other entries and saving the original
+  preferences as `gimprc.gimpml-backup` before the first change.
+- Requires no administrator password and does not modify GIMP.app or save API keys.
+
+Reopen GIMP and use **Filters > GIMP-ML > Settings...** to save your API key.
+Rerun the installer for updates or after switching GIMP versions. Errors are
+recorded in `~/Library/Logs/GIMP-ML/install.log`; the installer offers **Show Log**
+on failure. To uninstall, remove `gimpml-gemini` from the discovered user plugin
+directory and remove `~/Library/Application Support/GIMP-ML`. The standard user
+plugin search path should remain in GIMP's preferences.
+
+This build is ad-hoc signed, **not Developer ID signed or notarized**. macOS may
+block a downloaded copy; only for a build you trust, use **System Settings >
+Privacy & Security > Open Anyway**. Public distribution without this warning
+requires Developer ID signing and Apple notarization.
+
+### Source installation
+
 ```sh
 python3 scripts/install.py
 ```
@@ -35,6 +67,15 @@ python3 scripts/install.py --plug-in-dir "/your/GIMP/plug-ins"
 **Rerun the installer after moving the repository or updating plugin code.**
 Then fully quit GIMP (**Cmd+Q** on macOS) and reopen it; closing a dialog alone
 does not refresh the installed plugin.
+
+To use a permanent backend location and automatic search-path registration from
+the command line on macOS (with GIMP fully closed):
+
+```sh
+python3 scripts/install.py \
+  --runtime-dir "$HOME/Library/Application Support/GIMP-ML" \
+  --register-plugin-path
+```
 
 ## Credentials
 
@@ -140,6 +181,18 @@ validated, errors sanitized, and temporary files cleaned up on all outcomes.
 No persistent server or localhost port is used.
 
 ## Development and validation
+
+Build the lightweight, Intel/Apple Silicon macOS installer on macOS:
+
+```sh
+python3 scripts/build_dmg.py
+# Or choose a different output file:
+python3 scripts/build_dmg.py --output /path/to/GIMP-ML-macOS.dmg
+```
+
+This uses `osacompile`, `codesign`, and `hdiutil`. The DMG contains the installer
+and source payload, not your environment, credentials, or existing virtualenv.
+It does not bundle Python or dependencies. Existing output files are not overwritten.
 
 ```sh
 .venv/bin/python -m unittest discover -s tests -v
