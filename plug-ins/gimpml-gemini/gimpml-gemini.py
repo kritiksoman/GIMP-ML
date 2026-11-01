@@ -40,6 +40,14 @@ def runtime():
         raise RuntimeError("GIMP-ML installation is missing. Run scripts/install.py again.") from error
 
 
+def status_markup(message, help_urls):
+    markup = GLib.markup_escape_text(message)
+    for url in help_urls.values():
+        escaped_url = GLib.markup_escape_text(url)
+        markup = markup.replace(escaped_url, f'<a href="{escaped_url}">{escaped_url}</a>')
+    return markup
+
+
 def insert_generated_layer(png, image, prompt, model, fit_to_canvas=False):
     with tempfile.TemporaryDirectory(prefix="gimpml-layer-") as directory:
         path = Path(directory) / "generated.png"
@@ -508,7 +516,7 @@ class GenerateDialog(Gtk.Dialog):
         if cancelled:
             self.response(Gtk.ResponseType.CANCEL)
         elif error:
-            self.status.set_text(error)
+            self.status.set_markup(status_markup(error, self.settings.KEY_HELP_URLS))
             self.set_response_sensitive(Gtk.ResponseType.OK, True)
             self.prompt.set_sensitive(True)
             for control in self.controls.values():
@@ -551,11 +559,15 @@ def credential_request(root, python, payload):
 
 class SettingsDialog(Gtk.Dialog):
     def __init__(self, root, python):
+        sys.path.insert(0, str(root))
+        from gimpml.settings import KEY_HELP_URLS
+
         super().__init__(title="GIMP-ML - Settings", modal=True)
         self.root, self.python = root, python
         self.busy = False
         self.saved = False
         self.entries, self.remove, self.key_status = {}, {}, {}
+        self.key_help = {}
         self.add_button("_Cancel", Gtk.ResponseType.CANCEL)
         self.add_button("_Save", Gtk.ResponseType.OK)
         self.connect("response", self.on_response)
@@ -566,8 +578,8 @@ class SettingsDialog(Gtk.Dialog):
         content.pack_start(Gtk.Label(
             label="API keys are stored in macOS Keychain, not in the project.\n"
                   "Leave a field blank to keep its saved key. Check Remove to delete it.\n"
-                  "Environment variables override Keychain; .env is used if no key is saved.\n"
-                  "Removing a saved key does not remove environment or .env credentials.\n"
+                  "Worker environment variables override Keychain.\n"
+                  "Removing a saved key does not remove environment credentials.\n"
                   "macOS may ask you to unlock Keychain or allow access.",
             xalign=0, wrap=True), False, False, 0)
         for provider, label in (("openrouter", "OpenRouter API key"),
@@ -578,6 +590,11 @@ class SettingsDialog(Gtk.Dialog):
             entry.set_placeholder_text("Enter a new key (blank keeps the saved key)")
             content.pack_start(entry, False, False, 0)
             self.entries[provider] = entry
+            help_link = Gtk.LinkButton.new_with_label(
+                KEY_HELP_URLS[provider], "How to create your " + label)
+            help_link.set_halign(Gtk.Align.START)
+            content.pack_start(help_link, False, False, 0)
+            self.key_help[provider] = help_link
             status = Gtk.Label(label="Checking saved key...", xalign=0)
             content.pack_start(status, False, False, 0)
             self.key_status[provider] = status

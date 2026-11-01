@@ -10,6 +10,10 @@ MODELS = ("gemini-2.5-flash-image", "gemini-3.1-flash-image", "gemini-3-pro-imag
 RATIOS = ("1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "4:5", "5:4", "21:9")
 RESOLUTIONS = ("1K", "2K", "4K")
 PROVIDERS = ("openrouter", "google")
+KEY_HELP_URLS = {
+    "openrouter": "https://www.apideck.com/blog/how-to-get-your-openrouter-api-key",
+    "google": "https://www.merge.dev/blog/gemini-api-key",
+}
 MAX_REFERENCE_BYTES = 12 * 1024 * 1024
 MAX_REFERENCE_PIXELS = 32_000_000
 
@@ -60,20 +64,20 @@ def preferences(root: Path = ROOT) -> dict:
     return values
 
 
-def api_key(provider: str, root: Path = ROOT) -> str:
-    from dotenv import dotenv_values
+def api_key(provider: str) -> str:
     from gimpml.credentials import read_key
 
     name = "OPENROUTER_API_KEY" if provider == "openrouter" else "GEMINI_API_KEY"
-    values = dotenv_values(root / ".env")
     key = os.environ.get(name)
     if provider == "google" and not key:
         key = os.environ.get("GOOGLE_API_KEY")
     if not key:
-        key = read_key(provider) or values.get(name)
-    if provider == "google" and not key:
-        key = values.get("GOOGLE_API_KEY")
+        key = read_key(provider)
     if not key or not key.strip():
-        raise GenerationError(f"Set an API key in Filters > GIMP-ML > Settings on macOS, "
-                              f"or set {name} in the repository .env file or worker environment.")
+        provider_name = "OpenRouter" if provider == "openrouter" else "Google"
+        raise GenerationError(
+            f"No {provider_name} API key found. Create one: {KEY_HELP_URLS[provider]}\n"
+            f"Save it in Filters > GIMP-ML > Settings on macOS, or set {name} "
+            "in the worker environment."
+        )
     return key.strip()
