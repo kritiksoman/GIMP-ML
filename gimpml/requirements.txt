@@ -1,16 +1,3 @@
-requests
-# torch
-# transformers
-fastapi
-matplotlib
-# gradio
-opencv-python
-# xformers
-# https://github.com/apple/ml-stable-diffusion/archive/refs/heads/main.zip
-PyQt6
-PyQt6-WebEngine
-psutil
-openai
-pillow
-uvicorn
-pywin32
+requests>=2.32,<3
+Pillow>=11,<13
+python-dotenv>=1,<2
