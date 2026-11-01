@@ -21,6 +21,11 @@ def encoded_image(mode="RGB", format="PNG"):
 
 
 class RequestTests(unittest.TestCase):
+    def setUp(self):
+        self.saved_key = patch("gimpml.credentials.read_key", return_value=None)
+        self.saved_key.start()
+        self.addCleanup(self.saved_key.stop)
+
     def test_valid_defaults(self):
         GenerationRequest("a landscape").validate()
 
@@ -60,6 +65,28 @@ class RequestTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True):
             with self.assertRaisesRegex(GenerationError, "OPENROUTER_API_KEY"):
                 api_key("openrouter", Path(directory))
+
+    def test_keychain_precedence_and_google_environment_alias(self):
+        with (tempfile.TemporaryDirectory() as directory,
+              patch.dict(os.environ, {}, clear=True),
+              patch("gimpml.credentials.read_key", return_value="saved-key") as read):
+            root = Path(directory)
+            (root / ".env").write_text("GEMINI_API_KEY=file-key\nOPENROUTER_API_KEY=file-key\n")
+            self.assertEqual(api_key("google", root), "saved-key")
+            self.assertEqual(api_key("openrouter", root), "saved-key")
+            read.reset_mock()
+            with patch.dict(os.environ, {"GOOGLE_API_KEY": "environment-key"}):
+                self.assertEqual(api_key("google", root), "environment-key")
+            read.assert_not_called()
+
+    def test_keychain_failure_does_not_fall_back_to_file(self):
+        with (tempfile.TemporaryDirectory() as directory,
+              patch.dict(os.environ, {}, clear=True),
+              patch("gimpml.credentials.read_key", side_effect=GenerationError("Unlock Keychain."))):
+            root = Path(directory)
+            (root / ".env").write_text("OPENROUTER_API_KEY=file-key\n")
+            with self.assertRaisesRegex(GenerationError, "Unlock Keychain"):
+                api_key("openrouter", root)
 
 
 class ProviderTests(unittest.TestCase):

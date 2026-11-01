@@ -53,6 +53,14 @@ for name, (mode, label) in native.PROCEDURES.items():
     registered_procedures[mode] = procedure
 registered = registered_procedures["generate"]
 print("PASS: three separate procedures, fixed inputs, menu labels, and arguments")
+settings_procedure = Gimp.get_pdb().lookup_procedure(native.SETTINGS_PROCEDURE)
+assert settings_procedure is not None
+assert settings_procedure.get_menu_label() == "_Settings..."
+assert settings_procedure.get_menu_paths() == ["<Image>/Filters/GIMP-ML"]
+assert not {"openrouter-key", "google-key", "api-key"} & {
+    argument.name for argument in settings_procedure.get_arguments()
+}
+print("PASS: settings registration without secret procedure arguments")
 
 images = []
 for base_type, layer_type in (
@@ -306,6 +314,67 @@ with tempfile.TemporaryDirectory(prefix="gimpml-smoke-") as directory:
     print("PASS: actual backend interpreter and sanitized validation error")
 
     GimpUi.init("gimpml-smoke")
+    actual_saved_status = native.credential_request(
+        ROOT, ROOT / ".venv/bin/python", {"operation": "status"})
+    assert set(actual_saved_status) == {"openrouter", "google"}
+    assert all(type(value) is bool for value in actual_saved_status.values())
+    print("PASS: real external Keychain worker returns saved status only")
+    original_credentials = native.credential_request
+    credential_calls = []
+
+    def fake_credentials(root, python, payload):
+        credential_calls.append(payload)
+        return {"openrouter": True, "google": False}
+
+    native.credential_request = fake_credentials
+    settings_dialog = native.SettingsDialog(ROOT, fake)
+
+    def save_settings():
+        if settings_dialog.busy:
+            return GLib.SOURCE_CONTINUE
+        assert settings_dialog.key_status["openrouter"].get_text() == "Key saved in Keychain."
+        for entry in settings_dialog.entries.values():
+            assert not entry.get_visibility()
+            assert not entry.get_text()
+        settings_dialog.entries["google"].set_text("offline-private-key")
+        settings_dialog.remove["google"].set_active(True)
+        settings_dialog.response(Gtk.ResponseType.OK)
+        assert "not both" in settings_dialog.status.get_text()
+        assert not settings_dialog.busy
+        settings_dialog.remove["google"].set_active(False)
+        settings_dialog.response(Gtk.ResponseType.OK)
+        assert settings_dialog.busy
+        assert not settings_dialog.entries["google"].get_text()
+        return GLib.SOURCE_REMOVE
+
+    GLib.timeout_add(50, save_settings)
+    assert settings_dialog.run() == Gtk.ResponseType.OK
+    assert credential_calls == [
+        {"operation": "status"},
+        {"operation": "save", "keys": {"google": "offline-private-key"}, "clear": []},
+    ]
+    settings_dialog.destroy()
+
+    def failing_credentials(root, python, payload):
+        raise RuntimeError("Unlock Keychain and allow access.")
+
+    native.credential_request = failing_credentials
+    settings_dialog = native.SettingsDialog(ROOT, fake)
+
+    def dismiss_settings_error():
+        if settings_dialog.busy:
+            return GLib.SOURCE_CONTINUE
+        assert settings_dialog.status.get_text() == "Unlock Keychain and allow access."
+        assert settings_dialog.get_widget_for_response(Gtk.ResponseType.OK).get_sensitive()
+        settings_dialog.response(Gtk.ResponseType.CANCEL)
+        return GLib.SOURCE_REMOVE
+
+    GLib.timeout_add(50, dismiss_settings_error)
+    assert settings_dialog.run() == Gtk.ResponseType.CANCEL
+    settings_dialog.destroy()
+    native.credential_request = original_credentials
+    print("PASS: masked settings, save transport, conflicting removal, and actionable errors")
+
     defaults = {**settings.preferences(), "prompt": "offline fixture", "fit_to_canvas": False}
     fake.write_text(
         f"#!{ROOT}/.venv/bin/python\nimport json,sys\nfrom pathlib import Path\n"
