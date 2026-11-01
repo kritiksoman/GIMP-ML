@@ -12,7 +12,7 @@ MAX_KEY_LENGTH = 4096
 
 def backend():
     if sys.platform != "darwin":
-        raise GenerationError("Keychain settings are available on macOS only. Use .env on other platforms.")
+        raise GenerationError("Keychain settings are available on macOS only. Set API keys in the worker environment.")
     try:
         from keyring.backends.macOS import Keyring
     except ImportError as error:

@@ -6,13 +6,12 @@ import io
 import json
 import warnings
 from dataclasses import dataclass
-from pathlib import Path
 
 import requests
 from PIL import Image, UnidentifiedImageError
 
 from gimpml.settings import (
-    ROOT, MAX_REFERENCE_BYTES, GenerationError, GenerationRequest, api_key,
+    MAX_REFERENCE_BYTES, GenerationError, GenerationRequest, api_key,
 )
 
 
@@ -102,10 +101,10 @@ def reference_data(png: bytes) -> str:
 
 
 def generate(request: GenerationRequest, timeout: float = 180,
-             root: Path = ROOT, reference_png: bytes | None = None) -> GeneratedImage:
+             reference_png: bytes | None = None) -> GeneratedImage:
     request.validate()
     reference = reference_data(reference_png) if reference_png is not None else None
-    key = api_key(request.provider, root)
+    key = api_key(request.provider)
     if request.provider == "openrouter":
         payload = {"model": f"google/{request.model}", "prompt": request.prompt,
                    "aspect_ratio": request.aspect_ratio, "n": 1}

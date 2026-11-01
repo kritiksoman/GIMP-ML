@@ -51,42 +51,45 @@ class RequestTests(unittest.TestCase):
                 with self.subTest(contents=contents), self.assertRaises(GenerationError):
                     preferences(root)
 
-    def test_dotenv_and_environment_precedence(self):
-        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True):
-            root = Path(directory)
-            (root / ".env").write_text(
-                "OPENROUTER_API_KEY=local-key\nGOOGLE_API_KEY=google-key\n")
-            self.assertEqual(api_key("openrouter", root), "local-key")
-            self.assertEqual(api_key("google", root), "google-key")
-            with patch.dict(os.environ, {"OPENROUTER_API_KEY": "environment-key"}):
-                self.assertEqual(api_key("openrouter", root), "environment-key")
+    def test_environment_credentials_and_google_alias(self):
+        with patch.dict(os.environ, {
+            "OPENROUTER_API_KEY": "openrouter-key",
+            "GOOGLE_API_KEY": "google-key",
+        }, clear=True):
+            self.assertEqual(api_key("openrouter"), "openrouter-key")
+            self.assertEqual(api_key("google"), "google-key")
 
     def test_missing_key(self):
-        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True):
-            with self.assertRaisesRegex(GenerationError, "OPENROUTER_API_KEY"):
-                api_key("openrouter", Path(directory))
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(GenerationError) as error:
+                api_key("openrouter")
+        self.assertIn("OPENROUTER_API_KEY", str(error.exception))
+        self.assertIn(
+            "https://www.apideck.com/blog/how-to-get-your-openrouter-api-key",
+            str(error.exception),
+        )
 
-    def test_keychain_precedence_and_google_environment_alias(self):
-        with (tempfile.TemporaryDirectory() as directory,
-              patch.dict(os.environ, {}, clear=True),
+    def test_google_missing_key_links_to_key_creation_guide(self):
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(GenerationError) as error:
+                api_key("google")
+        self.assertIn("GEMINI_API_KEY", str(error.exception))
+        self.assertIn("https://www.merge.dev/blog/gemini-api-key", str(error.exception))
+
+    def test_environment_precedes_keychain(self):
+        with (patch.dict(os.environ, {}, clear=True),
               patch("gimpml.credentials.read_key", return_value="saved-key") as read):
-            root = Path(directory)
-            (root / ".env").write_text("GEMINI_API_KEY=file-key\nOPENROUTER_API_KEY=file-key\n")
-            self.assertEqual(api_key("google", root), "saved-key")
-            self.assertEqual(api_key("openrouter", root), "saved-key")
+            self.assertEqual(api_key("google"), "saved-key")
             read.reset_mock()
             with patch.dict(os.environ, {"GOOGLE_API_KEY": "environment-key"}):
-                self.assertEqual(api_key("google", root), "environment-key")
+                self.assertEqual(api_key("google"), "environment-key")
             read.assert_not_called()
 
-    def test_keychain_failure_does_not_fall_back_to_file(self):
-        with (tempfile.TemporaryDirectory() as directory,
-              patch.dict(os.environ, {}, clear=True),
+    def test_keychain_failure_is_reported(self):
+        with (patch.dict(os.environ, {}, clear=True),
               patch("gimpml.credentials.read_key", side_effect=GenerationError("Unlock Keychain."))):
-            root = Path(directory)
-            (root / ".env").write_text("OPENROUTER_API_KEY=file-key\n")
             with self.assertRaisesRegex(GenerationError, "Unlock Keychain"):
-                api_key("openrouter", root)
+                api_key("openrouter")
 
 
 class ProviderTests(unittest.TestCase):
