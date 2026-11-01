@@ -1,13 +1,7 @@
 {
-   "openai": {
-      "key": "",
-      "downloaded": false
-   },
-   "monodepth": {
-      "model": "Intel/dpt-hybrid-midas",
-      "downloaded": false
-   },
-   "gimpml": {
-      "port": 61482
-   }
+  "provider": "openrouter",
+  "model": "gemini-2.5-flash-image",
+  "aspect_ratio": "1:1",
+  "resolution": "1K",
+  "timeout_seconds": 180
 }
