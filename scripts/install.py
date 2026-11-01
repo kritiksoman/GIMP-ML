@@ -44,7 +44,7 @@ def main() -> None:
                     str(ROOT / "gimpml/requirements.txt")], check=True)
     subprocess.run([str(python), "-c",
                     "from gimpml.settings import preferences; preferences(); "
-                    "import requests, PIL, dotenv; print('Backend ready')"],
+                    "import requests, PIL; print('Backend ready')"],
                    cwd=ROOT, check=True)
     if sys.platform == "darwin":
         subprocess.run([str(python), "-c", "from keyring.backends.macOS import Keyring; Keyring()"],

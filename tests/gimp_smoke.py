@@ -328,6 +328,10 @@ with tempfile.TemporaryDirectory(prefix="gimpml-smoke-") as directory:
 
     native.credential_request = fake_credentials
     settings_dialog = native.SettingsDialog(ROOT, fake)
+    for provider, link in settings_dialog.key_help.items():
+        assert link.get_uri() == settings.KEY_HELP_URLS[provider]
+        assert link.get_visible()
+        assert link.get_sensitive()
 
     def save_settings():
         if settings_dialog.busy:
