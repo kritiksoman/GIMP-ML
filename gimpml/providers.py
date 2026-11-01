@@ -11,7 +11,9 @@ from pathlib import Path
 import requests
 from PIL import Image, UnidentifiedImageError
 
-from gimpml.settings import ROOT, GenerationError, GenerationRequest, api_key
+from gimpml.settings import (
+    ROOT, MAX_REFERENCE_BYTES, GenerationError, GenerationRequest, api_key,
+)
 
 
 MAX_RESPONSE_BYTES = 48 * 1024 * 1024
@@ -85,15 +87,35 @@ def decode_image(encoded: str, mime_type: str) -> GeneratedImage:
         raise GenerationError("The provider returned a corrupt or oversized image.") from error
 
 
+def reference_data(png: bytes) -> str:
+    if not isinstance(png, bytes) or not png.startswith(b"\x89PNG\r\n\x1a\n"):
+        raise GenerationError("The editing input must be a PNG image.")
+    if len(png) > MAX_REFERENCE_BYTES:
+        raise GenerationError("The editing input exceeds 12 MiB. Reduce the image size.")
+    try:
+        image = decode_image(base64.b64encode(png).decode(), "image/png")
+    except GenerationError as error:
+        raise GenerationError("Cannot use the editing input: " + str(error)) from error
+    if len(image.png) > MAX_REFERENCE_BYTES:
+        raise GenerationError("The editing input exceeds 12 MiB. Reduce the image size.")
+    return base64.b64encode(image.png).decode()
+
+
 def generate(request: GenerationRequest, timeout: float = 180,
-             root: Path = ROOT) -> GeneratedImage:
+             root: Path = ROOT, reference_png: bytes | None = None) -> GeneratedImage:
     request.validate()
+    reference = reference_data(reference_png) if reference_png is not None else None
     key = api_key(request.provider, root)
     if request.provider == "openrouter":
         payload = {"model": f"google/{request.model}", "prompt": request.prompt,
                    "aspect_ratio": request.aspect_ratio, "n": 1}
         if request.model != "gemini-2.5-flash-image":
             payload["resolution"] = request.resolution
+        if reference is not None:
+            payload["input_references"] = [{
+                "type": "image_url",
+                "image_url": {"url": "data:image/png;base64," + reference},
+            }]
         result = post_json(
             "https://openrouter.ai/api/v1/images",
             {"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
@@ -111,10 +133,13 @@ def generate(request: GenerationRequest, timeout: float = 180,
     image_config = {"aspectRatio": request.aspect_ratio}
     if request.model != "gemini-2.5-flash-image":
         image_config["imageSize"] = request.resolution
+    parts = [{"text": request.prompt}]
+    if reference is not None:
+        parts.append({"inlineData": {"mimeType": "image/png", "data": reference}})
     result = post_json(
         f"https://generativelanguage.googleapis.com/v1beta/models/{request.model}:generateContent",
         {"x-goog-api-key": key, "Content-Type": "application/json"},
-        {"contents": [{"parts": [{"text": request.prompt}]}],
+        {"contents": [{"parts": parts}],
          "generationConfig": {"responseModalities": ["TEXT", "IMAGE"],
                               "imageConfig": image_config}},
         timeout,

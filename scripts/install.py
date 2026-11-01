@@ -54,7 +54,8 @@ def main() -> None:
     target.chmod(0o755)
     (destination / "runtime.json").write_text(json.dumps(
         {"root": str(ROOT), "python": str(python)}, indent=2) + "\n")
-    print(f"Installed: {target}\nRestart GIMP, then choose Filters > GIMP-ML > Generate Image with Gemini.")
+    print(f"Installed: {target}\nRestart GIMP, then choose Filters > GIMP-ML > "
+          "Generate Image, Edit Selected Layer, or Edit Visible Canvas.")
 
 
 if __name__ == "__main__":
