@@ -10,6 +10,8 @@ MODELS = ("gemini-2.5-flash-image", "gemini-3.1-flash-image", "gemini-3-pro-imag
 RATIOS = ("1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "4:5", "5:4", "21:9")
 RESOLUTIONS = ("1K", "2K", "4K")
 PROVIDERS = ("openrouter", "google")
+MAX_REFERENCE_BYTES = 12 * 1024 * 1024
+MAX_REFERENCE_PIXELS = 32_000_000
 
 
 class GenerationError(Exception):

@@ -106,6 +106,72 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(post.call_args.args[2]["generationConfig"]["imageConfig"]["imageSize"], "4K")
 
     @patch("gimpml.providers.post_json")
+    def test_editing_reference_on_both_providers(self, post):
+        reference = base64.b64decode(encoded_image("RGBA"))
+        for provider in ("openrouter", "google"):
+            with self.subTest(provider=provider):
+                post.return_value = (
+                    {"data": [{"b64_json": encoded_image(), "media_type": "image/png"}]}
+                    if provider == "openrouter" else
+                    {"candidates": [{"content": {"parts": [
+                        {"inlineData": {"data": encoded_image(), "mimeType": "image/png"}}
+                    ]}}]}
+                )
+                result = providers.generate(
+                    GenerationRequest("make it blue", provider=provider), reference_png=reference)
+                self.assertEqual((result.width, result.height), (8, 4))
+                payload = post.call_args.args[2]
+                if provider == "openrouter":
+                    inputs = payload["input_references"]
+                    self.assertEqual(len(inputs), 1)
+                    self.assertEqual(inputs[0]["type"], "image_url")
+                    data_url = inputs[0]["image_url"]["url"]
+                    self.assertTrue(data_url.startswith("data:image/png;base64,"))
+                    encoded = data_url.split(",", 1)[1]
+                else:
+                    parts = payload["contents"][0]["parts"]
+                    self.assertEqual(parts[0], {"text": "make it blue"})
+                    self.assertEqual(parts[1]["inlineData"]["mimeType"], "image/png")
+                    encoded = parts[1]["inlineData"]["data"]
+                with Image.open(io.BytesIO(base64.b64decode(encoded))) as image:
+                    self.assertEqual(image.mode, "RGBA")
+                    self.assertEqual(image.size, (8, 4))
+                    self.assertEqual(image.info, {})
+
+    @patch("gimpml.providers.post_json")
+    def test_invalid_editing_inputs_never_contact_provider(self, post):
+        for reference in (b"", b"not png", b"\x89PNG\r\n\x1a\ncorrupt",
+                          base64.b64decode(encoded_image(format="JPEG")), "not bytes"):
+            with self.subTest(reference=reference), self.assertRaises(GenerationError):
+                providers.generate(GenerationRequest("edit"), reference_png=reference)
+        reference = base64.b64decode(encoded_image())
+        with patch("gimpml.providers.MAX_REFERENCE_BYTES", 8), self.assertRaises(GenerationError):
+            providers.generate(GenerationRequest("edit"), reference_png=reference)
+        with patch("gimpml.providers.MAX_PIXELS", 8), self.assertRaises(GenerationError):
+            providers.generate(GenerationRequest("edit"), reference_png=reference)
+        post.assert_not_called()
+
+    def test_editing_input_limits_include_exact_boundary(self):
+        reference = base64.b64decode(encoded_image("RGBA"))
+        with patch("gimpml.providers.MAX_REFERENCE_BYTES", len(reference)):
+            self.assertTrue(providers.reference_data(reference))
+        with (patch("gimpml.providers.MAX_REFERENCE_BYTES", len(reference) - 1),
+              self.assertRaises(GenerationError)):
+            providers.reference_data(reference)
+        with patch("gimpml.providers.MAX_PIXELS", 32):
+            self.assertTrue(providers.reference_data(reference))
+        with patch("gimpml.providers.MAX_PIXELS", 31), self.assertRaises(GenerationError):
+            providers.reference_data(reference)
+
+    @patch("gimpml.providers.post_json")
+    def test_text_only_google_does_not_upload_image(self, post):
+        post.return_value = {"candidates": [{"content": {"parts": [
+            {"inlineData": {"data": encoded_image(), "mimeType": "image/png"}}
+        ]}}]}
+        providers.generate(GenerationRequest("test", provider="google"))
+        self.assertEqual(post.call_args.args[2]["contents"], [{"parts": [{"text": "test"}]}])
+
+    @patch("gimpml.providers.post_json")
     def test_no_images_and_blocked_prompts(self, post):
         for provider, response in (
             ("openrouter", {}), ("openrouter", {"data": []}),
@@ -174,6 +240,38 @@ class ProviderTests(unittest.TestCase):
 
 
 class WorkerTests(unittest.TestCase):
+    @patch("gimpml.worker.generate")
+    def test_worker_editing_input_transport(self, generate):
+        generate.return_value = providers.decode_image(encoded_image(), "image/png")
+        reference = base64.b64decode(encoded_image("RGBA"))
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "input.png"
+            source.write_bytes(reference)
+            output = Path(directory) / "generated.png"
+            payload = json.dumps({"request": {"prompt": "edit"},
+                                  "input": str(source), "output": str(output)})
+            with patch("sys.stdin", io.StringIO(payload)), patch("sys.stdout", io.StringIO()):
+                self.assertEqual(worker.main(), 0)
+            self.assertEqual(generate.call_args.kwargs["reference_png"], reference)
+            self.assertEqual(source.read_bytes(), reference)
+            self.assertTrue(output.is_file())
+
+    @patch("gimpml.worker.generate")
+    def test_worker_invalid_editing_path_and_size(self, generate):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "input.png"
+            source.write_bytes(b"too large")
+            for input_path in ("relative.png", str(source.with_suffix(".jpg")),
+                               str(source.with_name("missing.png")), str(source), None):
+                payload = json.dumps({"request": {"prompt": "edit"}, "input": input_path,
+                                      "output": str(Path(directory) / "generated.png")})
+                with (self.subTest(input_path=input_path),
+                      patch("gimpml.worker.MAX_REFERENCE_BYTES", 4),
+                      patch("sys.stdin", io.StringIO(payload)),
+                      patch("sys.stdout", io.StringIO())):
+                    self.assertEqual(worker.main(), 1)
+            generate.assert_not_called()
+
     @patch("gimpml.worker.generate")
     def test_worker_output(self, generate):
         generate.return_value = providers.decode_image(encoded_image(), "image/png")

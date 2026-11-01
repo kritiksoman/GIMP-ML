@@ -1,8 +1,10 @@
-# GIMP-ML: Gemini image generation
+# GIMP-ML: image generation and editing
 
-A native **GIMP 3** plugin that turns a natural-language prompt into an image
-and adds it to your document as a **new layer**. Choose Gemini through
-**OpenRouter** or **Google's Gemini API**. Existing layers are not modified.
+Three native **GIMP 3** commands for generating and editing images using
+natural-language prompts: **Generate Image**, **Edit Selected Layer**, and
+**Edit Visible Canvas**. Choose **OpenRouter** or **Google** as the API provider.
+Results are added as a **new layer** by default; editing can optionally replace
+the selected layer's pixels with undo support.
 
 The legacy GIMP 2/Python 2 plugins, local neural-network models, OpenAI-only
 pipelines, and Qt tray application have been removed.
@@ -15,6 +17,8 @@ Native plugin dialog and generated output captured in GIMP 3.2.4 on macOS.
 The prompt "coffee mug in ice" uses `gemini-2.5-flash-image` via OpenRouter
 with a 1:1 aspect ratio and 1K resolution. The generated image appears as a
 new layer above the existing Background layer, alongside the plugin controls.
+This screenshot shows an earlier text-only generation dialog. The current version
+has three separate menu entries and dialogs with provider-neutral titles.
 
 ## Install
 
@@ -42,8 +46,10 @@ python3 scripts/install.py --plug-in-dir "/your/GIMP/plug-ins"
 
 Keep this repository at its installed location: the plugin records its
 absolute path. Run the installer again after moving it or updating plugin code.
+Fully quit GIMP and reopen it after installation to refresh its menus and dialogs.
 The installer only replaces its own `gimpml-gemini` plugin; it does not delete
-other user-installed plugins.
+other user-installed plugins. That installed entry point registers all three
+commands; no separate installation is needed for each command.
 
 ## Credentials
 
@@ -51,7 +57,7 @@ Create `.env` in the repository root, or keep your existing one:
 
 ```dotenv
 OPENROUTER_API_KEY=your-openrouter-key
-GEMINI_API_KEY=your-google-gemini-key
+GEMINI_API_KEY=your-google-api-key
 ```
 
 Only the key for the selected provider is needed. Google also accepts
@@ -64,9 +70,20 @@ Keys stay in the external API worker and are not written to layer names or logs.
 
 ## Use
 
-1. Restart GIMP after installation.
+Three separate commands are available under **Filters > GIMP-ML**:
+
+- **Generate Image...**: text-only generation without image upload.
+- **Edit Selected Layer...**: edit one layer using a text prompt.
+- **Edit Visible Canvas...**: edit the visible canvas composite.
+
+Each command has its own dialog with a fixed image input. Generation is available
+without an open document; the editing commands require an open RGB or grayscale image.
+
+### Generate an image from text
+
+1. Fully quit and reopen GIMP after installation.
 2. Open a document, or generate without an open document to create one.
-3. Choose **Filters > GIMP-ML > Generate Image with Gemini...**.
+3. Choose **Filters > GIMP-ML > Generate Image...**.
 4. Enter a prompt, such as "A cinematic mountain landscape at sunset."
 5. Choose the provider, image model, aspect ratio, and resolution.
 6. Click **Generate**. The generated image appears as a new top layer.
@@ -74,8 +91,50 @@ Keys stay in the external API worker and are not written to layer names or logs.
 Native output size is preserved by default. **Fit image within canvas** scales
 and centers the new layer while preserving aspect ratio; it does not resize
 the canvas or stretch the image. Insertion into an existing document is one
-undo operation. RGB and grayscale documents are supported; indexed documents
-are not supported.
+undo operation.
+
+### Edit an existing image with text
+
+1. Open an RGB or grayscale document.
+2. Choose **Filters > GIMP-ML > Edit Selected Layer...** or
+   **Edit Visible Canvas...**.
+   Selected-layer editing requires exactly one ordinary layer, not a group or
+   layer mask. It uploads that layer's pixels, including pixels outside the canvas,
+   without applying its opacity, blend mode, or mask. Visible-canvas editing uploads
+   the visible composite within the canvas bounds; hidden layers are not included.
+3. Describe the change, for example "Turn the coffee mug red, keeping the ice."
+4. Keep **Add a new layer** to preserve originals, or choose **Replace selected
+   layer pixels**. Replacement requires one selected layer with unlocked content
+   and alpha; its parent groups must also have unlocked content.
+5. Check **I allow uploading this image to the selected provider for editing**,
+   then click **Apply Edit**. Consent is unchecked each time an editing dialog opens.
+
+Edited results are scaled to fit within the input bounds without stretching,
+centered, and padded with transparency if the provider changes the aspect ratio.
+Selected-layer results retain the input layer's position; canvas results use the
+canvas bounds. **Fit image within canvas** applies only to text-only generation.
+
+Replacement changes the selected layer's pixels in one undo operation, retaining
+its identity, name, dimensions, offsets, opacity, blend mode, visibility, and mask.
+When editing the visible canvas, replacement crops the edited composite to the
+selected layer's bounds. That composite can include other layers' appearance;
+adding a new layer is generally preferable. Masks, opacity, and blend modes still
+apply to replacement pixels. Editing is a whole-image model operation, not a
+guaranteed pixel-preserving edit: the entire chosen input is uploaded even if a
+selection exists. Replacement respects the current GIMP selection when applying
+pixels; new-layer output is not clipped to that selection. Layers without alpha
+receive an alpha channel in the same undo operation so transparent padding can
+be represented.
+
+Input PNGs are limited to 12 MiB and 32 million pixels. Reduce the source image
+size if it exceeds these limits. Exported image metadata is removed before upload.
+Temporary exports are deleted on success, failure, or cancellation. Provider
+support and output fidelity vary; unsupported requests produce an explicit error.
+
+### Models and image settings
+
+The **Gemini image model** option selects the model used by each command.
+RGB and grayscale documents are supported; indexed documents are not supported.
 
 `gemini-2.5-flash-image` supports 1K output only. The other offered image models
 support 1K, 2K, and 4K. Provider/model availability and supported capabilities
@@ -84,20 +143,22 @@ OpenRouter uses provider-prefixed model IDs internally; Google uses bare IDs.
 Defaults and a 10-600 second timeout are configured in
 [`gimpml/config.json`](gimpml/config.json).
 
-Your **prompt** is sent to the selected external provider. This version does
-not upload your canvas or layers, provide reference-image editing, or keep
-conversation history. Generation can incur charges. Cancellation stops the
-local worker and prevents layer insertion, but cannot guarantee the provider
+Your **prompt** is sent to the selected external provider. Text-only generation
+does not upload your canvas or layers. Editing also sends the chosen layer or
+visible canvas after explicit upload consent. No conversation history is kept.
+Generation and editing can incur charges. Cancellation stops the
+local worker and prevents layer insertion or pixel replacement, but cannot guarantee the provider
 stops processing or charging. No automatic retries or provider switching occur.
 
 ## Architecture
 
 ```text
-GIMP 3 / GTK dialog
-    -> short-lived Python worker (JSON over stdin/stdout)
-        -> OpenRouter Image API or Google Gemini generateContent
+GIMP 3 / three menu commands with dedicated GTK dialogs
+    -> optional private PNG export for editing
+    -> short-lived Python worker (JSON and local image paths over stdin/stdout)
+        -> OpenRouter Image API or Google generateContent
         -> validated PNG in a private temporary directory
-    -> GIMP file-load-layer / insert-layer
+    -> new layer or undoable selected-layer pixel replacement
 ```
 
 The native plugin uses GIMP's Python/GI runtime and standard library only.
@@ -123,18 +184,34 @@ On macOS, run the **offline** GIMP integration test:
 Provider tests mock HTTP responses; the GIMP test uses a local fixture and makes
 no paid API requests. It checks registration, worker transport, native dialog
 generation/cancellation, RGB/grayscale layer insertion, fitting, and new documents.
+Editing checks cover layer/canvas export, upload consent, reference transport,
+and pixel replacement while preserving layer properties and masks.
 Tests do not prove live API account access or billing.
 The integration test opens a temporary GIMP instance because dialogs and new
 document displays cannot be tested with the console-only executable.
 
-The procedure is also available noninteractively as `python-fu-gimpml-gemini`
-with `prompt`, `provider`, `model`, `aspect-ratio`, `resolution`, and
-`fit-to-canvas` arguments.
+The three procedures are also available noninteractively:
+
+- `python-fu-gimpml-generate`
+- `python-fu-gimpml-edit-layer`
+- `python-fu-gimpml-edit-canvas`
+
+All accept `prompt`, `provider`, `model`, `aspect-ratio`, and `resolution`.
+Generation additionally accepts `fit-to-canvas`. The editing procedures instead
+accept `output-mode` (`new-layer` or `replace-layer`) and `allow-image-upload`
+(default `false`, must be `true` to edit). Each procedure fixes its input mode;
+there is no `input-mode` argument. The former combined `python-fu-gimpml-gemini`
+procedure has been removed; scripts must migrate to the appropriate new procedure.
+All three share one installed Python entry point and the same backend.
 
 ## License and citation
 
 The project remains [MIT licensed](LICENSE.md). Provider terms apply to API use
 and generated images. Google-generated images may include SynthID watermarks.
+
+The paper cited below describes the project's legacy computer-vision plugins
+and models, which have been dropped from the current implementation. It does
+not describe the current GIMP 3 image-generation and editing plugins.
 
 ```bibtex
 @article{soman2020GIMPML,
