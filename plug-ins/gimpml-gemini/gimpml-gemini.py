@@ -25,6 +25,7 @@ PROCEDURES = {
 }
 OUTPUT_MODES = (("new-layer", "Add a new layer (preserve originals)"),
                 ("replace-layer", "Replace selected layer pixels (undoable)"))
+SETTINGS_PROCEDURE = "python-fu-gimpml-settings"
 
 
 def runtime():
@@ -270,6 +271,16 @@ def apply_edited_image(png, image, prompt, model, bounds, output_mode, target=No
     Gimp.displays_flush()
 
 
+def worker_environment(root):
+    environment = os.environ.copy()
+    # GIMP's bundled Python paths must not leak into the external interpreter.
+    for key in list(environment):
+        if key.startswith(("PYTHON", "DYLD_", "GI_", "GIMP", "GTK", "GEGL", "BABL")):
+            environment.pop(key)
+    environment["PYTHONPATH"] = str(root)
+    return environment
+
+
 class Worker:
     def __init__(self, root, python, timeout):
         self.root = root
@@ -293,18 +304,12 @@ class Worker:
                 source = Path(directory) / "input.png"
                 source.write_bytes(reference_png)
                 payload["input"] = str(source)
-            environment = os.environ.copy()
-            # GIMP's bundled Python paths must not leak into the external interpreter.
-            for key in list(environment):
-                if key.startswith(("PYTHON", "DYLD_", "GI_", "GIMP", "GTK", "GEGL", "BABL")):
-                    environment.pop(key)
-            environment["PYTHONPATH"] = str(self.root)
             with self.lock:
                 if self.cancelled.is_set():
                     return None
                 self.process = subprocess.Popen(
                     [str(self.python), "-m", "gimpml.worker"], cwd=str(self.root),
-                    env=environment, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                    env=worker_environment(self.root), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE, text=True,
                 )
             try:
@@ -516,6 +521,150 @@ class GenerateDialog(Gtk.Dialog):
         return GLib.SOURCE_REMOVE
 
 
+def credential_request(root, python, payload):
+    try:
+        process = subprocess.run(
+            [str(python), "-m", "gimpml.credentials"], cwd=str(root),
+            env=worker_environment(root), input=json.dumps(payload), capture_output=True,
+            text=True, timeout=60,
+        )
+    except subprocess.TimeoutExpired as error:
+        raise RuntimeError("Keychain access timed out. Some changes may have been saved. "
+                           "Unlock Keychain and reopen Settings to check.") from error
+    except OSError as error:
+        raise RuntimeError("Cannot launch the settings worker. Run scripts/install.py again.") from error
+    try:
+        result = json.loads(process.stdout)
+    except ValueError as error:
+        raise RuntimeError("The settings worker failed. Run scripts/install.py again.") from error
+    if not isinstance(result, dict):
+        raise RuntimeError("The settings worker returned an invalid result.")
+    if result.get("status") != "success" or process.returncode != 0:
+        message = result.get("message")
+        raise RuntimeError(message if isinstance(message, str) else "The settings worker failed.")
+    saved = result.get("saved")
+    if (not isinstance(saved, dict) or set(saved) != {"openrouter", "google"}
+            or any(type(value) is not bool for value in saved.values())):
+        raise RuntimeError("The settings worker returned invalid credential status.")
+    return saved
+
+
+class SettingsDialog(Gtk.Dialog):
+    def __init__(self, root, python):
+        super().__init__(title="GIMP-ML - Settings", modal=True)
+        self.root, self.python = root, python
+        self.busy = False
+        self.saved = False
+        self.entries, self.remove, self.key_status = {}, {}, {}
+        self.add_button("_Cancel", Gtk.ResponseType.CANCEL)
+        self.add_button("_Save", Gtk.ResponseType.OK)
+        self.connect("response", self.on_response)
+        self.connect("delete-event", self.on_delete)
+        content = self.get_content_area()
+        content.set_border_width(16)
+        content.set_spacing(12)
+        content.pack_start(Gtk.Label(
+            label="API keys are stored in macOS Keychain, not in the project.\n"
+                  "Leave a field blank to keep its saved key. Check Remove to delete it.\n"
+                  "Environment variables override Keychain; .env is used if no key is saved.\n"
+                  "Removing a saved key does not remove environment or .env credentials.\n"
+                  "macOS may ask you to unlock Keychain or allow access.",
+            xalign=0, wrap=True), False, False, 0)
+        for provider, label in (("openrouter", "OpenRouter API key"),
+                                ("google", "Google API key")):
+            content.pack_start(Gtk.Label(label=label, xalign=0), False, False, 0)
+            entry = Gtk.Entry(visibility=False)
+            entry.set_max_length(4096)
+            entry.set_placeholder_text("Enter a new key (blank keeps the saved key)")
+            content.pack_start(entry, False, False, 0)
+            self.entries[provider] = entry
+            status = Gtk.Label(label="Checking saved key...", xalign=0)
+            content.pack_start(status, False, False, 0)
+            self.key_status[provider] = status
+            remove = Gtk.CheckButton(label="Remove saved " + label)
+            content.pack_start(remove, False, False, 0)
+            self.remove[provider] = remove
+        self.status = Gtk.Label(xalign=0, wrap=True)
+        content.pack_start(self.status, False, False, 0)
+        self.show_all()
+        self.start({"operation": "status"})
+
+    def start(self, payload):
+        self.busy = True
+        for response in (Gtk.ResponseType.OK, Gtk.ResponseType.CANCEL):
+            self.set_response_sensitive(response, False)
+        for widget in (*self.entries.values(), *self.remove.values()):
+            widget.set_sensitive(False)
+        self.status.set_text("Accessing macOS Keychain...")
+        threading.Thread(target=self.execute, args=(payload,), daemon=True).start()
+
+    def execute(self, payload):
+        try:
+            result = credential_request(self.root, self.python, payload)
+            error = None
+        except RuntimeError as exception:
+            result, error = None, str(exception)
+        GLib.idle_add(self.complete, result, error, payload["operation"] == "save")
+
+    def complete(self, result, error, saving):
+        self.busy = False
+        for response in (Gtk.ResponseType.OK, Gtk.ResponseType.CANCEL):
+            self.set_response_sensitive(response, True)
+        for widget in (*self.entries.values(), *self.remove.values()):
+            widget.set_sensitive(True)
+        if error:
+            for status in self.key_status.values():
+                status.set_text("Saved-key status unavailable.")
+            self.status.set_text(error)
+        else:
+            for provider, exists in result.items():
+                self.key_status[provider].set_text("Key saved in Keychain." if exists else "No saved key.")
+            self.status.set_text("Keys are not displayed or checked against the provider.")
+            if saving:
+                self.saved = True
+                self.response(Gtk.ResponseType.OK)
+        return GLib.SOURCE_REMOVE
+
+    def on_delete(self, *_args):
+        return self.busy
+
+    def on_response(self, _dialog, response):
+        if self.saved:
+            return
+        if self.busy:
+            self.stop_emission_by_name("response")
+            return
+        if response != Gtk.ResponseType.OK:
+            return
+        self.stop_emission_by_name("response")
+        keys = {provider: entry.get_text().strip() for provider, entry in self.entries.items()
+                if entry.get_text().strip()}
+        clear = [provider for provider, control in self.remove.items() if control.get_active()]
+        if set(keys) & set(clear):
+            self.status.set_text("Choose either a new key or removal for each provider, not both.")
+            return
+        for entry in self.entries.values():
+            entry.set_text("")
+        self.start({"operation": "save", "keys": keys, "clear": clear})
+
+
+def run_settings(procedure, run_mode, _image, _drawables, _config, _data):
+    if run_mode != Gimp.RunMode.INTERACTIVE:
+        Gimp.message("Open GIMP-ML Settings interactively to manage API keys.")
+        return procedure.new_return_values(Gimp.PDBStatusType.CALLING_ERROR, GLib.Error())
+    try:
+        root, python = runtime()
+        GimpUi.init(SETTINGS_PROCEDURE)
+        dialog = SettingsDialog(root, python)
+        response = dialog.run()
+        dialog.destroy()
+        status = Gimp.PDBStatusType.SUCCESS if response == Gtk.ResponseType.OK else Gimp.PDBStatusType.CANCEL
+        return procedure.new_return_values(status, GLib.Error())
+    except (RuntimeError, OSError, GLib.Error) as error:
+        Gimp.message(str(error))
+        return procedure.new_return_values(Gimp.PDBStatusType.EXECUTION_ERROR, GLib.Error(str(error)))
+
+
 def run(procedure, run_mode, image, drawables, config, _data):
     try:
         root, python = runtime()
@@ -580,9 +729,21 @@ class GeminiPlugin(Gimp.PlugIn):
         return False, None, None
 
     def do_query_procedures(self):
-        return list(PROCEDURES)
+        return list(PROCEDURES) + ([SETTINGS_PROCEDURE] if sys.platform == "darwin" else [])
 
     def do_create_procedure(self, name):
+        if name == SETTINGS_PROCEDURE:
+            procedure = Gimp.ImageProcedure.new(
+                self, name, Gimp.PDBProcType.PLUGIN, run_settings, None)
+            procedure.set_image_types("*")
+            procedure.set_sensitivity_mask(Gimp.ProcedureSensitivityMask.ALWAYS)
+            procedure.set_menu_label("_Settings...")
+            procedure.add_menu_path("<Image>/Filters/GIMP-ML")
+            procedure.set_documentation("Manage API keys in macOS Keychain.",
+                                        "Masked key fields; credentials are not saved in procedure arguments.",
+                                        name)
+            procedure.set_attribution("Kritik Soman", "Kritik Soman", "2026")
+            return procedure
         if name not in PROCEDURES:
             return None
         input_mode, label = PROCEDURES[name]

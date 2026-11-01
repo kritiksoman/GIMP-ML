@@ -46,6 +46,9 @@ def main() -> None:
                     "from gimpml.settings import preferences; preferences(); "
                     "import requests, PIL, dotenv; print('Backend ready')"],
                    cwd=ROOT, check=True)
+    if sys.platform == "darwin":
+        subprocess.run([str(python), "-c", "from keyring.backends.macOS import Keyring; Keyring()"],
+                       cwd=ROOT, check=True)
     destination = directory.expanduser().resolve() / "gimpml-gemini"
     destination.mkdir(parents=True, exist_ok=True)
     source = ROOT / "plug-ins/gimpml-gemini/gimpml-gemini.py"
@@ -55,7 +58,7 @@ def main() -> None:
     (destination / "runtime.json").write_text(json.dumps(
         {"root": str(ROOT), "python": str(python)}, indent=2) + "\n")
     print(f"Installed: {target}\nRestart GIMP, then choose Filters > GIMP-ML > "
-          "Generate Image, Edit Selected Layer, or Edit Visible Canvas.")
+          "Generate Image, Edit Selected Layer, Edit Visible Canvas, or Settings (macOS).")
 
 
 if __name__ == "__main__":
