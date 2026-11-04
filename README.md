@@ -20,10 +20,17 @@ Requirements: GIMP 3.0 or newer, a separate Python 3.10+ installation with
 
 ### macOS disk image
 
-Open `GIMP-ML-macOS.dmg`, fully quit GIMP (**Cmd+Q**), and double-click
-**Install GIMP-ML**. If GIMP is not in `/Applications/GIMP.app`, the installer
-asks you to select it. Python from Homebrew or python.org must already be installed;
+On macOS 13 or newer, open `GIMP-ML-macOS.dmg`, fully quit GIMP (**Cmd+Q**), and
+double-click **Install GIMP-ML**. If GIMP is not in `/Applications/GIMP.app`, use
+**Choose GIMP...** to select it. Python from Homebrew or python.org must already be installed;
 setup downloads dependencies and does not install Python itself.
+
+The native installer contains an **interactive terminal** and an animated progress
+bar in one window; it does not launch Terminal.app. Output is streamed to the
+embedded terminal and the installation log. **Ctrl+C** interrupts setup.
+After setup finishes, the terminal becomes an interactive Bash shell for commands;
+click **Done** to close it before ejecting the disk image. Download times vary,
+so the progress bar is indeterminate rather than claiming a percentage.
 
 The installer:
 
@@ -35,10 +42,11 @@ The installer:
   only if it is missing, preserving other entries and saving the original
   preferences as `gimprc.gimpml-backup` before the first change.
 - Requires no administrator password and does not modify GIMP.app or save API keys.
+  The running-GIMP check applies only to the installing user, not other accounts.
 
 Reopen GIMP and use **Filters > GIMP-ML > Settings...** to save your API key.
 Rerun the installer for updates or after switching GIMP versions. Errors are
-recorded in `~/Library/Logs/GIMP-ML/install.log`; the installer offers **Show Log**
+recorded in `~/Library/Logs/GIMP-ML/install.log` and shown in the embedded terminal
 on failure. To uninstall, remove `gimpml-gemini` from the discovered user plugin
 directory and remove `~/Library/Application Support/GIMP-ML`. The standard user
 plugin search path should remain in GIMP's preferences.
@@ -190,9 +198,12 @@ python3 scripts/build_dmg.py
 python3 scripts/build_dmg.py --output /path/to/GIMP-ML-macOS.dmg
 ```
 
-This uses `osacompile`, `codesign`, and `hdiutil`. The DMG contains the installer
+This requires Xcode with Swift 6.2+ and uses Swift Package Manager, `codesign`,
+and `hdiutil`. The first build downloads the pinned MIT-licensed
+[SwiftTerm](https://github.com/migueldeicaza/SwiftTerm) terminal component;
+its license is included in the app. The DMG contains the native installer
 and source payload, not your environment, credentials, or existing virtualenv.
-It does not bundle Python or dependencies. Existing output files are not overwritten.
+It does not bundle Python or Python dependencies. Existing output files are not overwritten.
 
 ```sh
 .venv/bin/python -m unittest discover -s tests -v
