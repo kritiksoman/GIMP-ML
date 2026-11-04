@@ -1,6 +1,8 @@
 import json
 import os
 from pathlib import Path
+import plistlib
+import signal
 import subprocess
 import sys
 import tempfile
@@ -84,7 +86,8 @@ class InstallerTests(unittest.TestCase):
             install.register_plugin_path(self.config, self.root / ("a" + os.pathsep + "b"), "other")
         self.assertFalse(self.gimprc.exists())
 
-    def test_running_gimp_and_process_check_errors_are_reported(self):
+    @patch("scripts.install.os.getuid", return_value=502, create=True)
+    def test_running_gimp_and_process_check_errors_are_reported(self, _getuid):
         for code in (0, 2):
             with self.subTest(code=code), patch(
                     "scripts.install.subprocess.run",
@@ -92,8 +95,11 @@ class InstallerTests(unittest.TestCase):
                 with self.assertRaises(RuntimeError):
                     install.require_gimp_closed()
         with patch("scripts.install.subprocess.run",
-                   return_value=subprocess.CompletedProcess([], 1, stderr="")):
+                   return_value=subprocess.CompletedProcess([], 1, stderr="")) as run:
             install.require_gimp_closed()
+        self.assertEqual(run.call_args.args[0],
+                         ["/usr/bin/pgrep", "-u", "502", "-x",
+                          r"gimp|gimp-console|gimp-3\.[0-9]+"])
 
     def test_permanent_runtime_survives_source_removal(self):
         source = self.root / "mounted-payload"
@@ -161,21 +167,86 @@ class InstallerTests(unittest.TestCase):
         self.assertFalse(runtime.exists())
 
     def test_dmg_staging_excludes_environment_and_seals_resources(self):
-        def run(command, **_kwargs):
-            if command[0] == "osacompile":
-                (Path(command[2]) / "Contents/Resources").mkdir(parents=True)
-
-        with patch("scripts.build_dmg.subprocess.run", side_effect=run) as command:
+        binary = self.root / "native-binary"
+        binary.write_text("native installer")
+        binary.chmod(0o755)
+        license_file = self.root / "terminal-license"
+        license_file.write_text("terminal license")
+        with (patch("scripts.build_dmg.build_native_installer",
+                    return_value=(binary, license_file)),
+              patch("scripts.build_dmg.subprocess.run") as command):
             application = build_dmg.stage_installer(self.root)
         payload = application / "Contents/Resources/payload"
         self.assertEqual({path.name for path in payload.iterdir()}, {"gimpml", "plug-ins", "scripts"})
         self.assertFalse(list(payload.rglob("__pycache__")))
         self.assertFalse(list(payload.rglob("runtime.json")))
         self.assertTrue((payload / "scripts/install.py").is_file())
+        executable = application / "Contents/MacOS/GIMPMLInstaller"
+        self.assertEqual(executable.read_text(), binary.read_text())
+        self.assertEqual(executable.stat().st_mode & 0o777, 0o755)
+        with (application / "Contents/Info.plist").open("rb") as info:
+            self.assertEqual(plistlib.load(info)["CFBundleExecutable"], "GIMPMLInstaller")
+        resources = application / "Contents/Resources"
+        self.assertEqual((resources / "SwiftTerm-LICENSE").read_text(), license_file.read_text())
+        self.assertTrue((resources / "install-session.command").is_file())
+        self.assertFalse((self.root / "Install GIMP-ML via Terminal.command").exists())
         self.assertEqual(command.call_args_list[-2].args[0][:4],
                          ["codesign", "--force", "--sign", "-"])
         self.assertEqual(command.call_args_list[-1].args[0][:4],
                          ["codesign", "--verify", "--deep", "--strict"])
+
+    @unittest.skipUnless(sys.platform == "darwin", "macOS session runner")
+    def test_terminal_session_streams_output_and_reports_exit_status(self):
+        resources = self.root / "resources with spaces"
+        resources.mkdir()
+        log = self.root / "logs/install.log"
+        result_file = self.root / "status"
+        for status in (0, 7):
+            with self.subTest(status=status):
+                (resources / "install.command").write_text(
+                    f'printf "%s\\n" "$1"\necho "setup error" >&2\nexit {status}\n')
+                result = subprocess.run(
+                    ["/bin/bash", str(build_dmg.ROOT / "scripts/macos/install-session.command"),
+                     str(resources), "/custom/GIMP's app.app", str(log), str(result_file)],
+                    capture_output=True, text=True, timeout=10)
+                self.assertEqual(result.returncode, status, result.stderr)
+                self.assertEqual(result_file.read_text(), f"{status}\n")
+                self.assertEqual(log.read_text(), result.stdout)
+                self.assertIn("/custom/GIMP's app.app", result.stdout)
+                self.assertIn("setup error", result.stdout)
+                self.assertEqual(log.stat().st_mode & 0o777, 0o600)
+                self.assertFalse(result_file.with_suffix(".tmp").exists())
+
+    @unittest.skipUnless(sys.platform == "darwin", "macOS session runner")
+    def test_terminal_session_reports_log_setup_failure(self):
+        blocked = self.root / "not-a-directory"
+        blocked.write_text("")
+        result_file = self.root / "status"
+        result = subprocess.run(
+            ["/bin/bash", str(build_dmg.ROOT / "scripts/macos/install-session.command"),
+             str(self.root), "/Applications/GIMP.app", str(blocked / "install.log"),
+             str(result_file)], capture_output=True, text=True, timeout=10)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result_file.read_text(), "1\n")
+        self.assertIn("mkdir:", result.stderr)
+        self.assertIn(str(blocked), result.stderr)
+
+    @unittest.skipUnless(sys.platform == "darwin", "macOS session runner")
+    def test_terminal_session_interrupt_is_not_reported_as_success(self):
+        resources = self.root / "resources"
+        resources.mkdir()
+        (resources / "install.command").write_text('echo "setup started"\nsleep 0.5\n')
+        result_file = self.root / "status"
+        with subprocess.Popen(
+                ["/bin/bash", str(build_dmg.ROOT / "scripts/macos/install-session.command"),
+                 str(resources), "/Applications/GIMP.app", str(self.root / "logs/install.log"),
+                 str(result_file)], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True) as process:
+            self.assertEqual(process.stdout.readline().strip(), "setup started")
+            process.send_signal(signal.SIGINT)
+            _stdout, stderr = process.communicate(timeout=10)
+        self.assertEqual(process.returncode, 130, stderr)
+        self.assertEqual(result_file.read_text(), "130\n")
 
 
 if __name__ == "__main__":

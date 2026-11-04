@@ -39,7 +39,7 @@ def gimp_configuration(executable: str | None) -> tuple[Path, str]:
 
 def require_gimp_closed() -> None:
     result = subprocess.run(
-        ["/usr/bin/pgrep", "-x", r"gimp|gimp-console|gimp-3\.[0-9]+"],
+        ["/usr/bin/pgrep", "-u", str(os.getuid()), "-x", r"gimp|gimp-console|gimp-3\.[0-9]+"],
         capture_output=True, text=True,
     )
     if result.returncode == 0:
