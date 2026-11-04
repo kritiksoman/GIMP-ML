@@ -3,6 +3,7 @@
 
 import argparse
 from pathlib import Path
+import plistlib
 import shutil
 import subprocess
 import sys
@@ -12,12 +13,39 @@ import tempfile
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def build_native_installer() -> tuple[Path, Path]:
+    package = ROOT / "scripts/macos/installer"
+    build = ["swift", "build", "--package-path", str(package), "-c", "release",
+             "--arch", "arm64", "--arch", "x86_64"]
+    subprocess.run([*build, "--product", "GIMPMLInstaller"], check=True)
+    binaries = Path(subprocess.run([*build, "--show-bin-path"], check=True,
+                                   capture_output=True, text=True).stdout.strip())
+    return binaries / "GIMPMLInstaller", package / ".build/checkouts/SwiftTerm/LICENSE"
+
+
 def stage_installer(directory: Path) -> Path:
+    executable, license_file = build_native_installer()
     application = directory / "Install GIMP-ML.app"
-    subprocess.run(["osacompile", "-o", str(application),
-                    str(ROOT / "scripts/macos/installer.applescript")], check=True)
+    executables = application / "Contents/MacOS"
+    executables.mkdir(parents=True)
     resources = application / "Contents/Resources"
+    resources.mkdir()
+    shutil.copy2(executable, executables / "GIMPMLInstaller")
+    with (application / "Contents/Info.plist").open("wb") as info:
+        plistlib.dump({
+            "CFBundleIdentifier": "org.gimpml.installer",
+            "CFBundleName": "Install GIMP-ML",
+            "CFBundleExecutable": "GIMPMLInstaller",
+            "CFBundlePackageType": "APPL",
+            "CFBundleVersion": "1.3",
+            "CFBundleShortVersionString": "1.3",
+            "LSMinimumSystemVersion": "13.0",
+            "NSHighResolutionCapable": True,
+        }, info)
+    shutil.copy2(license_file, resources / "SwiftTerm-LICENSE")
     shutil.copy2(ROOT / "scripts/macos/install.command", resources / "install.command")
+    shutil.copy2(ROOT / "scripts/macos/install-session.command",
+                 resources / "install-session.command")
     payload = resources / "payload"
     (payload / "scripts").mkdir(parents=True)
     shutil.copy2(ROOT / "scripts/install.py", payload / "scripts/install.py")
@@ -39,7 +67,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=ROOT / "dist/GIMP-ML-macOS.dmg")
     args = parser.parse_args()
     if sys.platform != "darwin":
-        parser.error("Build the DMG on macOS with osacompile and hdiutil.")
+        parser.error("Build the DMG on macOS with Swift 6.2+, Xcode, and hdiutil.")
     output = args.output.expanduser().resolve()
     if output.exists():
         parser.error(f"Output already exists: {output}. Choose another --output or remove it first.")
